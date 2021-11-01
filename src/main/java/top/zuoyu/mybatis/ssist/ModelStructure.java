@@ -26,7 +26,6 @@ import javassist.bytecode.FieldInfo;
 import javassist.bytecode.annotation.Annotation;
 import javassist.bytecode.annotation.EnumMemberValue;
 import javassist.bytecode.annotation.StringMemberValue;
-import top.zuoyu.mybatis.data.enums.JdbcType;
 import top.zuoyu.mybatis.data.model.Column;
 import top.zuoyu.mybatis.data.model.Table;
 import top.zuoyu.mybatis.exception.CustomException;
@@ -48,11 +47,13 @@ public class ModelStructure {
     private static final String NO = "NO";
     private static final String NULL = "null";
 
+    private static final String PACKAGE_NAME = ClassUtils.getPackageName(BaseModel.class);
+
     public static void registerModel(@NonNull Table table) {
         ClassPool classPool = ClassPool.getDefault();
-        String packageName = ClassUtils.getPackageName(BaseModel.class);
+
         // 创建一个空类
-        CtClass ctClass = classPool.makeClass(packageName + PACKAGE_SEPARATOR + table.getTableName());
+        CtClass ctClass = classPool.makeClass(PACKAGE_NAME + PACKAGE_SEPARATOR + StrUtil.captureName(table.getTableName()));
         ctClass.setModifiers(Modifier.PUBLIC);
         ClassFile classFile = ctClass.getClassFile();
         ConstPool constPool = classFile.getConstPool();
@@ -89,6 +90,8 @@ public class ModelStructure {
             CtClass longClass = classPool.get(Long.TYPE.getName());
             CtField serialVersionField = new CtField(longClass, "serialVersionUID", ctClass);
             serialVersionField.setModifiers(Modifier.PRIVATE);
+            serialVersionField.setModifiers(Modifier.STATIC);
+            serialVersionField.setModifiers(Modifier.FINAL);
             ctClass.addField(serialVersionField, CtField.Initializer.constant(ThreadLocalRandom.current().nextLong()));
 
             // 添加无参的构造函数
@@ -104,15 +107,14 @@ public class ModelStructure {
      * 字段部分的生成
      */
     private static void registerField(@NonNull ClassPool classPool, CtClass ctClass, ConstPool constPool, @NonNull Column column) {
-        String dataType = column.getDataType();
+        Class<?> dataType = column.getDataType();
         String tableName = column.getTableName();
         String columnName = column.getColumnName();
         boolean isNullable = YES.equalsIgnoreCase(column.getIsNullable());
         String columnDef = column.getColumnDef();
-        int type = Integer.parseInt(dataType);
         try {
             // 新增字段
-            CtClass typeClass = classPool.get(JdbcType.valueOf(type).getJavaType().getName());
+            CtClass typeClass = classPool.get(dataType.getTypeName());
             CtField field = new CtField(typeClass, columnName, ctClass);
             field.setModifiers(Modifier.PRIVATE);
 
@@ -136,7 +138,7 @@ public class ModelStructure {
             // 统一列
             Annotation columnAnn = new Annotation("com.fasterxml.jackson.annotation.JsonProperty", constPool);
             columnAnn.addMemberValue("value", new StringMemberValue(columnName, constPool));
-            if (StringUtils.hasLength(columnDef) && !JdbcType.valueOf(type).getJavaType().isAssignableFrom(Date.class)) {
+            if (StringUtils.hasLength(columnDef) && !dataType.isAssignableFrom(Date.class)) {
                 columnAnn.addMemberValue("defaultValue", new StringMemberValue(columnDef, constPool));
             }
             fieldAttr.addAnnotation(columnAnn);
@@ -147,7 +149,7 @@ public class ModelStructure {
             fieldAttr.addAnnotation(aliasAnn);
 
             // 是否为时间类型
-            if (JdbcType.valueOf(type).getJavaType().isAssignableFrom(Date.class)) {
+            if (dataType.isAssignableFrom(Date.class)) {
                 Annotation formatAnn = new Annotation("com.fasterxml.jackson.annotation.JsonFormat", constPool);
                 formatAnn.addMemberValue("pattern", new StringMemberValue("yyyy-MM-dd HH:mm:ss", constPool));
                 fieldAttr.addAnnotation(formatAnn);

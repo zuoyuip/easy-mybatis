@@ -7,6 +7,7 @@ import java.sql.SQLException;
 import org.springframework.lang.NonNull;
 
 import top.zuoyu.mybatis.data.enums.ColumnMeta;
+import top.zuoyu.mybatis.data.enums.JdbcType;
 import top.zuoyu.mybatis.exception.CustomException;
 
 /**
@@ -19,6 +20,7 @@ public class Column implements Serializable, Cloneable {
 
 
     private static final long serialVersionUID = -8107550134001981283L;
+
 
     /**
      * 表类别
@@ -41,9 +43,9 @@ public class Column implements Serializable, Cloneable {
     private String columnName;
 
     /**
-     * 对应的java.sql.Types的SQL类型(列类型ID)
+     * 对应的列类型ID
      */
-    private String dataType;
+    private Class<?> dataType;
 
     /**
      * java.sql.Types类型名称(列类型名称)
@@ -203,12 +205,13 @@ public class Column implements Serializable, Cloneable {
         this.columnName = columnName;
     }
 
-    public String getDataType() {
+    public Class<?> getDataType() {
         return this.dataType;
     }
 
     public void setDataType(String dataType) {
-        this.dataType = dataType;
+        int type = Integer.parseInt(dataType);
+        this.dataType = JdbcType.valueOf(type).getJavaType();
     }
 
     public String getTypeName() {
