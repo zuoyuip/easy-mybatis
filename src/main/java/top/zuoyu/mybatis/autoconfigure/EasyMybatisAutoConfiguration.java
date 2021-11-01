@@ -2,10 +2,12 @@ package top.zuoyu.mybatis.autoconfigure;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.sql.DataSource;
 
+import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.mapping.DatabaseIdProvider;
 import org.apache.ibatis.plugin.Interceptor;
 import org.apache.ibatis.session.ExecutorType;
@@ -15,18 +17,32 @@ import org.mybatis.spring.SqlSessionTemplate;
 import org.mybatis.spring.boot.autoconfigure.ConfigurationCustomizer;
 import org.mybatis.spring.boot.autoconfigure.MybatisProperties;
 import org.mybatis.spring.boot.autoconfigure.SpringBootVFS;
+import org.mybatis.spring.mapper.ClassPathMapperScanner;
+import org.mybatis.spring.mapper.MapperFactoryBean;
+import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.beans.factory.support.BeanDefinitionRegistry;
+import org.springframework.boot.autoconfigure.AutoConfigurationPackages;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnSingleCandidate;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.context.EnvironmentAware;
+import org.springframework.context.ResourceLoaderAware;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.ImportBeanDefinitionRegistrar;
+import org.springframework.core.env.Environment;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.lang.NonNull;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
@@ -150,5 +166,78 @@ public class EasyMybatisAutoConfiguration implements InitializingBean {
             return new SqlSessionTemplate(sqlSessionFactory);
         }
     }
+
+    /**
+     * This will just scan the same base package as Spring Boot does. If you want
+     * more power, you can explicitly use
+     * {@link org.mybatis.spring.annotation.MapperScan} but this will get typed
+     * mappers working correctly, out-of-the-box, similar to using Spring Data JPA
+     * repositories.
+     */
+    public static class AutoConfiguredMapperScannerRegistrar
+            implements BeanFactoryAware, ImportBeanDefinitionRegistrar, ResourceLoaderAware, EnvironmentAware {
+
+        private BeanFactory beanFactory;
+
+        private ResourceLoader resourceLoader;
+
+        private Environment environment;
+
+        @Override
+        public void registerBeanDefinitions(AnnotationMetadata importingClassMetadata, BeanDefinitionRegistry registry) {
+
+
+            ClassPathMapperScanner scanner = new ClassPathMapperScanner(registry);
+            try {
+                if (this.resourceLoader != null) {
+                    scanner.setResourceLoader(this.resourceLoader);
+                }
+                List<String> packages = AutoConfigurationPackages.get(this.beanFactory);
+
+                // TODO 添加包名
+                packages.addAll(Arrays.asList());
+
+                scanner.registerFilters();
+                scanner.doScan(StringUtils.toStringArray(packages));
+            } catch (IllegalStateException ex) {
+
+            }
+        }
+
+        @Override
+        public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
+            this.beanFactory = beanFactory;
+        }
+
+        @Override
+        public void setEnvironment(Environment environment) {
+            this.environment = environment;
+        }
+
+        @Override
+        public void setResourceLoader(ResourceLoader resourceLoader) {
+            this.resourceLoader = resourceLoader;
+        }
+    }
+
+    /**
+     * {@link org.mybatis.spring.annotation.MapperScan} ultimately ends up
+     * creating instances of {@link MapperFactoryBean}. If
+     * {@link org.mybatis.spring.annotation.MapperScan} is used then this
+     * auto-configuration is not needed. If it is _not_ used, however, then this
+     * will bring in a bean registrar and automatically register components based
+     * on the same component-scanning path as Spring Boot itself.
+     */
+    @org.springframework.context.annotation.Configuration
+    @Import({ AutoConfiguredMapperScannerRegistrar.class })
+    @ConditionalOnMissingBean(MapperFactoryBean.class)
+    public static class MapperScannerRegistrarNotFoundConfiguration implements InitializingBean {
+
+        @Override
+        public void afterPropertiesSet() {
+
+        }
+    }
+
 
 }
