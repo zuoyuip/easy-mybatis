@@ -6,5 +6,5 @@ package top.zuoyu.mybatis.temp.model;
  * @author: zuoyu
  * @create: 2021-10-17 16:33
  */
-public class BaseModel {
+public interface BaseModel {
 }

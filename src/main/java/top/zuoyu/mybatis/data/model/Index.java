@@ -7,10 +7,6 @@ import java.util.Objects;
 
 import org.springframework.lang.NonNull;
 
-
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
-
 import top.zuoyu.mybatis.data.enums.IndexMeta;
 import top.zuoyu.mybatis.exception.CustomException;
 
@@ -27,7 +23,6 @@ public class Index implements Serializable, Cloneable {
     /**
      * 表类别
      */
-    @JsonInclude(value = Include.ALWAYS)
     private String tableCat;
 
     /**
@@ -89,9 +84,6 @@ public class Index implements Serializable, Cloneable {
      * 过滤器条件
      */
     private String filterCondition;
-
-    public Index() {
-    }
 
     public Index(Table table, ResultSet resultSet) {
         try {

@@ -8,13 +8,16 @@ import java.util.Date;
 import java.util.concurrent.ThreadLocalRandom;
 
 import org.springframework.lang.NonNull;
-import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
+
+import com.fasterxml.jackson.annotation.JsonAlias;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import javassist.CannotCompileException;
 import javassist.ClassPool;
 import javassist.CtClass;
-import javassist.CtConstructor;
 import javassist.CtField;
 import javassist.CtNewMethod;
 import javassist.Modifier;
@@ -26,10 +29,11 @@ import javassist.bytecode.FieldInfo;
 import javassist.bytecode.annotation.Annotation;
 import javassist.bytecode.annotation.EnumMemberValue;
 import javassist.bytecode.annotation.StringMemberValue;
+import top.zuoyu.mybatis.annotation.Model;
+import top.zuoyu.mybatis.common.Constant;
 import top.zuoyu.mybatis.data.model.Column;
 import top.zuoyu.mybatis.data.model.Table;
 import top.zuoyu.mybatis.exception.CustomException;
-import top.zuoyu.mybatis.temp.model.BaseModel;
 import top.zuoyu.mybatis.utils.ClassUtil;
 import top.zuoyu.mybatis.utils.StrUtil;
 
@@ -39,26 +43,26 @@ import top.zuoyu.mybatis.utils.StrUtil;
  * @author: zuoyu
  * @create: 2021-10-17 16:45
  */
-public class ModelStructure {
+class ModelStructure {
 
-    private static final CharSequence PACKAGE_SEPARATOR = ".";
-    private static final CharSequence NAME_SEPARATOR = "_";
-    private static final String YES = "YES";
-    private static final String NO = "NO";
-    private static final String NULL = "null";
 
-    private static final String PACKAGE_NAME = ClassUtils.getPackageName(BaseModel.class);
-
-    public static void registerModel(@NonNull Table table) {
+    static void registerModel(@NonNull Table table) {
         ClassPool classPool = ClassPool.getDefault();
 
         // 创建一个空类
-        CtClass ctClass = classPool.makeClass(PACKAGE_NAME + PACKAGE_SEPARATOR + StrUtil.captureName(table.getTableName()));
+        CtClass ctClass = classPool.makeClass(Constant.MODEL_PACKAGE_NAME + Constant.PACKAGE_SEPARATOR + StrUtil.captureName(table.getTableName()));
         ctClass.setModifiers(Modifier.PUBLIC);
         ClassFile classFile = ctClass.getClassFile();
         ConstPool constPool = classFile.getConstPool();
 
-        registerEntity(classPool, classFile, ctClass, constPool, table);
+        // 类上注解
+        AnnotationsAttribute classAttr = new AnnotationsAttribute(constPool, AnnotationsAttribute.visibleTag);
+        Annotation modelAnn = new Annotation(Model.class.getTypeName(), constPool);
+        modelAnn.addMemberValue("value", new StringMemberValue(table.getTableName(), constPool));
+        classAttr.addAnnotation(modelAnn);
+        classFile.addAttribute(classAttr);
+
+        registerEntity(classPool, ctClass);
 
         Collection<Column> columns = table.getColumns();
         columns.forEach(column -> registerField(classPool, ctClass, constPool, column));
@@ -75,28 +79,24 @@ public class ModelStructure {
     /**
      * 类部分的生成
      */
-    private static void registerEntity(@NonNull ClassPool classPool, ClassFile classFile, @NonNull CtClass ctClass, ConstPool constPool, @NonNull Table table) {
+    private static void registerEntity(@NonNull ClassPool classPool, @NonNull CtClass ctClass) {
         try {
+
             // 实现Serializable接口
-            CtClass serializableInterface = classPool.get(Serializable.class.getName());
+            CtClass serializableInterface = classPool.get(Serializable.class.getTypeName());
             ctClass.addInterface(serializableInterface);
 
             // 实现Cloneable接口
-            CtClass cloneableInterface = classPool.get(Cloneable.class.getName());
+            CtClass cloneableInterface = classPool.get(Cloneable.class.getTypeName());
             ctClass.addInterface(cloneableInterface);
 
             // 添加serialVersionUID
-            // TODO 待解决static和final
-            CtClass longClass = classPool.get(Long.TYPE.getName());
+            CtClass longClass = classPool.get(Long.TYPE.getTypeName());
             CtField serialVersionField = new CtField(longClass, "serialVersionUID", ctClass);
-            serialVersionField.setModifiers(Modifier.PRIVATE);
-            serialVersionField.setModifiers(Modifier.STATIC);
-            serialVersionField.setModifiers(Modifier.FINAL);
+            serialVersionField.setModifiers(Modifier.setPrivate(Modifier.STATIC | Modifier.FINAL));
             ctClass.addField(serialVersionField, CtField.Initializer.constant(ThreadLocalRandom.current().nextLong()));
 
-            // 添加无参的构造函数
-            CtConstructor ctNotParamsConstructor = new CtConstructor(new CtClass[]{}, ctClass);
-            ctClass.addConstructor(ctNotParamsConstructor);
+            // 添加无参构造器会造成实例化时内存溢出
 
         } catch (CannotCompileException | NotFoundException e) {
             throw new CustomException("registerEntity is fail!", e);
@@ -110,7 +110,7 @@ public class ModelStructure {
         Class<?> dataType = column.getDataType();
         String tableName = column.getTableName();
         String columnName = column.getColumnName();
-        boolean isNullable = YES.equalsIgnoreCase(column.getIsNullable());
+        boolean isNullable = Constant.YES.equalsIgnoreCase(column.getIsNullable());
         String columnDef = column.getColumnDef();
         try {
             // 新增字段
@@ -124,19 +124,19 @@ public class ModelStructure {
 
 
             // 是否允许为NULL
-            Annotation includeAnn = new Annotation("com.fasterxml.jackson.annotation.JsonInclude", constPool);
+            Annotation includeAnn = new Annotation(JsonInclude.class.getTypeName(), constPool);
             EnumMemberValue generationTypeValue = new EnumMemberValue(constPool);
-            generationTypeValue.setType("com.fasterxml.jackson.annotation.JsonInclude.Include");
+            generationTypeValue.setType(JsonInclude.Include.class.getTypeName());
             if (isNullable) {
-                generationTypeValue.setValue("NON_ABSENT");
+                generationTypeValue.setValue(JsonInclude.Include.NON_NULL.name());
             } else {
-                generationTypeValue.setValue("ALWAYS");
+                generationTypeValue.setValue(JsonInclude.Include.ALWAYS.name());
             }
             includeAnn.addMemberValue("value", generationTypeValue);
             fieldAttr.addAnnotation(includeAnn);
 
             // 统一列
-            Annotation columnAnn = new Annotation("com.fasterxml.jackson.annotation.JsonProperty", constPool);
+            Annotation columnAnn = new Annotation(JsonProperty.class.getTypeName(), constPool);
             columnAnn.addMemberValue("value", new StringMemberValue(columnName, constPool));
             if (StringUtils.hasLength(columnDef) && !dataType.isAssignableFrom(Date.class)) {
                 columnAnn.addMemberValue("defaultValue", new StringMemberValue(columnDef, constPool));
@@ -144,13 +144,13 @@ public class ModelStructure {
             fieldAttr.addAnnotation(columnAnn);
 
             // 属性别名
-            Annotation aliasAnn = new Annotation("com.fasterxml.jackson.annotation.JsonAlias", constPool);
-            aliasAnn.addMemberValue("value", new StringMemberValue(tableName + NAME_SEPARATOR + columnName, constPool));
+            Annotation aliasAnn = new Annotation(JsonAlias.class.getTypeName(), constPool);
+            aliasAnn.addMemberValue("value", new StringMemberValue(tableName + Constant.NAME_SEPARATOR + columnName, constPool));
             fieldAttr.addAnnotation(aliasAnn);
 
             // 是否为时间类型
             if (dataType.isAssignableFrom(Date.class)) {
-                Annotation formatAnn = new Annotation("com.fasterxml.jackson.annotation.JsonFormat", constPool);
+                Annotation formatAnn = new Annotation(JsonFormat.class.getTypeName(), constPool);
                 formatAnn.addMemberValue("pattern", new StringMemberValue("yyyy-MM-dd HH:mm:ss", constPool));
                 fieldAttr.addAnnotation(formatAnn);
             }

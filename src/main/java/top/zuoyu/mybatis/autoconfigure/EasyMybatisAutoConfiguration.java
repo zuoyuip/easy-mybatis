@@ -1,12 +1,14 @@
 package top.zuoyu.mybatis.autoconfigure;
 
-import java.sql.Connection;
+import java.io.File;
 import java.sql.SQLException;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import javax.sql.DataSource;
 
+import org.apache.commons.lang.ArrayUtils;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.mapping.DatabaseIdProvider;
 import org.apache.ibatis.plugin.Interceptor;
@@ -44,15 +46,15 @@ import org.springframework.core.env.Environment;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.lang.NonNull;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
-import top.zuoyu.mybatis.data.DataInfoLoad;
-import top.zuoyu.mybatis.data.model.Table;
-import top.zuoyu.mybatis.ssist.MapperStructure;
-import top.zuoyu.mybatis.ssist.MapperXmlStructure;
-import top.zuoyu.mybatis.ssist.ModelStructure;
+import top.zuoyu.mybatis.common.Constant;
+import top.zuoyu.mybatis.ssist.StructureInit;
+import top.zuoyu.mybatis.temp.model.BaseModel;
+
 
 /**
  * 自动装配 .
@@ -93,24 +95,37 @@ public class EasyMybatisAutoConfiguration implements InitializingBean {
 
     @Override
     public void afterPropertiesSet() throws Exception {
+        // 添加别名包
+        String typeAliasesPackage = this.properties.getTypeAliasesPackage();
+        String modelPackageName = ClassUtils.getPackageName(BaseModel.class);
+        if (StringUtils.hasLength(typeAliasesPackage)) {
+            this.properties.setTypeAliasesPackage(typeAliasesPackage + "," + modelPackageName);
+        } else {
+            this.properties.setTypeAliasesPackage(modelPackageName);
+        }
 
+        // 添加xml文件包
+        String[] mapperLocations = this.properties.getMapperLocations();
+        String locations = String.format("classpath*:" + Constant.MAPPER_XML_DIR_NAME + File.separator + Constant.MAPPER_XML_SUFFIX, Constant.WILDCARD_SEPARATOR);
+        String[] newMapperLocations;
+        if (ArrayUtils.isEmpty(mapperLocations)) {
+            newMapperLocations = new String[1];
+            newMapperLocations[0] = locations;
+        } else {
+            newMapperLocations = Arrays.copyOf(mapperLocations, mapperLocations.length + 1);
+            newMapperLocations[mapperLocations.length] = locations;
+        }
+        this.properties.setMapperLocations(newMapperLocations);
 
+        System.out.println("-------------------------------afterPropertiesSet----------------------------------");
     }
 
-
-    public void initModels(@NonNull DataSource dataSource) throws SQLException {
-        Connection connection = dataSource.getConnection();
-        List<Table> tables = DataInfoLoad.getTables(connection);
-        tables.forEach(ModelStructure::registerModel);
-        tables.forEach(MapperXmlStructure::registerMapperXml);
-        tables.forEach(MapperStructure::registerMapper);
-    }
 
     @Bean
     @ConditionalOnMissingBean
     public SqlSessionFactory sqlSessionFactory(DataSource dataSource) throws Exception {
-        initModels(dataSource);
-        System.out.println("-----------------------------initModels---------------------------");
+        StructureInit.register(dataSource);
+        System.out.println("-----------------------------StructureInit.register---------------------------");
         SqlSessionFactoryBean factory = new SqlSessionFactoryBean();
         factory.setDataSource(dataSource);
         factory.setVfs(SpringBootVFS.class);
@@ -168,11 +183,7 @@ public class EasyMybatisAutoConfiguration implements InitializingBean {
     }
 
     /**
-     * This will just scan the same base package as Spring Boot does. If you want
-     * more power, you can explicitly use
-     * {@link org.mybatis.spring.annotation.MapperScan} but this will get typed
-     * mappers working correctly, out-of-the-box, similar to using Spring Data JPA
-     * repositories.
+     * 修改扫描包
      */
     public static class AutoConfiguredMapperScannerRegistrar
             implements BeanFactoryAware, ImportBeanDefinitionRegistrar, ResourceLoaderAware, EnvironmentAware {
@@ -194,8 +205,9 @@ public class EasyMybatisAutoConfiguration implements InitializingBean {
                 }
                 List<String> packages = AutoConfigurationPackages.get(this.beanFactory);
 
-                // TODO 添加包名
-                packages.addAll(Arrays.asList());
+
+                packages.addAll(Collections.singletonList(Constant.MAPPER_PACKAGE_NAME));
+                scanner.setAnnotationClass(Mapper.class);
 
                 scanner.registerFilters();
                 scanner.doScan(StringUtils.toStringArray(packages));
@@ -221,15 +233,10 @@ public class EasyMybatisAutoConfiguration implements InitializingBean {
     }
 
     /**
-     * {@link org.mybatis.spring.annotation.MapperScan} ultimately ends up
-     * creating instances of {@link MapperFactoryBean}. If
-     * {@link org.mybatis.spring.annotation.MapperScan} is used then this
-     * auto-configuration is not needed. If it is _not_ used, however, then this
-     * will bring in a bean registrar and automatically register components based
-     * on the same component-scanning path as Spring Boot itself.
+     * 自动扫描
      */
-    @org.springframework.context.annotation.Configuration
-    @Import({ AutoConfiguredMapperScannerRegistrar.class })
+    @Configuration
+    @Import({AutoConfiguredMapperScannerRegistrar.class})
     @ConditionalOnMissingBean(MapperFactoryBean.class)
     public static class MapperScannerRegistrarNotFoundConfiguration implements InitializingBean {
 
@@ -237,6 +244,16 @@ public class EasyMybatisAutoConfiguration implements InitializingBean {
         public void afterPropertiesSet() {
 
         }
+    }
+
+    /**
+     * Support Devtools Restart.
+     */
+    @Configuration
+    @ConditionalOnProperty(prefix = "spring.devtools.restart", name = "enabled", matchIfMissing = true)
+    static class RestartConfiguration {
+
+
     }
 
 

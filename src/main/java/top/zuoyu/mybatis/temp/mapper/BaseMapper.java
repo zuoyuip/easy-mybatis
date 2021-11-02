@@ -1,7 +1,7 @@
 package top.zuoyu.mybatis.temp.mapper;
 
 /**
- * 基本DAO .
+ * 基本Mapper .
  *
  * @author: zuoyu
  * @create: 2021-10-17 16:33
