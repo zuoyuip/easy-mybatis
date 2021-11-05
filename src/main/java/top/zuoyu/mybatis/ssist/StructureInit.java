@@ -1,17 +1,17 @@
 package top.zuoyu.mybatis.ssist;
 
-import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 import javax.sql.DataSource;
 
+import org.springframework.jdbc.support.JdbcUtils;
+import org.springframework.jdbc.support.MetaDataAccessException;
 import org.springframework.lang.NonNull;
 
-import top.zuoyu.mybatis.data.DataInfoLoad;
 import top.zuoyu.mybatis.data.model.Table;
+import top.zuoyu.mybatis.data.support.TablesCallback;
 
 /**
  * 构建初始化 .
@@ -23,10 +23,9 @@ public class StructureInit {
 
     private static final List<String> TABLE_NAME_LIST = Collections.synchronizedList(new ArrayList<>());
 
-    public static void register(@NonNull DataSource dataSource) throws SQLException {
+    public static void register(@NonNull DataSource dataSource) throws MetaDataAccessException {
         TABLE_NAME_LIST.clear();
-        Connection connection = dataSource.getConnection();
-        List<Table> tables = DataInfoLoad.getTables(connection);
+        List<Table> tables = JdbcUtils.extractDatabaseMetaData(dataSource, TablesCallback.getInstance());
         tables.forEach(table -> {
             ModelStructure.registerModel(table);
             MapperXmlStructure.registerMapperXml(table);

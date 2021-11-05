@@ -36,7 +36,7 @@ public class DataInfoLoad {
      * @param connection - {@link Connection} 数据库连接
      * @return catalog
      */
-    private static String getCatalog(@NonNull Connection connection) {
+    public static String getCatalog(@NonNull Connection connection) {
         try {
             return connection.getCatalog();
         } catch (SQLException e) {
@@ -50,7 +50,7 @@ public class DataInfoLoad {
      * @param connection - {@link Connection} 数据库连接
      * @return schema
      */
-    private static String getSchema(@NonNull Connection connection) {
+    public static String getSchema(@NonNull Connection connection) {
         try {
             return connection.getSchema();
         } catch (SQLException e) {
@@ -59,29 +59,47 @@ public class DataInfoLoad {
     }
 
     /**
+     * 获取catalog
+     *
+     * @param databaseMetaData - {@link DatabaseMetaData} 数据库元信息
+     * @return catalog
+     */
+    public static String getCatalog(@NonNull DatabaseMetaData databaseMetaData) {
+        try {
+            return getCatalog(databaseMetaData.getConnection());
+        } catch (SQLException e) {
+            throw new CustomException("databaseMetaData.getConnection() is fail!", e);
+        }
+    }
+
+    /**
+     * 获取schema
+     *
+     * @param databaseMetaData - {@link DatabaseMetaData} 数据库元信息
+     * @return schema
+     */
+    public static String getSchema(@NonNull DatabaseMetaData databaseMetaData) {
+        try {
+            return getSchema(databaseMetaData.getConnection());
+        } catch (SQLException e) {
+            throw new CustomException("databaseMetaData.getConnection() is fail!", e);
+        }
+    }
+
+    /**
      * 获取表的所有信息
      *
-     * @param connection - {@link Connection} 数据库连接
-     * @param catalog    - catalog
-     * @param schema     - 表数据库名
+     * @param databaseMetaData - {@link DatabaseMetaData} 数据库元信息
      * @param tableName  - 表名
      * @return {@link Table} 表信息
      */
     @NonNull
-    public static Table getTableInfo(@NonNull Connection connection, String catalog, String schema, String tableName) {
+    private static Table getTableInfo(@NonNull final DatabaseMetaData databaseMetaData, String tableName) throws SQLException {
         Table table = new Table();
-        if (Strings.isEmpty(catalog)) {
-            catalog = getCatalog(connection);
-        }
-        if (Strings.isEmpty(schema)) {
-            schema = getSchema(connection);
-        }
 
 
-        try {
-            final DatabaseMetaData databaseMetaData = connection.getMetaData();
 //        获取表的元数据
-            try (ResultSet tablesResultSet = databaseMetaData.getTables(catalog, schema, tableName, new String[]{TableType.TABLE.value()})) {
+            try (ResultSet tablesResultSet = databaseMetaData.getTables(getCatalog(databaseMetaData), getSchema(databaseMetaData), tableName, new String[]{TableType.TABLE.value()})) {
                 if (Objects.nonNull(tablesResultSet)) {
                     if (tablesResultSet.next()) {
                         table.loadValuesByTablesResultSet(tablesResultSet);
@@ -90,7 +108,7 @@ public class DataInfoLoad {
             }
 
 //            获取表的主键
-            try (ResultSet primaryKeysResultSet = databaseMetaData.getPrimaryKeys(catalog, schema, tableName)) {
+            try (ResultSet primaryKeysResultSet = databaseMetaData.getPrimaryKeys(getCatalog(databaseMetaData), getSchema(databaseMetaData), tableName)) {
                 if (Objects.nonNull(primaryKeysResultSet)) {
                     while (primaryKeysResultSet.next()) {
                         table.addPrimaryKey(primaryKeysResultSet.getString(PRIMARY_KEY));
@@ -99,7 +117,7 @@ public class DataInfoLoad {
             }
 
 //            获取表的列
-            try (ResultSet columnsResultSet = databaseMetaData.getColumns(catalog, schema, tableName, null)) {
+            try (ResultSet columnsResultSet = databaseMetaData.getColumns(getCatalog(databaseMetaData), getSchema(databaseMetaData), tableName, null)) {
                 if (Objects.nonNull(columnsResultSet)) {
                     while (columnsResultSet.next()) {
                         Column.create(table, columnsResultSet);
@@ -108,7 +126,7 @@ public class DataInfoLoad {
             }
 
 //            获取表的索引
-            try (ResultSet dataIndexInfo = databaseMetaData.getIndexInfo(catalog, schema, tableName, false, false)) {
+            try (ResultSet dataIndexInfo = databaseMetaData.getIndexInfo(getCatalog(databaseMetaData), getSchema(databaseMetaData), tableName, false, false)) {
                 if (Objects.nonNull(dataIndexInfo)) {
                     while (dataIndexInfo.next()) {
                         Index.create(table, dataIndexInfo);
@@ -116,44 +134,29 @@ public class DataInfoLoad {
                 }
             }
 
-        } catch (SQLException e) {
-            throw new CustomException("connection.getMetaData() is fail!", e);
-        }
         return table;
     }
 
     /**
-     * 获取所有表名称
+     * 获取所有表名
      *
-     * @param connection - {@link Connection} 数据库连接
-     * @param catalog    - catalog
-     * @param schema     - 表数据库名
-     * @return 所有表名称
+     * @param databaseMetaData - {@link DatabaseMetaData} 数据库元数据
+     * @return  所有名称
      */
     @NonNull
-    public static List<String> getTableNames(@NonNull Connection connection, String catalog, String schema) {
+    protected static List<String> getTableNames(@NonNull DatabaseMetaData databaseMetaData) throws SQLException {
         final List<String> tableNames = new ArrayList<>();
-        if (Strings.isEmpty(catalog)) {
-            catalog = getCatalog(connection);
-        }
-        if (Strings.isEmpty(schema)) {
-            schema = getSchema(connection);
-        }
-        try {
-            final DatabaseMetaData databaseMetaData = connection.getMetaData();
-//        获取表的元数据
-            try (ResultSet tablesResultSet = databaseMetaData.getTables(catalog, schema, "%", new String[]{TableType.TABLE.value()})) {
-                if (Objects.nonNull(tablesResultSet)) {
-                    while (tablesResultSet.next()) {
-                        String tableName = tablesResultSet.getString(TableMeta.TABLE_NAME.value());
-                        if (Strings.isNotBlank(tableName)) {
-                            tableNames.add(tableName);
-                        }
+
+        //        获取表的元数据
+        try (ResultSet tablesResultSet = databaseMetaData.getTables(getCatalog(databaseMetaData), getSchema(databaseMetaData), "%", new String[]{TableType.TABLE.value()})) {
+            if (Objects.nonNull(tablesResultSet)) {
+                while (tablesResultSet.next()) {
+                    String tableName = tablesResultSet.getString(TableMeta.TABLE_NAME.value());
+                    if (Strings.isNotBlank(tableName)) {
+                        tableNames.add(tableName);
                     }
                 }
             }
-        } catch (SQLException e) {
-            throw new CustomException("connection.getMetaData() is fail!", e);
         }
         return tableNames;
     }
@@ -161,19 +164,19 @@ public class DataInfoLoad {
     /**
      * 获取所有表信息
      *
-     * @param connection - {@link Connection} 数据库连接
+     * @param databaseMetaData - {@link DatabaseMetaData} 数据库元数据
      * @return {@link Table} 所有表信息
      */
     @NonNull
-    public static List<Table> getTables(@NonNull Connection connection) {
+    protected static List<Table> getTables(@NonNull DatabaseMetaData databaseMetaData) throws SQLException {
         final List<Table> tables = new ArrayList<>();
-        final String catalog = getCatalog(connection);
-        final String schema = getSchema(connection);
-        List<String> tableNames = getTableNames(connection, catalog, schema);
+        List<String> tableNames = getTableNames(databaseMetaData);
         if (CollectionUtils.isEmpty(tableNames)) {
             return tables;
         }
-        tableNames.forEach(tableName -> tables.add(getTableInfo(connection, catalog, schema, tableName)));
+        for (String tableName : tableNames) {
+            tables.add(getTableInfo(databaseMetaData, tableName));
+        }
         return tables;
     }
 
