@@ -7,6 +7,7 @@ import javax.sql.DataSource;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.configurationprocessor.json.JSONObject;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.support.JdbcUtils;
 import org.springframework.jdbc.support.MetaDataAccessException;
@@ -23,6 +24,7 @@ class EasyMybatisApplicationTests {
 
     @Test
     void contextLoads() throws SQLException, MetaDataAccessException {
+
 
         List<Table> tables = JdbcUtils.extractDatabaseMetaData(dataSource, TablesCallback.getInstance());
         tables.forEach(table -> table.getColumns().forEach(System.out::println));
