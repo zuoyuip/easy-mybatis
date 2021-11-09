@@ -1,17 +1,15 @@
-/*
- * Copyright (C) 2010 The Android Open Source Project
- *
- * {@author: zuoyu }在其基础上进行了改动
- */
-
 package top.zuoyu.mybatis.json;
 
+import java.io.Serializable;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 
 import org.springframework.lang.NonNull;
 
@@ -23,7 +21,7 @@ import top.zuoyu.mybatis.exception.JsonException;
  * @author: zuoyu
  * @create: 2021-11-05 10:00
  */
-public class JsonObject {
+public class JsonObject implements Cloneable, Serializable, InvocationHandler, Map<String, Object> {
 
     /**
      * 用于显式定义没有值的名称的标记值
@@ -43,6 +41,7 @@ public class JsonObject {
 
     };
     private static final Double NEGATIVE_ZERO = -0d;
+    private static final long serialVersionUID = 1L;
     private final Map<String, Object> nameValuePairs;
 
     public JsonObject() {
@@ -197,12 +196,6 @@ public class JsonObject {
         return null;
     }
 
-    /**
-     * 返回此对象中名称/值映射的数量
-     */
-    public int length() {
-        return this.nameValuePairs.size();
-    }
 
     /**
      * 将value映射到name ，破坏任何具有相同名称的现有名称/值映射
@@ -259,16 +252,183 @@ public class JsonObject {
      * @param value – 对应的值
      * @return {@link JsonObject}
      */
-    public JsonObject put(String name, Object value) throws JsonException {
+    public JsonObject put(String name, byte value) throws JsonException {
+        this.nameValuePairs.put(checkName(name), value);
+        return this;
+    }
+
+    /**
+     * 将value映射到name ，破坏任何具有相同名称的现有名称/值映射
+     *
+     * @param name  - 属性的名称
+     * @param value – 对应的值
+     * @return {@link JsonObject}
+     */
+    public JsonObject put(String name, short value) throws JsonException {
+        this.nameValuePairs.put(checkName(name), value);
+        return this;
+    }
+
+    /**
+     * 将value映射到name ，破坏任何具有相同名称的现有名称/值映射
+     *
+     * @param name  - 属性的名称
+     * @param value – 对应的值
+     * @return {@link JsonObject}
+     */
+    public JsonObject put(String name, char value) throws JsonException {
+        this.nameValuePairs.put(checkName(name), value);
+        return this;
+    }
+
+    /**
+     * 将value映射到name ，破坏任何具有相同名称的现有名称/值映射
+     *
+     * @param name  - 属性的名称
+     * @param value – 对应的值
+     * @return {@link JsonObject}
+     */
+    public JsonObject put(String name, String value) throws JsonException {
+        this.nameValuePairs.put(checkName(name), value);
+        return this;
+    }
+
+    /**
+     * 返回此对象中名称/值映射的数量
+     */
+    @Override
+    public int size() {
+        return this.nameValuePairs.size();
+    }
+
+    /**
+     * 判断此对象是否为空
+     *
+     * @return 是/否
+     */
+    @Override
+    public boolean isEmpty() {
+        return this.nameValuePairs.isEmpty();
+    }
+
+    /**
+     * 判断此对象是否存在该名称
+     *
+     * @param key - 名称
+     * @return 是/否
+     */
+    @Override
+    public boolean containsKey(Object key) {
+        return this.nameValuePairs.containsKey(key);
+    }
+
+    /**
+     * 判断此对象是否存在该zhi值
+     *
+     * @param value - 值
+     * @return 是/否
+     */
+    @Override
+    public boolean containsValue(Object value) {
+        return this.nameValuePairs.containsValue(value);
+    }
+
+    /**
+     * 获取此对象中名称为{@code key}的值
+     *
+     * @param key - 名称
+     * @return 对应的值
+     */
+    @Override
+    public Object get(Object key) {
+        return this.nameValuePairs.get(key);
+    }
+
+    /**
+     * 将value映射到name ，破坏任何具有相同名称的现有名称/值映射
+     *
+     * @param name  - 属性的名称
+     * @param value – 对应的值
+     * @return {@link JsonObject}
+     */
+    @Override
+    public JsonObject put(String name, Object value) {
         if (value == null) {
             this.nameValuePairs.remove(name);
             return this;
         }
         if (value instanceof Number) {
-            Json.checkDouble(((Number) value).doubleValue());
+            try {
+                Json.checkDouble(((Number) value).doubleValue());
+            } catch (JsonException e) {
+                e.printStackTrace();
+            }
         }
-        this.nameValuePairs.put(checkName(name), value);
+        try {
+            this.nameValuePairs.put(checkName(name), value);
+        } catch (JsonException e) {
+            e.printStackTrace();
+        }
         return this;
+    }
+
+    /**
+     * 如果存在，则删除对应映射
+     *
+     * @param key - 属性的名称
+     * @return 先前由name映射的值，如果没有这样的映射，则为 null
+     */
+    @Override
+    public Object remove(Object key) {
+        return this.nameValuePairs.remove(key);
+    }
+
+    /**
+     * 添加相应Map的所有名称和映射
+     *
+     * @param map - Map
+     */
+    @Override
+    public void putAll(Map<? extends String, ?> map) {
+        this.nameValuePairs.putAll(map);
+    }
+
+    /**
+     * 清空所有名称和映射
+     */
+    @Override
+    public void clear() {
+        this.nameValuePairs.clear();
+    }
+
+    /**
+     * 返回所有的名称
+     *
+     * @return 所有名称的集合
+     */
+    @Override
+    public Set<String> keySet() {
+        return this.nameValuePairs.keySet();
+    }
+
+    /**
+     * 返回所有的值
+     *
+     * @return 所有值的集合
+     */
+    @Override
+    public Collection<Object> values() {
+        return this.nameValuePairs.values();
+    }
+
+    /**
+     * 返回所有名称-映射
+     *
+     * @return 所有名称-映射形式的集合
+     */
+    @Override
+    public Set<Entry<String, Object>> entrySet() {
+        return this.nameValuePairs.entrySet();
     }
 
     /**
@@ -688,4 +848,8 @@ public class JsonObject {
         stringer.endObject();
     }
 
+    @Override
+    public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+        return null;
+    }
 }

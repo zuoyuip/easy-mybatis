@@ -1,18 +1,4 @@
-/*
- * Copyright (C) 2010 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      https://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+
 
 package top.zuoyu.mybatis.json;
 
@@ -22,41 +8,7 @@ import java.util.List;
 
 import top.zuoyu.mybatis.exception.JsonException;
 
-// Note: this class was written without inspecting the non-free org.json source code.
 
-/**
- * Implements {@link JsonObject#toString} and {@link JsonArray#toString}. Most application
- * developers should use those methods directly and disregard this API. For example:<pre>
- * JSONObject object = ...
- * String json = object.toString();</pre>
- * <p>
- * Stringers only encode well-formed JSON strings. In particular:
- * <ul>
- * <li>The stringer must have exactly one top-level array or object.
- * <li>Lexical scopes must be balanced: every call to {@link #array} must have a matching
- * call to {@link #endArray} and every call to {@link #object} must have a matching call
- * to {@link #endObject}.
- * <li>Arrays may not contain keys (property names).
- * <li>Objects must alternate keys (property names) and values.
- * <li>Values are inserted with either literal {@link #value(Object) value} calls, or by
- * nesting arrays or objects.
- * </ul>
- * Calls that would result in a malformed JSON string will fail with a
- * {@link JsonException}.
- * <p>
- * This class provides no facility for pretty-printing (ie. indenting) output. To encode
- * indented output, use {@link JsonObject#toString(int)} or
- * {@link JsonArray#toString(int)}.
- * <p>
- * Some implementations of the API support at most 20 levels of nesting. Attempts to
- * create more than 20 levels of nesting may fail with a {@link JsonException}.
- * <p>
- * Each stringer may be used to encode a single top level value. Instances of this class
- * are not thread safe. Although this class is nonfinal, it was not designed for
- * inheritance and should not be subclassed. In particular, self-use by overrideable
- * methods is not specified. See <i>Effective Java</i> Item 17, "Design and Document or
- * inheritance or else prohibit it" for further information.
- */
 public class JsonStringer {
 
 	/**

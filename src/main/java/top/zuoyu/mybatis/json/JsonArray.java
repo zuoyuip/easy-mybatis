@@ -1,9 +1,3 @@
-/*
- * Copyright (C) 2010 The Android Open Source Project
- *
- * {@author: zuoyu }在其基础上进行了改动
- */
-
 package top.zuoyu.mybatis.json;
 
 import java.lang.reflect.Array;
