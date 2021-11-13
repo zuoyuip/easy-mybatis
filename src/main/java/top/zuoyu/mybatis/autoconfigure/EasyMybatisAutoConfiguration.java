@@ -43,6 +43,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.ImportBeanDefinitionRegistrar;
 import org.springframework.core.env.Environment;
+import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.lang.NonNull;
@@ -52,6 +53,7 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 import top.zuoyu.mybatis.common.Constant;
+import top.zuoyu.mybatis.json.JsonObject;
 import top.zuoyu.mybatis.ssist.StructureInit;
 import top.zuoyu.mybatis.temp.model.BaseModel;
 
@@ -73,6 +75,8 @@ public class EasyMybatisAutoConfiguration implements InitializingBean {
     private final MybatisProperties properties;
 
     private final Interceptor[] interceptors;
+
+    private Resource[] resources;
 
     private final ResourceLoader resourceLoader;
 
@@ -97,7 +101,7 @@ public class EasyMybatisAutoConfiguration implements InitializingBean {
     public void afterPropertiesSet() throws Exception {
         // 添加别名包
         String typeAliasesPackage = this.properties.getTypeAliasesPackage();
-        String modelPackageName = ClassUtils.getPackageName(BaseModel.class);
+        String modelPackageName = ClassUtils.getPackageName(JsonObject.class);
         if (StringUtils.hasLength(typeAliasesPackage)) {
             this.properties.setTypeAliasesPackage(typeAliasesPackage + "," + modelPackageName);
         } else {
@@ -106,16 +110,16 @@ public class EasyMybatisAutoConfiguration implements InitializingBean {
 
         // 添加xml文件包
         String[] mapperLocations = this.properties.getMapperLocations();
-        String locations = String.format("classpath*:" + Constant.MAPPER_XML_DIR_NAME + File.separator + Constant.MAPPER_XML_SUFFIX, Constant.WILDCARD_SEPARATOR);
-        String[] newMapperLocations;
-        if (ArrayUtils.isEmpty(mapperLocations)) {
-            newMapperLocations = new String[1];
-            newMapperLocations[0] = locations;
-        } else {
-            newMapperLocations = Arrays.copyOf(mapperLocations, mapperLocations.length + 1);
-            newMapperLocations[mapperLocations.length] = locations;
-        }
-        this.properties.setMapperLocations(newMapperLocations);
+//        String locations = String.format("classpath*:" + Constant.MAPPER_XML_DIR_NAME + File.separator + Constant.MAPPER_XML_SUFFIX, Constant.WILDCARD_SEPARATOR);
+//        String[] newMapperLocations;
+//        if (ArrayUtils.isEmpty(mapperLocations)) {
+//            newMapperLocations = new String[1];
+//            newMapperLocations[0] = locations;
+//        } else {
+//            newMapperLocations = Arrays.copyOf(mapperLocations, mapperLocations.length + 1);
+//            newMapperLocations[mapperLocations.length] = locations;
+//        }
+        this.properties.setMapperLocations(mapperLocations);
 
         System.out.println("-------------------------------afterPropertiesSet----------------------------------");
     }
@@ -124,7 +128,7 @@ public class EasyMybatisAutoConfiguration implements InitializingBean {
     @Bean
     @ConditionalOnMissingBean
     public SqlSessionFactory sqlSessionFactory(DataSource dataSource) throws Exception {
-        StructureInit.register(dataSource);
+        this.resources = StructureInit.register(dataSource);
         System.out.println("-----------------------------StructureInit.register---------------------------");
         SqlSessionFactoryBean factory = new SqlSessionFactoryBean();
         factory.setDataSource(dataSource);
@@ -152,7 +156,11 @@ public class EasyMybatisAutoConfiguration implements InitializingBean {
             factory.setTypeHandlersPackage(this.properties.getTypeHandlersPackage());
         }
         if (!ObjectUtils.isEmpty(this.properties.resolveMapperLocations())) {
-            factory.setMapperLocations(this.properties.resolveMapperLocations());
+            Resource[] resolveMapperLocations = this.properties.resolveMapperLocations();
+            Resource[] all = (Resource[]) ArrayUtils.addAll(resolveMapperLocations, this.resources);
+            factory.setMapperLocations(all);
+        } else {
+            factory.setMapperLocations(this.resources);
         }
 
         return factory.getObject();

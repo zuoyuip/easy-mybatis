@@ -21,6 +21,7 @@ import javassist.ClassPool;
 import javassist.CtClass;
 import javassist.CtField;
 import javassist.NotFoundException;
+import top.zuoyu.mybatis.json.JsonObject;
 import top.zuoyu.mybatis.utils.ClassUtil;
 
 /**
@@ -52,23 +53,14 @@ public class TestController {
             classPool.appendClassPath(ClassUtil.getBasePath().getPath());
             TypeAliasRegistry typeAliasRegistry = sqlSession.getConfiguration().getTypeAliasRegistry();
             Map<String, Class<?>> typeAliases = typeAliasRegistry.getTypeAliases();
-            Class<?> wechatinfoClass = typeAliases.get("wechatinfo");
+            Class<?> wechatinfoClass = typeAliases.get("jsonobject");
             Method selectList = ReflectionUtils.findMethod(mapperClass, "selectList", wechatinfoClass);
-            List o = (List) ReflectionUtils.invokeMethod(selectList, mapper, wechatinfoClass.newInstance());
-            ObjectMapper objectMapper = new ObjectMapper();
-            o.forEach(o1 -> {
-                try {
-                    String s = objectMapper.writeValueAsString(o1);
-                    System.out.println(s);
-                } catch (JsonProcessingException e) {
-                    e.printStackTrace();
-                }
-            });
+            List<JsonObject> o = (List) ReflectionUtils.invokeMethod(selectList, mapper, wechatinfoClass.newInstance());
+            o.forEach(System.out::println);
 
         } catch (ClassNotFoundException | NotFoundException | InstantiationException | IllegalAccessException e) {
             e.printStackTrace();
         }
-
 
 
     }

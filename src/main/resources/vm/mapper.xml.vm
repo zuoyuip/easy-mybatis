@@ -3,8 +3,8 @@
 PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="${packageName}.${ClassName}Mapper">
-    
-    <resultMap type="${ClassName}" id="${ClassName}Result">
+
+    <resultMap type="top.zuoyu.mybatis.json.JsonObject" id="${ClassName}Result">
 #foreach ($column in $columns)
         <result property="${column.javaField}"    column="${column.columnName}"    />
 #end
@@ -14,9 +14,9 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         select#foreach($column in $columns) $column.columnName#if($velocityCount != $columns.size()),#end#end from ${tableName}
     </sql>
 
-    <select id="selectList" parameterType="${ClassName}" resultMap="${ClassName}Result">
+    <select id="selectList" parameterType="top.zuoyu.mybatis.json.JsonObject"  resultType="top.zuoyu.mybatis.json.JsonObject">
         <include refid="select${ClassName}Vo"/>
-        <where>  
+        <where>
 #foreach($column in $columns)
 #set($javaField=$column.javaField)
 #set($javaType=$column.javaType)
@@ -25,13 +25,13 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 #end
         </where>
     </select>
-    
-    <select id="selectById" parameterType="${pkColumn.javaType}" resultMap="${ClassName}Result">
+
+    <select id="selectById" parameterType="${pkColumn.javaType}"  resultType="top.zuoyu.mybatis.json.JsonObject">
         <include refid="select${ClassName}Vo"/>
         where ${pkColumn.columnName} = #{${pkColumn.javaField}}
     </select>
-        
-    <insert id="insert" parameterType="${ClassName}"#if($pkColumn.increment) useGeneratedKeys="true" keyProperty="$pkColumn.javaField"#end>
+
+    <insert id="insert" parameterType="top.zuoyu.mybatis.json.JsonObject"#if($pkColumn.increment) useGeneratedKeys="true" keyProperty="$pkColumn.javaField"#end>
         insert into ${tableName}
         <trim prefix="(" suffix=")" suffixOverrides=",">
 #foreach($column in $columns)
@@ -49,7 +49,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
          </trim>
     </insert>
 
-    <update id="update" parameterType="${ClassName}">
+    <update id="update" parameterType="top.zuoyu.mybatis.json.JsonObject">
         update ${tableName}
         <trim prefix="SET" suffixOverrides=",">
 #foreach($column in $columns)

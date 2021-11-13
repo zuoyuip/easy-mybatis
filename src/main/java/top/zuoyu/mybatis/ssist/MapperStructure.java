@@ -22,6 +22,7 @@ import top.zuoyu.mybatis.annotation.Model;
 import top.zuoyu.mybatis.common.Constant;
 import top.zuoyu.mybatis.data.model.Table;
 import top.zuoyu.mybatis.exception.CustomException;
+import top.zuoyu.mybatis.json.JsonObject;
 import top.zuoyu.mybatis.utils.ClassUtil;
 import top.zuoyu.mybatis.utils.StrUtil;
 
@@ -44,7 +45,8 @@ class MapperStructure {
         ConstPool constPool = classFile.getConstPool();
 
 
-        String modelName = Constant.MODEL_PACKAGE_NAME + Constant.PACKAGE_SEPARATOR + StrUtil.captureName(table.getTableName());
+//        String modelName = Constant.MODEL_PACKAGE_NAME + Constant.PACKAGE_SEPARATOR + StrUtil.captureName(table.getTableName());
+        String modelName = JsonObject.class.getTypeName();
         try {
             CtClass modelClass = classPool.get(modelName);
 
@@ -64,10 +66,13 @@ class MapperStructure {
             e.printStackTrace();
         }
 
-        URL basePath = ClassUtil.getBasePath();
+
+
+//        URL basePath = ClassUtil.getBasePath();
         try {
-            ctClass.writeFile(basePath.getPath());
-        } catch (CannotCompileException | IOException e) {
+            classPool.toClass(ctClass);
+//            ctClass.writeFile(basePath.getPath());
+        } catch (CannotCompileException e) {
             throw new CustomException("writeFile is fail!", e);
         }
 
