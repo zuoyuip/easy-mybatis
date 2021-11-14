@@ -1,27 +1,25 @@
 package top.zuoyu.mybatis.controller;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.apache.ibatis.type.TypeAliasRegistry;
-import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import javassist.CannotCompileException;
 import javassist.ClassPool;
-import javassist.CtClass;
-import javassist.CtField;
 import javassist.NotFoundException;
+import top.zuoyu.mybatis.annotation.Magic;
+import top.zuoyu.mybatis.aspectj.cglib.CglibProxy;
+import top.zuoyu.mybatis.aspectj.cglib.Mappers;
 import top.zuoyu.mybatis.json.JsonObject;
+import top.zuoyu.mybatis.service.UnifyService;
 import top.zuoyu.mybatis.utils.ClassUtil;
 
 /**
@@ -34,10 +32,13 @@ import top.zuoyu.mybatis.utils.ClassUtil;
 @RequestMapping("test")
 public class TestController {
 
-    private final SqlSessionFactory sqlSessionFactory;
+    @Magic("wechatinfo")
+    private UnifyService unifyService;
 
-    public TestController(SqlSessionFactory sqlSessionFactory) {
-        this.sqlSessionFactory = sqlSessionFactory;
+    private final SqlSession sqlSession;
+
+    public TestController(SqlSession sqlSession) {
+        this.sqlSession = sqlSession;
     }
 
     @GetMapping
@@ -46,23 +47,32 @@ public class TestController {
 
         try {
             Class<?> aClass = Class.forName("top.zuoyu.mybatis.temp.mapper.WechatinfoMapper");
-            SqlSession sqlSession = sqlSessionFactory.openSession();
             Object mapper = sqlSession.getMapper(aClass);
-            Class<?> mapperClass = mapper.getClass();
-            ClassPool classPool = ClassPool.getDefault();
-            classPool.appendClassPath(ClassUtil.getBasePath().getPath());
-            TypeAliasRegistry typeAliasRegistry = sqlSession.getConfiguration().getTypeAliasRegistry();
-            Map<String, Class<?>> typeAliases = typeAliasRegistry.getTypeAliases();
-            Class<?> wechatinfoClass = typeAliases.get("jsonobject");
-            Method selectList = ReflectionUtils.findMethod(mapperClass, "selectList", wechatinfoClass);
-            List<JsonObject> o = (List) ReflectionUtils.invokeMethod(selectList, mapper, wechatinfoClass.newInstance());
-            o.forEach(System.out::println);
+//            Class<?> mapperClass = mapper.getClass();
+                UnifyService unifyService = (UnifyService) mapper;
+                unifyService.selectList().forEach(System.out::println);
+//            CglibProxy cglibProxy = new CglibProxy();
+//            UnifyService unifyService = cglibProxy.getBean(mapperClass);
+//            ClassPool classPool = ClassPool.getDefault();
+//            classPool.appendClassPath(ClassUtil.getBasePath().getPath());
+//            TypeAliasRegistry typeAliasRegistry = sqlSession.getConfiguration().getTypeAliasRegistry();
+//            Map<String, Class<?>> typeAliases = typeAliasRegistry.getTypeAliases();
+//            Class<?> wechatinfoClass = typeAliases.get("jsonobject");
+//            Method selectList = ReflectionUtils.findMethod(mapperClass, "selectList");
+//            List<JsonObject> o = (List) ReflectionUtils.invokeMethod(selectList, mapper);
+//            o.forEach(System.out::println);
 
-        } catch (ClassNotFoundException | NotFoundException | InstantiationException | IllegalAccessException e) {
+        } catch (ClassNotFoundException e) {
             e.printStackTrace();
         }
 
 
+    }
+
+    @GetMapping("service")
+    public void testUnifyService(){
+        UnifyService unifyService = Mappers.getUnifyService("wechatinfo");
+        unifyService.selectListByExample(new JsonObject()).forEach(System.out::println);
     }
 
 }

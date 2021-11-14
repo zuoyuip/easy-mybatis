@@ -38,11 +38,12 @@ import top.zuoyu.mybatis.utils.ClassUtil;
 import top.zuoyu.mybatis.utils.StrUtil;
 
 /**
- * 实体构建 .
+ * 实体构建（此版本不需要） .
  *
  * @author: zuoyu
  * @create: 2021-10-17 16:45
  */
+@Deprecated
 class ModelStructure {
 
 

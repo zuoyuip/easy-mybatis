@@ -1,3 +1,4 @@
 # Auto Configure
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-top.zuoyu.mybatis.autoconfigure.EasyMybatisAutoConfiguration
+top.zuoyu.mybatis.autoconfigure.EasyMybatisAutoConfiguration,\
+top.zuoyu.mybatis.autoconfigure.MapperInitAutoConfiguration

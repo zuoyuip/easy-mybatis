@@ -1,15 +1,11 @@
 package top.zuoyu.mybatis.autoconfigure;
 
-import java.io.File;
 import java.sql.SQLException;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 import javax.sql.DataSource;
 
 import org.apache.commons.lang.ArrayUtils;
-import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.mapping.DatabaseIdProvider;
 import org.apache.ibatis.plugin.Interceptor;
 import org.apache.ibatis.session.ExecutorType;
@@ -19,15 +15,8 @@ import org.mybatis.spring.SqlSessionTemplate;
 import org.mybatis.spring.boot.autoconfigure.ConfigurationCustomizer;
 import org.mybatis.spring.boot.autoconfigure.MybatisProperties;
 import org.mybatis.spring.boot.autoconfigure.SpringBootVFS;
-import org.mybatis.spring.mapper.ClassPathMapperScanner;
-import org.mybatis.spring.mapper.MapperFactoryBean;
-import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.BeanFactory;
-import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.ObjectProvider;
-import org.springframework.beans.factory.support.BeanDefinitionRegistry;
-import org.springframework.boot.autoconfigure.AutoConfigurationPackages;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
@@ -36,26 +25,19 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnSingleCandidate;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.context.EnvironmentAware;
-import org.springframework.context.ResourceLoaderAware;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
-import org.springframework.context.annotation.ImportBeanDefinitionRegistrar;
-import org.springframework.core.env.Environment;
+import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
-import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.lang.NonNull;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
-import top.zuoyu.mybatis.common.Constant;
 import top.zuoyu.mybatis.json.JsonObject;
 import top.zuoyu.mybatis.ssist.StructureInit;
-import top.zuoyu.mybatis.temp.model.BaseModel;
 
 
 /**
@@ -65,18 +47,19 @@ import top.zuoyu.mybatis.temp.model.BaseModel;
  * @create: 2021-10-29 16:55
  */
 @Configuration(proxyBeanMethods = false)
+@EnableAspectJAutoProxy(exposeProxy = true)
 @ConditionalOnClass({SqlSessionFactory.class, SqlSessionFactoryBean.class})
 @ConditionalOnSingleCandidate(DataSource.class)
-@EnableConfigurationProperties(MybatisProperties.class)
+@EnableConfigurationProperties({MybatisProperties.class, EasyProperties.class})
 @AutoConfigureAfter(DataSourceAutoConfiguration.class)
 @AutoConfigureBefore(name = "org.mybatis.spring.boot.autoconfigure.MybatisAutoConfiguration")
 public class EasyMybatisAutoConfiguration implements InitializingBean {
 
     private final MybatisProperties properties;
 
-    private final Interceptor[] interceptors;
+    private final EasyProperties easyProperties;
 
-    private Resource[] resources;
+    private final Interceptor[] interceptors;
 
     private final ResourceLoader resourceLoader;
 
@@ -86,11 +69,12 @@ public class EasyMybatisAutoConfiguration implements InitializingBean {
 
 
     public EasyMybatisAutoConfiguration(@NonNull MybatisProperties properties,
-                                        @NonNull ObjectProvider<Interceptor[]> interceptorsProvider,
+                                        @NonNull EasyProperties easyProperties, @NonNull ObjectProvider<Interceptor[]> interceptorsProvider,
                                         @NonNull ResourceLoader resourceLoader,
                                         @NonNull ObjectProvider<DatabaseIdProvider> databaseIdProvider,
                                         @NonNull ObjectProvider<List<ConfigurationCustomizer>> configurationCustomizersProvider) throws SQLException {
         this.properties = properties;
+        this.easyProperties = easyProperties;
         this.interceptors = interceptorsProvider.getIfAvailable();
         this.resourceLoader = resourceLoader;
         this.databaseIdProvider = databaseIdProvider.getIfAvailable();
@@ -98,7 +82,7 @@ public class EasyMybatisAutoConfiguration implements InitializingBean {
     }
 
     @Override
-    public void afterPropertiesSet() throws Exception {
+    public void afterPropertiesSet() {
         // 添加别名包
         String typeAliasesPackage = this.properties.getTypeAliasesPackage();
         String modelPackageName = ClassUtils.getPackageName(JsonObject.class);
@@ -107,29 +91,14 @@ public class EasyMybatisAutoConfiguration implements InitializingBean {
         } else {
             this.properties.setTypeAliasesPackage(modelPackageName);
         }
-
-        // 添加xml文件包
-        String[] mapperLocations = this.properties.getMapperLocations();
-//        String locations = String.format("classpath*:" + Constant.MAPPER_XML_DIR_NAME + File.separator + Constant.MAPPER_XML_SUFFIX, Constant.WILDCARD_SEPARATOR);
-//        String[] newMapperLocations;
-//        if (ArrayUtils.isEmpty(mapperLocations)) {
-//            newMapperLocations = new String[1];
-//            newMapperLocations[0] = locations;
-//        } else {
-//            newMapperLocations = Arrays.copyOf(mapperLocations, mapperLocations.length + 1);
-//            newMapperLocations[mapperLocations.length] = locations;
-//        }
-        this.properties.setMapperLocations(mapperLocations);
-
-        System.out.println("-------------------------------afterPropertiesSet----------------------------------");
     }
 
 
     @Bean
     @ConditionalOnMissingBean
     public SqlSessionFactory sqlSessionFactory(DataSource dataSource) throws Exception {
-        this.resources = StructureInit.register(dataSource);
-        System.out.println("-----------------------------StructureInit.register---------------------------");
+        Resource[] resources = StructureInit.register(dataSource);
+        this.easyProperties.setResources(resources);
         SqlSessionFactoryBean factory = new SqlSessionFactoryBean();
         factory.setDataSource(dataSource);
         factory.setVfs(SpringBootVFS.class);
@@ -157,10 +126,10 @@ public class EasyMybatisAutoConfiguration implements InitializingBean {
         }
         if (!ObjectUtils.isEmpty(this.properties.resolveMapperLocations())) {
             Resource[] resolveMapperLocations = this.properties.resolveMapperLocations();
-            Resource[] all = (Resource[]) ArrayUtils.addAll(resolveMapperLocations, this.resources);
+            Resource[] all = (Resource[]) ArrayUtils.addAll(resolveMapperLocations, this.easyProperties.getResources());
             factory.setMapperLocations(all);
         } else {
-            factory.setMapperLocations(this.resources);
+            factory.setMapperLocations(this.easyProperties.getResources());
         }
 
         return factory.getObject();
@@ -190,69 +159,6 @@ public class EasyMybatisAutoConfiguration implements InitializingBean {
         }
     }
 
-    /**
-     * 修改扫描包
-     */
-    public static class AutoConfiguredMapperScannerRegistrar
-            implements BeanFactoryAware, ImportBeanDefinitionRegistrar, ResourceLoaderAware, EnvironmentAware {
-
-        private BeanFactory beanFactory;
-
-        private ResourceLoader resourceLoader;
-
-        private Environment environment;
-
-        @Override
-        public void registerBeanDefinitions(AnnotationMetadata importingClassMetadata, BeanDefinitionRegistry registry) {
-
-
-            ClassPathMapperScanner scanner = new ClassPathMapperScanner(registry);
-            try {
-                if (this.resourceLoader != null) {
-                    scanner.setResourceLoader(this.resourceLoader);
-                }
-                List<String> packages = AutoConfigurationPackages.get(this.beanFactory);
-
-
-                packages.addAll(Collections.singletonList(Constant.MAPPER_PACKAGE_NAME));
-                scanner.setAnnotationClass(Mapper.class);
-
-                scanner.registerFilters();
-                scanner.doScan(StringUtils.toStringArray(packages));
-            } catch (IllegalStateException ex) {
-
-            }
-        }
-
-        @Override
-        public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
-            this.beanFactory = beanFactory;
-        }
-
-        @Override
-        public void setEnvironment(Environment environment) {
-            this.environment = environment;
-        }
-
-        @Override
-        public void setResourceLoader(ResourceLoader resourceLoader) {
-            this.resourceLoader = resourceLoader;
-        }
-    }
-
-    /**
-     * 自动扫描
-     */
-    @Configuration
-    @Import({AutoConfiguredMapperScannerRegistrar.class})
-    @ConditionalOnMissingBean(MapperFactoryBean.class)
-    public static class MapperScannerRegistrarNotFoundConfiguration implements InitializingBean {
-
-        @Override
-        public void afterPropertiesSet() {
-
-        }
-    }
 
     /**
      * Support Devtools Restart.

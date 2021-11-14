@@ -1,33 +1,28 @@
 package top.zuoyu.mybatis;
 
 import java.sql.SQLException;
-import java.util.List;
 
-import javax.sql.DataSource;
+import javax.annotation.Resource;
 
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.configurationprocessor.json.JSONObject;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.jdbc.support.JdbcUtils;
 import org.springframework.jdbc.support.MetaDataAccessException;
+import org.springframework.stereotype.Service;
 
-import top.zuoyu.mybatis.data.model.Table;
-import top.zuoyu.mybatis.data.support.TablesCallback;
+import top.zuoyu.mybatis.annotation.Magic;
+import top.zuoyu.mybatis.service.UnifyService;
 
 @SpringBootTest
 class EasyMybatisApplicationTests {
 
-    @Autowired
-    DataSource dataSource;
+    @Resource
 
+    @Magic("wechatinfo")
+    private UnifyService unifyService;
 
     @Test
     void contextLoads() throws SQLException, MetaDataAccessException {
 
-
-        List<Table> tables = JdbcUtils.extractDatabaseMetaData(dataSource, TablesCallback.getInstance());
-        tables.forEach(table -> table.getColumns().forEach(System.out::println));
     }
 
 }

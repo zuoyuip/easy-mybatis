@@ -14,14 +14,22 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         select#foreach($column in $columns) $column.columnName#if($velocityCount != $columns.size()),#end#end from ${tableName}
     </sql>
 
-    <select id="selectList" parameterType="top.zuoyu.mybatis.json.JsonObject"  resultType="top.zuoyu.mybatis.json.JsonObject">
+    <select id="selectList" resultType="top.zuoyu.mybatis.json.JsonObject">
+        <include refid="select${ClassName}Vo"/>
+    </select>
+
+    <select id="selectListByExample" parameterType="top.zuoyu.mybatis.json.JsonObject"  resultType="top.zuoyu.mybatis.json.JsonObject">
         <include refid="select${ClassName}Vo"/>
         <where>
 #foreach($column in $columns)
 #set($javaField=$column.javaField)
 #set($javaType=$column.javaType)
 #set($columnName=$column.columnName)
-            <if test="$javaField != null #if($javaType == 'String' ) and $javaField.trim() != ''#end"> and $columnName = #{$javaField}</if>
+#if($javaType == "java.lang.String")
+    <if test="$javaField != null #if($javaType == 'String' ) and $javaField.trim() != ''#end"> and $columnName like concat('%', #{$javaField}, '%')</if>
+#else
+    <if test="$javaField != null #if($javaType == 'String' ) and $javaField.trim() != ''#end"> and $columnName = #{$javaField}</if>
+#end
 #end
         </where>
     </select>

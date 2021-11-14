@@ -1,10 +1,6 @@
 package top.zuoyu.mybatis.ssist;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.StringReader;
 import java.io.StringWriter;
-import java.net.URL;
 import java.nio.charset.StandardCharsets;
 
 import org.apache.velocity.Template;
@@ -12,10 +8,7 @@ import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.Velocity;
 import org.springframework.lang.NonNull;
 
-import top.zuoyu.mybatis.common.Constant;
 import top.zuoyu.mybatis.data.model.Table;
-import top.zuoyu.mybatis.exception.CustomException;
-import top.zuoyu.mybatis.utils.ClassUtil;
 import top.zuoyu.mybatis.utils.StrUtil;
 import top.zuoyu.mybatis.utils.VelocityInitializer;
 import top.zuoyu.mybatis.utils.VelocityUtils;
@@ -32,7 +25,6 @@ class MapperXmlStructure {
     @NonNull
     static String registerMapperXml(@NonNull Table table) {
 
-        String fileName = StrUtil.captureName(table.getTableName());
         VelocityInitializer.initVelocity();
 
         VelocityContext context = VelocityUtils.prepareContext(table);
@@ -44,14 +36,6 @@ class MapperXmlStructure {
         template.merge(context, stringWriter);
 
 
-
         return stringWriter.toString();
-//        URL basePath = ClassUtil.getBasePath();
-//        File path = new File(basePath.getPath(), Constant.MAPPER_XML_DIR_NAME + File.separator + String.format(Constant.MAPPER_XML_SUFFIX, fileName));
-//        try {
-////            FileUtils.writeStringToFile(path, stringWriter.toString(), StandardCharsets.UTF_8);
-//        } catch (IOException e) {
-//            throw new CustomException(String.format("渲染%sMapper.xml失败", fileName));
-//        }
     }
 }
