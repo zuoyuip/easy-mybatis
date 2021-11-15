@@ -71,7 +71,7 @@ public class JsonObject implements Cloneable, Serializable, InvocationHandler, M
      *
      * @param readFrom – 一个标记器，用 nextValue() 方法的值生成一个JsonObject
      */
-    public JsonObject(@NonNull JsonTokener readFrom) throws JsonException {
+    public JsonObject(@NonNull JsonTokener readFrom) {
         Object object = readFrom.nextValue();
         if (object instanceof JsonObject) {
             this.nameValuePairs = ((JsonObject) object).nameValuePairs;
@@ -85,7 +85,7 @@ public class JsonObject implements Cloneable, Serializable, InvocationHandler, M
      *
      * @param json – 包含对象的 JSON 编码字符串
      */
-    public JsonObject(String json) throws JsonException {
+    public JsonObject(String json) {
         this(new JsonTokener(json));
     }
 
@@ -96,7 +96,7 @@ public class JsonObject implements Cloneable, Serializable, InvocationHandler, M
      * @param copyFrom – 来源
      * @param names    - 属性名称
      */
-    public JsonObject(@NonNull JsonObject copyFrom, @NonNull String[] names) throws JsonException {
+    public JsonObject(@NonNull JsonObject copyFrom, @NonNull String[] names) {
         this();
         for (String name : names) {
             Object value = copyFrom.opt(name);
@@ -111,7 +111,7 @@ public class JsonObject implements Cloneable, Serializable, InvocationHandler, M
      *
      * @param number - 数字
      */
-    public static String numberToString(Number number) throws JsonException {
+    public static String numberToString(Number number) {
         if (number == null) {
             throw new JsonException("Number must be non-null");
         }
@@ -204,7 +204,7 @@ public class JsonObject implements Cloneable, Serializable, InvocationHandler, M
      * @param value – 对应的值
      * @return {@link JsonObject}
      */
-    public JsonObject put(String name, boolean value) throws JsonException {
+    public JsonObject put(String name, boolean value) {
         this.nameValuePairs.put(checkName(name), value);
         return this;
     }
@@ -216,7 +216,7 @@ public class JsonObject implements Cloneable, Serializable, InvocationHandler, M
      * @param value – 对应的值
      * @return {@link JsonObject}
      */
-    public JsonObject put(String name, double value) throws JsonException {
+    public JsonObject put(String name, double value) {
         this.nameValuePairs.put(checkName(name), Json.checkDouble(value));
         return this;
     }
@@ -228,7 +228,7 @@ public class JsonObject implements Cloneable, Serializable, InvocationHandler, M
      * @param value – 对应的值
      * @return {@link JsonObject}
      */
-    public JsonObject put(String name, int value) throws JsonException {
+    public JsonObject put(String name, int value) {
         this.nameValuePairs.put(checkName(name), value);
         return this;
     }
@@ -240,7 +240,7 @@ public class JsonObject implements Cloneable, Serializable, InvocationHandler, M
      * @param value – 对应的值
      * @return {@link JsonObject}
      */
-    public JsonObject put(String name, long value) throws JsonException {
+    public JsonObject put(String name, long value) {
         this.nameValuePairs.put(checkName(name), value);
         return this;
     }
@@ -252,7 +252,7 @@ public class JsonObject implements Cloneable, Serializable, InvocationHandler, M
      * @param value – 对应的值
      * @return {@link JsonObject}
      */
-    public JsonObject put(String name, byte value) throws JsonException {
+    public JsonObject put(String name, byte value) {
         this.nameValuePairs.put(checkName(name), value);
         return this;
     }
@@ -264,7 +264,7 @@ public class JsonObject implements Cloneable, Serializable, InvocationHandler, M
      * @param value – 对应的值
      * @return {@link JsonObject}
      */
-    public JsonObject put(String name, short value) throws JsonException {
+    public JsonObject put(String name, short value) {
         this.nameValuePairs.put(checkName(name), value);
         return this;
     }
@@ -276,7 +276,7 @@ public class JsonObject implements Cloneable, Serializable, InvocationHandler, M
      * @param value – 对应的值
      * @return {@link JsonObject}
      */
-    public JsonObject put(String name, char value) throws JsonException {
+    public JsonObject put(String name, char value) {
         this.nameValuePairs.put(checkName(name), value);
         return this;
     }
@@ -288,8 +288,12 @@ public class JsonObject implements Cloneable, Serializable, InvocationHandler, M
      * @param value – 对应的值
      * @return {@link JsonObject}
      */
-    public JsonObject put(String name, String value) throws JsonException {
-        this.nameValuePairs.put(checkName(name), value);
+    public JsonObject put(String name, String value) {
+        try {
+            this.nameValuePairs.put(checkName(name), value);
+        } catch (JsonException e) {
+            e.printStackTrace();
+        }
         return this;
     }
 
@@ -439,7 +443,7 @@ public class JsonObject implements Cloneable, Serializable, InvocationHandler, M
      * @param value – 对应的值
      * @return {@link JsonObject}
      */
-    public JsonObject putOpt(String name, Object value) throws JsonException {
+    public JsonObject putOpt(String name, Object value) {
         if (name == null || value == null) {
             return this;
         }
@@ -454,7 +458,7 @@ public class JsonObject implements Cloneable, Serializable, InvocationHandler, M
      * @param value – 对应的值
      * @return {@link JsonObject}
      */
-    public JsonObject accumulate(String name, Object value) throws JsonException {
+    public JsonObject accumulate(String name, Object value) {
         Object current = this.nameValuePairs.get(checkName(name));
         if (current == null) {
             return put(name, value);
@@ -476,7 +480,7 @@ public class JsonObject implements Cloneable, Serializable, InvocationHandler, M
         return this;
     }
 
-    String checkName(String name) throws JsonException {
+    String checkName(String name) {
         if (name == null) {
             throw new JsonException("Names must be non-null");
         }
@@ -520,7 +524,7 @@ public class JsonObject implements Cloneable, Serializable, InvocationHandler, M
      * @param name - 属性的名称
      * @throws JsonException 如果不存在则抛出异常{@link JsonException}
      */
-    public Object get(String name) throws JsonException {
+    public Object get(String name) {
         Object result = this.nameValuePairs.get(name);
         if (result == null) {
             throw new JsonException("No value for " + name);
@@ -544,7 +548,7 @@ public class JsonObject implements Cloneable, Serializable, InvocationHandler, M
      * @param name - 属性的名称
      * @throws JsonException 如果不存在或无法强制转换则抛出异常{@link JsonException}
      */
-    public Boolean getBoolean(String name) throws JsonException {
+    public Boolean getBoolean(String name) {
         Object object = get(name);
         Boolean result = Json.toBoolean(object);
         if (result == null) {
@@ -582,7 +586,7 @@ public class JsonObject implements Cloneable, Serializable, InvocationHandler, M
      * @param name - 属性的名称
      * @throws JsonException 如果不存在或无法强制转换则抛出异常{@link JsonException}
      */
-    public Double getDouble(String name) throws JsonException {
+    public Double getDouble(String name) {
         Object object = get(name);
         Double result = Json.toDouble(object);
         if (result == null) {
@@ -620,7 +624,7 @@ public class JsonObject implements Cloneable, Serializable, InvocationHandler, M
      * @param name - 属性的名称
      * @throws JsonException 如果不存在或无法强制转换则抛出异常{@link JsonException}
      */
-    public Integer getInteger(String name) throws JsonException {
+    public Integer getInteger(String name) {
         Object object = get(name);
         Integer result = Json.toInteger(object);
         if (result == null) {
@@ -658,7 +662,7 @@ public class JsonObject implements Cloneable, Serializable, InvocationHandler, M
      * @param name - 属性的名称
      * @throws JsonException 如果不存在或无法强制转换则抛出异常{@link JsonException}
      */
-    public Long getLong(String name) throws JsonException {
+    public Long getLong(String name) {
         Object object = get(name);
         Long result = Json.toLong(object);
         if (result == null) {
@@ -696,7 +700,7 @@ public class JsonObject implements Cloneable, Serializable, InvocationHandler, M
      * @param name - 属性的名称
      * @throws JsonException 如果不存在或无法强制转换则抛出异常{@link JsonException}
      */
-    public String getString(String name) throws JsonException {
+    public String getString(String name) {
         Object object = get(name);
         String result = Json.toString(object);
         if (result == null) {
@@ -734,7 +738,7 @@ public class JsonObject implements Cloneable, Serializable, InvocationHandler, M
      * @param name - 属性的名称
      * @throws JsonException 如果不存在或无法强制转换则抛出异常{@link JsonException}
      */
-    public JsonArray getJsonArray(String name) throws JsonException {
+    public JsonArray getJsonArray(String name) {
         Object object = get(name);
         if (object instanceof JsonArray) {
             return (JsonArray) object;
@@ -760,7 +764,7 @@ public class JsonObject implements Cloneable, Serializable, InvocationHandler, M
      * @param name - 属性的名称
      * @throws JsonException 如果不存在或无法强制转换则抛出异常{@link JsonException}
      */
-    public JsonObject getJsonObject(String name) throws JsonException {
+    public JsonObject getJsonObject(String name) {
         Object object = get(name);
         if (object instanceof JsonObject) {
             return (JsonObject) object;
@@ -834,13 +838,13 @@ public class JsonObject implements Cloneable, Serializable, InvocationHandler, M
      *
      * @param indentSpaces – 每级嵌套缩进的空格数
      */
-    public String toString(int indentSpaces) throws JsonException {
+    public String toString(int indentSpaces) {
         JsonStringer stringer = new JsonStringer(indentSpaces);
         writeTo(stringer);
         return stringer.toString();
     }
 
-    void writeTo(@NonNull JsonStringer stringer) throws JsonException {
+    void writeTo(@NonNull JsonStringer stringer) {
         stringer.object();
         for (Map.Entry<String, Object> entry : this.nameValuePairs.entrySet()) {
             stringer.key(entry.getKey()).value(entry.getValue());

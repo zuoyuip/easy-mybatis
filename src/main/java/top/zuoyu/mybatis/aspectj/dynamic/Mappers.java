@@ -1,7 +1,5 @@
-package top.zuoyu.mybatis.aspectj.cglib;
+package top.zuoyu.mybatis.aspectj.dynamic;
 
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -9,7 +7,6 @@ import java.util.Set;
 import org.apache.ibatis.session.SqlSession;
 import org.springframework.util.CollectionUtils;
 
-import top.zuoyu.mybatis.exception.EasyMybatisException;
 import top.zuoyu.mybatis.service.UnifyService;
 import top.zuoyu.mybatis.ssist.StructureInit;
 
@@ -19,23 +16,9 @@ import top.zuoyu.mybatis.ssist.StructureInit;
  * @author: zuoyu
  * @create: 2021-11-14 14:52
  */
-public class Mappers {
+public class Mappers extends top.zuoyu.mybatis.aspectj.cglib.Mappers {
 
-    protected static final Map<String, UnifyService> TABLE_NAME_UNIFY_SERVICE = Collections.synchronizedMap(new HashMap<>());
     private volatile static Mappers MAPPERS;
-
-    /**
-     * 根据表名获取相应的 {@link UnifyService}
-     *
-     * @param tableName - 表名
-     * @return 相应的 {@link UnifyService}
-     */
-    public static UnifyService getUnifyService(String tableName) {
-        if (TABLE_NAME_UNIFY_SERVICE.containsKey(tableName)) {
-            return TABLE_NAME_UNIFY_SERVICE.get(tableName);
-        }
-        throw new EasyMybatisException("non-existent tableName: " + tableName);
-    }
 
     protected Mappers() {
     }
@@ -51,12 +34,12 @@ public class Mappers {
         return MAPPERS;
     }
 
-
     /**
      * 初始化
      *
      * @param sqlSession - {@link SqlSession}
      */
+    @Override
     public void init(SqlSession sqlSession) {
         Map<String, Class<?>> tableNameClass = StructureInit.getTableNameClass();
         if (CollectionUtils.isEmpty(tableNameClass)) {
@@ -67,18 +50,9 @@ public class Mappers {
             String tableName = entry.getKey();
             Class<?> mapperInterfaceClass = entry.getValue();
             Object mapper = sqlSession.getMapper(mapperInterfaceClass);
-            Class<?> mapperClass = mapper.getClass();
-            CglibProxy cglibProxy = new CglibProxy();
-            UnifyService unifyService = cglibProxy.getBean(mapperClass);
+            UnifyService unifyService = new DynamicProxy(mapper).getUnifyService();
             TABLE_NAME_UNIFY_SERVICE.put(tableName, unifyService);
         }
-    }
-
-    /**
-     * 清空服务存储（慎用）
-     */
-    public void clearMappers() {
-        TABLE_NAME_UNIFY_SERVICE.clear();
     }
 
 }

@@ -45,7 +45,7 @@ public class JsonArray {
      *
      * @param readFrom - 标记器
      */
-    public JsonArray(@NonNull JsonTokener readFrom) throws JsonException {
+    public JsonArray(@NonNull JsonTokener readFrom) {
         Object object = readFrom.nextValue();
         if (object instanceof JsonArray) {
             this.values = ((JsonArray) object).values;
@@ -59,7 +59,7 @@ public class JsonArray {
      *
      * @param json - JSON 字符串
      */
-    public JsonArray(String json) throws JsonException {
+    public JsonArray(String json) {
         this(new JsonTokener(json));
     }
 
@@ -68,7 +68,7 @@ public class JsonArray {
      *
      * @param array - 给定数组
      */
-    public JsonArray(@NonNull Object array) throws JsonException {
+    public JsonArray(@NonNull Object array) {
         if (!array.getClass().isArray()) {
             throw new JsonException("Not a primitive array: " + array.getClass());
         }
@@ -84,7 +84,7 @@ public class JsonArray {
      *
      * @param array - 给定数组
      */
-    public JsonArray(@NonNull Object[] array) throws JsonException {
+    public JsonArray(@NonNull Object[] array) {
         final int length = Array.getLength(array);
         this.values = new ArrayList<>(length);
         for (int i = 0; i < length; ++i) {
@@ -118,7 +118,7 @@ public class JsonArray {
      * @param value - the value
      * @return {@link JsonArray}
      */
-    public JsonArray put(double value) throws JsonException {
+    public JsonArray put(double value) {
         this.values.add(Json.checkDouble(value));
         return this;
     }
@@ -164,7 +164,7 @@ public class JsonArray {
      * @param value - the value
      * @return {@link JsonArray}
      */
-    public JsonArray put(int index, boolean value) throws JsonException {
+    public JsonArray put(int index, boolean value) {
         return put(index, (Boolean) value);
     }
 
@@ -176,7 +176,7 @@ public class JsonArray {
      * @param value - the value
      * @return {@link JsonArray}
      */
-    public JsonArray put(int index, double value) throws JsonException {
+    public JsonArray put(int index, double value) {
         return put(index, (Double) value);
     }
 
@@ -188,7 +188,7 @@ public class JsonArray {
      * @param value - the value
      * @return {@link JsonArray}
      */
-    public JsonArray put(int index, int value) throws JsonException {
+    public JsonArray put(int index, int value) {
         return put(index, (Integer) value);
     }
 
@@ -200,7 +200,7 @@ public class JsonArray {
      * @param value - the value
      * @return {@link JsonArray}
      */
-    public JsonArray put(int index, long value) throws JsonException {
+    public JsonArray put(int index, long value) {
         return put(index, (Long) value);
     }
 
@@ -212,7 +212,7 @@ public class JsonArray {
      * @param value - the value
      * @return {@link JsonArray}
      */
-    public JsonArray put(int index, Object value) throws JsonException {
+    public JsonArray put(int index, Object value) {
         if (value instanceof Number) {
             Json.checkDouble(((Number) value).doubleValue());
         }
@@ -240,7 +240,7 @@ public class JsonArray {
      * @param index - 索引
      * @return 对应的值
      */
-    public Object get(int index) throws JsonException {
+    public Object get(int index) {
         try {
             Object value = this.values.get(index);
             if (Objects.isNull(value)) {
@@ -285,7 +285,7 @@ public class JsonArray {
      * @return 对应的值
      * @throws JsonException - 如果index处的值不存在或无法强制转换则抛出异常
      */
-    public Boolean getBoolean(int index) throws JsonException {
+    public Boolean getBoolean(int index) {
         Object object = get(index);
         Boolean result = Json.toBoolean(object);
         if (Objects.isNull(result)) {
@@ -324,7 +324,7 @@ public class JsonArray {
      * @return 对应的值
      * @throws JsonException - 如果index处的值不存在或无法强制转换则抛出异常
      */
-    public Double getDouble(int index) throws JsonException {
+    public Double getDouble(int index) {
         Object object = get(index);
         Double result = Json.toDouble(object);
         if (Objects.isNull(result)) {
@@ -363,7 +363,7 @@ public class JsonArray {
      * @return 对应的值
      * @throws JsonException - 如果index处的值不存在或无法强制转换则抛出异常
      */
-    public Integer getInteger(int index) throws JsonException {
+    public Integer getInteger(int index) {
         Object object = get(index);
         Integer result = Json.toInteger(object);
         if (Objects.isNull(result)) {
@@ -402,7 +402,7 @@ public class JsonArray {
      * @return 对应的值
      * @throws JsonException - 如果index处的值不存在或无法强制转换则抛出异常
      */
-    public Long getLong(int index) throws JsonException {
+    public Long getLong(int index) {
         Object object = get(index);
         Long result = Json.toLong(object);
         if (Objects.isNull(result)) {
@@ -441,7 +441,7 @@ public class JsonArray {
      * @return 对应的值
      * @throws JsonException - 如果该值不存在
      */
-    public String getString(int index) throws JsonException {
+    public String getString(int index) {
         Object object = get(index);
         String result = Json.toString(object);
         if (Objects.isNull(result)) {
@@ -480,7 +480,7 @@ public class JsonArray {
      * @return 对应的值
      * @throws JsonException - 如果index处的值不存在或无法强制转换则抛出异常
      */
-    public JsonArray getJsonArray(int index) throws JsonException {
+    public JsonArray getJsonArray(int index) {
         Object object = get(index);
         if (object instanceof JsonArray) {
             return (JsonArray) object;
@@ -507,7 +507,7 @@ public class JsonArray {
      * @return 对应的值
      * @throws JsonException - 如果index处的值不存在或无法强制转换则抛出异常
      */
-    public JsonObject getJsonObject(int index) throws JsonException {
+    public JsonObject getJsonObject(int index) {
         Object object = get(index);
         if (object instanceof JsonObject) {
             return (JsonObject) object;
@@ -535,7 +535,7 @@ public class JsonArray {
      * @param names 名称组
      * @return {@link JsonObject} 格式的结果
      */
-    public JsonObject toJsonObject(@NonNull JsonArray names) throws JsonException {
+    public JsonObject toJsonObject(@NonNull JsonArray names) {
         JsonObject result = new JsonObject();
         int length = Math.min(names.length(), this.values.size());
         if (length == 0) {
@@ -555,7 +555,7 @@ public class JsonArray {
      * @throws JsonException - 元素转换异常
      */
     @SuppressWarnings("rawtypes")
-    public List<JsonObject> toJsonObjects() throws JsonException {
+    public List<JsonObject> toJsonObjects() {
         if (this.values.size() < 1) {
             return null;
         }
@@ -587,7 +587,7 @@ public class JsonArray {
      * @param separator 转义字符
      * @return 转义的字符串
      */
-    public String join(String separator) throws JsonException {
+    public String join(String separator) {
         JsonStringer stringer = new JsonStringer();
         stringer.open(JsonStringer.Scope.NULL, "");
         for (int i = 0, size = this.values.size(); i < size; i++) {
@@ -616,13 +616,13 @@ public class JsonArray {
      *
      * @param indentSpaces – 每级嵌套缩进的空格数
      */
-    public String toString(int indentSpaces) throws JsonException {
+    public String toString(int indentSpaces) {
         JsonStringer stringer = new JsonStringer(indentSpaces);
         writeTo(stringer);
         return stringer.toString();
     }
 
-    void writeTo(@NonNull JsonStringer stringer) throws JsonException {
+    void writeTo(@NonNull JsonStringer stringer) {
         stringer.array();
         for (Object value : this.values) {
             stringer.value(value);

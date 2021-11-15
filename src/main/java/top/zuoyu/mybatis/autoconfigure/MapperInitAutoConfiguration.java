@@ -3,9 +3,8 @@ package top.zuoyu.mybatis.autoconfigure;
 import org.apache.ibatis.session.SqlSession;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Lazy;
 
-import top.zuoyu.mybatis.aspectj.cglib.Mappers;
+import top.zuoyu.mybatis.aspectj.dynamic.Mappers;
 
 /**
  * Mapper加载自动配置 .
@@ -19,6 +18,6 @@ public class MapperInitAutoConfiguration {
 
     public MapperInitAutoConfiguration(SqlSession sqlSession) {
         System.out.println("-------------------MapperInitAutoConfiguration-----------------------");
-//        Mappers.init(sqlSession);
+        Mappers.getInstance().init(sqlSession);
     }
 }

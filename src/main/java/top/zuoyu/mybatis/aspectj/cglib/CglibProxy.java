@@ -19,13 +19,27 @@ public class CglibProxy implements MethodInterceptor {
 
     private final Enhancer enhancer = new Enhancer();
 
-    @Override
-    public Object intercept(Object o, Method method, Object[] objects, @NonNull MethodProxy methodProxy) throws Throwable {
-        return methodProxy.invokeSuper(o, objects);
+    private void before(Object o, Method method, Object[] args) {
+
     }
+
+    private void after(Object o, Method method, Object[] args) {
+
+    }
+
+    @Override
+    public Object intercept(Object o, Method method, Object[] args, @NonNull MethodProxy methodProxy) throws Throwable {
+        before(o, method, args);
+        Object invokeSuper = methodProxy.invokeSuper(o, args);
+        after(o, method, args);
+        return invokeSuper;
+    }
+
+
 
     public UnifyService getBean(Class<?> beanClass) {
         this.enhancer.setSuperclass(beanClass);
+        this.enhancer.setInterfaces(new Class[]{UnifyService.class});
         this.enhancer.setCallback(this);
         return (UnifyService) this.enhancer.create();
     }
