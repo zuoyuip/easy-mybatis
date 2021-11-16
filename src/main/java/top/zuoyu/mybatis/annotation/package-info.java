@@ -1,4 +1,6 @@
 /*
+ * 注解
+ *
  * Copyright (c) 2021, zuoyu (zuoyuip@foxmil.com).
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,26 +15,4 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package top.zuoyu.mybatis;
-
-import java.sql.SQLException;
-
-import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.jdbc.support.MetaDataAccessException;
-
-import top.zuoyu.mybatis.annotation.Magic;
-import top.zuoyu.mybatis.service.UnifyService;
-
-@SpringBootTest
-class EasyMybatisApplicationTests {
-
-    @Magic("wechatinfo")
-    private UnifyService unifyService;
-
-    @Test
-    void contextLoads() throws SQLException, MetaDataAccessException {
-        unifyService.selectList().forEach(System.out::println);
-    }
-
-}
+package top.zuoyu.mybatis.annotation;

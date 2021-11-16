@@ -2,24 +2,24 @@
 <!DOCTYPE mapper
 PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="${packageName}.${ClassName}Mapper">
+<mapper namespace="${packageName}.${className}Mapper">
 
-    <resultMap type="top.zuoyu.mybatis.json.JsonObject" id="${ClassName}Result">
+    <resultMap type="top.zuoyu.mybatis.json.JsonObject" id="${className}Result">
 #foreach ($column in $columns)
         <result property="${column.javaField}"    column="${column.columnName}"    />
 #end
     </resultMap>
 
-    <sql id="select${ClassName}Vo">
+    <sql id="select${className}Vo">
         select#foreach($column in $columns) $column.columnName#if($velocityCount != $columns.size()),#end#end from ${tableName}
     </sql>
 
     <select id="selectList" resultType="top.zuoyu.mybatis.json.JsonObject">
-        <include refid="select${ClassName}Vo"/>
+        <include refid="select${className}Vo"/>
     </select>
 
     <select id="selectListByExample" parameterType="top.zuoyu.mybatis.json.JsonObject"  resultType="top.zuoyu.mybatis.json.JsonObject">
-        <include refid="select${ClassName}Vo"/>
+        <include refid="select${className}Vo"/>
         <where>
 #foreach($column in $columns)
 #set($javaField=$column.javaField)
@@ -35,7 +35,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </select>
 
     <select id="selectById" parameterType="${pkColumn.javaType}"  resultType="top.zuoyu.mybatis.json.JsonObject">
-        <include refid="select${ClassName}Vo"/>
+        <include refid="select${className}Vo"/>
         where ${pkColumn.columnName} = #{${pkColumn.javaField}}
     </select>
 

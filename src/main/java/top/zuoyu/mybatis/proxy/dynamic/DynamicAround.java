@@ -13,27 +13,33 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package top.zuoyu.mybatis.annotation;
+package top.zuoyu.mybatis.proxy.dynamic;
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import java.lang.reflect.Method;
+
+import org.springframework.lang.NonNull;
 
 /**
- * 对应的model .
+ * 动态代理方法环绕 .
  *
  * @author: zuoyu
- * @create: 2021-11-02 16:46
+ * @create: 2021-11-15 10:53
  */
-@Target({ElementType.TYPE})
-@Retention(RetentionPolicy.RUNTIME)
-@Documented
-public @interface Model {
+public interface DynamicAround {
 
     /**
-     * 对应的model名称
+     * 前置方法
+     * @param proxy - 代理对象
+     * @param method - 代理方法
+     * @param args - 代理参数
      */
-    String value() default "";
+    void before(Object proxy, @NonNull Method method, Object[] args);
+
+    /**
+     * 后置方法
+     * @param proxy - 代理对象
+     * @param method - 代理方法
+     * @param args - 代理参数
+     */
+    void after(Object proxy, @NonNull Method method, Object[] args);
 }

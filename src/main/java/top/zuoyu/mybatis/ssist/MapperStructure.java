@@ -1,3 +1,18 @@
+/*
+ * Copyright (c) 2021, zuoyu (zuoyuip@foxmil.com).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package top.zuoyu.mybatis.ssist;
 
 import java.util.List;
@@ -10,8 +25,6 @@ import javassist.CtClass;
 import javassist.CtMethod;
 import javassist.Modifier;
 import javassist.NotFoundException;
-import javassist.bytecode.ClassFile;
-import javassist.bytecode.ConstPool;
 import top.zuoyu.mybatis.common.Constant;
 import top.zuoyu.mybatis.data.model.Table;
 import top.zuoyu.mybatis.exception.CustomException;
@@ -34,7 +47,6 @@ class MapperStructure {
         // 创建一个接口
         CtClass ctClass = classPool.makeInterface(Constant.MAPPER_PACKAGE_NAME + Constant.PACKAGE_SEPARATOR + String.format(Constant.MAPPER_SUFFIX, StrUtil.captureName(table.getTableName())));
         ctClass.setModifiers(Modifier.setPublic(Modifier.INTERFACE));
-
 
 
         try {
