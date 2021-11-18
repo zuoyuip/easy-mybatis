@@ -17,11 +17,18 @@ package top.zuoyu.mybatis.json;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.TemporalAccessor;
+import java.util.Calendar;
 import java.util.Date;
 
 import org.springframework.lang.NonNull;
+import org.springframework.util.StringUtils;
 
+import top.zuoyu.mybatis.exception.EasyMybatisException;
 import top.zuoyu.mybatis.exception.JsonException;
+import top.zuoyu.mybatis.utils.DateUtils;
 
 /**
  * 转换工具 .
@@ -32,6 +39,9 @@ import top.zuoyu.mybatis.exception.JsonException;
 class Json {
 
     private static final int BIG_LENGTH = 65535;
+
+    private static final int BIG_DECIMAL_SCALE = 100;
+    private static final int BIG_INTEGER_SCALE = 1000;
 
 
     static double checkDouble(double d) throws JsonException {
@@ -227,7 +237,7 @@ class Json {
         } else if (value instanceof BigDecimal) {
             BigDecimal decimal = (BigDecimal) value;
             int scale = decimal.scale();
-            if (scale > -1000 && scale < 1000) {
+            if (scale > -BIG_INTEGER_SCALE && scale < BIG_INTEGER_SCALE) {
                 return ((BigDecimal) value).toBigInteger();
             }
         }
@@ -246,7 +256,55 @@ class Json {
     }
 
     static Date toDate(Object value) {
-        return (Date) value;
+        return toDate(value, null);
+    }
+
+    static Date toDate(Object value, String format) {
+        if (value == null) {
+            return null;
+        }
+        if (value instanceof CharSequence && StringUtils.hasLength(value.toString())) {
+            return null;
+        }
+        if (value instanceof Date) {
+            return (Date) value;
+        }
+
+        if (value instanceof Calendar) {
+            return ((Calendar) value).getTime();
+        }
+
+        long longValue = -1;
+
+        if (value instanceof BigDecimal) {
+            BigDecimal bigDecimal = ((BigDecimal) value);
+            int scale = bigDecimal.scale();
+            if (scale >= -BIG_DECIMAL_SCALE && scale <= BIG_DECIMAL_SCALE) {
+                return new Date(longValue);
+            }
+            return new Date(bigDecimal.longValueExact());
+        }
+
+        if (value instanceof Number) {
+            longValue = ((Number) value).longValue();
+            return new Date(longValue);
+        }
+
+        if (value instanceof TemporalAccessor) {
+            LocalDateTime localDateTime = LocalDateTime.from((TemporalAccessor) value);
+            return DateUtils.asDate(localDateTime);
+        }
+
+        if (value instanceof CharSequence) {
+            if (!StringUtils.hasLength(format)) {
+                LocalDateTime localDateTime = LocalDateTime.parse(value.toString());
+                return DateUtils.asDate(localDateTime);
+            }
+            DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(format);
+            LocalDateTime localDateTime = LocalDateTime.parse(value.toString(), dateTimeFormatter);
+            return DateUtils.asDate(localDateTime);
+        }
+        throw typeMismatch(value, "date");
     }
 
 

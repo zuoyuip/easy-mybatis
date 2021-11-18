@@ -35,6 +35,19 @@ import java.util.Set;
 import org.springframework.lang.NonNull;
 
 import top.zuoyu.mybatis.exception.JsonException;
+import top.zuoyu.mybatis.json.convert.BigDecimalConvert;
+import top.zuoyu.mybatis.json.convert.BigIntegerConvert;
+import top.zuoyu.mybatis.json.convert.BooleanConvert;
+import top.zuoyu.mybatis.json.convert.ByteConvert;
+import top.zuoyu.mybatis.json.convert.CharacterConvert;
+import top.zuoyu.mybatis.json.convert.ConvertClass;
+import top.zuoyu.mybatis.json.convert.DateConvert;
+import top.zuoyu.mybatis.json.convert.DoubleConvert;
+import top.zuoyu.mybatis.json.convert.FloatConvert;
+import top.zuoyu.mybatis.json.convert.IntegerConvert;
+import top.zuoyu.mybatis.json.convert.LongConvert;
+import top.zuoyu.mybatis.json.convert.ShortConvert;
+import top.zuoyu.mybatis.json.convert.StringConvert;
 
 /**
  * Json对象 .
@@ -579,6 +592,39 @@ public class JsonObject implements Cloneable, Serializable, InvocationHandler, M
     }
 
     /**
+     * 返回name映射的值，（如果它存在并且是 {@link Boolean} 或可以强制为 {@link Boolean} ）
+     *
+     * @param name - 属性的名称
+     * @param booleanConvert - Boolean转换器
+     * @throws JsonException 如果不存在或无法强制转换则抛出异常{@link JsonException}
+     */
+    public Boolean getBoolean(String name, @NonNull BooleanConvert booleanConvert) {
+        Object object = get(name);
+        Boolean result = booleanConvert.convert(object);
+        if (result == null) {
+            throw Json.typeMismatch(name, object, "boolean");
+        }
+        return result;
+    }
+
+    /**
+     * 返回name映射的值，（如果它存在并且是 {@link Boolean} 或可以强制为 {@link Boolean} ）， 否则返回默认值
+     *
+     * @param name - 属性的名称
+     * @param booleanConvert - Boolean转换器
+     * @param defaultValue  - 默认值
+     * @throws JsonException 如果不存在或无法强制转换则抛出异常{@link JsonException}
+     */
+    public Boolean getBoolean(String name, @NonNull BooleanConvert booleanConvert, Boolean defaultValue) {
+        Object object = get(name);
+        Boolean result = booleanConvert.convert(object, defaultValue);
+        if (result == null) {
+            throw Json.typeMismatch(name, object, "boolean");
+        }
+        return result;
+    }
+
+    /**
      * 返回name映射的值，（如果它存在并且是布尔值或可以强制为布尔值），否则返回 false
      *
      * @param name - 属性的名称
@@ -617,6 +663,39 @@ public class JsonObject implements Cloneable, Serializable, InvocationHandler, M
     }
 
     /**
+     * 返回name映射的值，（如果它存在并且是 {@link Byte} 或可以强制为 {@link Byte} ）
+     *
+     * @param name - 属性的名称
+     * @param byteConvert - Byte转换器
+     * @throws JsonException 如果不存在或无法强制转换则抛出异常{@link JsonException}
+     */
+    public Byte getByte(String name, @NonNull ByteConvert byteConvert) {
+        Object object = get(name);
+        Byte result = byteConvert.convert(object);
+        if (result == null) {
+            throw Json.typeMismatch(name, object, "byte");
+        }
+        return result;
+    }
+
+    /**
+     * 返回name映射的值，（如果它存在并且是 {@link Byte} 或可以强制为 {@link Byte} ）， 否则返回默认值
+     *
+     * @param name - 属性的名称
+     * @param byteConvert - Byte转换器
+     * @param defaultValue - 默认值
+     * @throws JsonException 如果不存在或无法强制转换则抛出异常{@link JsonException}
+     */
+    public Byte getByte(String name, @NonNull ByteConvert byteConvert, Byte defaultValue) {
+        Object object = get(name);
+        Byte result = byteConvert.convert(object, defaultValue);
+        if (result == null) {
+            throw Json.typeMismatch(name, object, "byte");
+        }
+        return result;
+    }
+
+    /**
      * 返回name映射的值，（如果它存在并且是byte值或可以强制为byte值），否则返回 0
      *
      * @param name - 属性的名称
@@ -648,6 +727,39 @@ public class JsonObject implements Cloneable, Serializable, InvocationHandler, M
     public Short getShort(String name) {
         Object object = get(name);
         Short result = Json.toShort(object);
+        if (result == null) {
+            throw Json.typeMismatch(name, object, "short");
+        }
+        return result;
+    }
+
+    /**
+     * 返回name映射的值，（如果它存在并且是 {@link Short} 或可以强制为 {@link Short} ）
+     *
+     * @param name - 属性的名称
+     * @param shortConvert - Short转换器
+     * @throws JsonException 如果不存在或无法强制转换则抛出异常{@link JsonException}
+     */
+    public Short getShort(String name, @NonNull ShortConvert shortConvert) {
+        Object object = get(name);
+        Short result = shortConvert.convert(object);
+        if (result == null) {
+            throw Json.typeMismatch(name, object, "short");
+        }
+        return result;
+    }
+
+    /**
+     * 返回name映射的值，（如果它存在并且是 {@link Short} 或可以强制为 {@link Short} ）， 否则返回默认值
+     *
+     * @param name - 属性的名称
+     * @param shortConvert - Short转换器
+     * @param defaultValue - 默认值
+     * @throws JsonException 如果不存在或无法强制转换则抛出异常{@link JsonException}
+     */
+    public Short getShort(String name, @NonNull ShortConvert shortConvert, Short defaultValue) {
+        Object object = get(name);
+        Short result = shortConvert.convert(object, defaultValue);
         if (result == null) {
             throw Json.typeMismatch(name, object, "short");
         }
@@ -694,6 +806,39 @@ public class JsonObject implements Cloneable, Serializable, InvocationHandler, M
     }
 
     /**
+     * 返回name映射的值，（如果它存在并且是 {@link Integer} 或可以强制为 {@link Integer} ）
+     *
+     * @param name - 属性的名称
+     * @param integerConvert - Integer转换器
+     * @throws JsonException 如果不存在或无法强制转换则抛出异常{@link JsonException}
+     */
+    public Integer getInteger(String name, @NonNull IntegerConvert integerConvert) {
+        Object object = get(name);
+        Integer result = integerConvert.convert(object);
+        if (result == null) {
+            throw Json.typeMismatch(name, object, "int");
+        }
+        return result;
+    }
+
+    /**
+     * 返回name映射的值，（如果它存在并且是 {@link Integer} 或可以强制为 {@link Integer} ），否则返回默认值
+     *
+     * @param name - 属性的名称
+     * @param integerConvert - Integer转换器
+     * @param defaultValue - 默认值
+     * @throws JsonException 如果不存在或无法强制转换则抛出异常{@link JsonException}
+     */
+    public Integer getInteger(String name, @NonNull IntegerConvert integerConvert, Integer defaultValue) {
+        Object object = get(name);
+        Integer result = integerConvert.convert(object, defaultValue);
+        if (result == null) {
+            throw Json.typeMismatch(name, object, "int");
+        }
+        return result;
+    }
+
+    /**
      * 返回name映射的值，（如果它存在并且是一个 int 或可以强制为一个 int ），否则返回 0
      *
      * @param name - 属性的名称
@@ -725,6 +870,39 @@ public class JsonObject implements Cloneable, Serializable, InvocationHandler, M
     public Long getLong(String name) {
         Object object = get(name);
         Long result = Json.toLong(object);
+        if (result == null) {
+            throw Json.typeMismatch(name, object, "long");
+        }
+        return result;
+    }
+
+    /**
+     * 返回name映射的值，（如果它存在并且是 {@link Long} 或可以强制为 {@link Long} ）
+     *
+     * @param name - 属性的名称
+     * @param longConvert - Long转换器
+     * @throws JsonException 如果不存在或无法强制转换则抛出异常{@link JsonException}
+     */
+    public Long getLong(String name, @NonNull LongConvert longConvert) {
+        Object object = get(name);
+        Long result = longConvert.convert(object);
+        if (result == null) {
+            throw Json.typeMismatch(name, object, "long");
+        }
+        return result;
+    }
+
+    /**
+     * 返回name映射的值，（如果它存在并且是 {@link Long} 或可以强制为 {@link Long} ），否则返回默认值
+     *
+     * @param name - 属性的名称
+     * @param longConvert - Long转换器
+     * @param defaultValue - 默认值
+     * @throws JsonException 如果不存在或无法强制转换则抛出异常{@link JsonException}
+     */
+    public Long getLong(String name, @NonNull LongConvert longConvert, Long defaultValue) {
+        Object object = get(name);
+        Long result = longConvert.convert(object, defaultValue);
         if (result == null) {
             throw Json.typeMismatch(name, object, "long");
         }
@@ -770,6 +948,39 @@ public class JsonObject implements Cloneable, Serializable, InvocationHandler, M
     }
 
     /**
+     * 返回name映射的值，（如果它存在并且是 {@link Float} 或可以强制为 {@link Float} ）
+     *
+     * @param name - 属性的名称
+     * @param floatConvert - Float转换器
+     * @throws JsonException 如果不存在或无法强制转换则抛出异常{@link JsonException}
+     */
+    public Float getFloat(String name, @NonNull FloatConvert floatConvert) {
+        Object object = get(name);
+        Float result = floatConvert.convert(object);
+        if (result == null) {
+            throw Json.typeMismatch(name, object, "float");
+        }
+        return result;
+    }
+
+    /**
+     * 返回name映射的值，（如果它存在并且是 {@link Float} 或可以强制为 {@link Float} ），否则返回默认值
+     *
+     * @param name - 属性的名称
+     * @param floatConvert - Float转换器
+     * @param defaultValue - 默认值
+     * @throws JsonException 如果不存在或无法强制转换则抛出异常{@link JsonException}
+     */
+    public Float getFloat(String name, @NonNull FloatConvert floatConvert, Float defaultValue) {
+        Object object = get(name);
+        Float result = floatConvert.convert(object, defaultValue);
+        if (result == null) {
+            throw Json.typeMismatch(name, object, "float");
+        }
+        return result;
+    }
+
+    /**
      * 返回name映射的值，（如果它存在并且是一个 float 或可以强制为一个 float ），否则返回 0
      *
      * @param name - 属性的名称
@@ -801,6 +1012,39 @@ public class JsonObject implements Cloneable, Serializable, InvocationHandler, M
     public Double getDouble(String name) {
         Object object = get(name);
         Double result = Json.toDouble(object);
+        if (result == null) {
+            throw Json.typeMismatch(name, object, "double");
+        }
+        return result;
+    }
+
+    /**
+     * 返回name映射的值，（如果它存在并且是 {@link Double} 或可以强制为 {@link Double} ）
+     *
+     * @param name - 属性的名称
+     * @param doubleConvert - Double转换器
+     * @throws JsonException 如果不存在或无法强制转换则抛出异常{@link JsonException}
+     */
+    public Double getDouble(String name, @NonNull DoubleConvert doubleConvert) {
+        Object object = get(name);
+        Double result = doubleConvert.convert(object);
+        if (result == null) {
+            throw Json.typeMismatch(name, object, "double");
+        }
+        return result;
+    }
+
+    /**
+     * 返回name映射的值，（如果它存在并且是 {@link Double} 或可以强制为 {@link Double} ），否则返回默认值
+     *
+     * @param name - 属性的名称
+     * @param doubleConvert - Double转换器
+     * @param defaultValue - m默认值
+     * @throws JsonException 如果不存在或无法强制转换则抛出异常{@link JsonException}
+     */
+    public Double getDouble(String name, @NonNull DoubleConvert doubleConvert, Double defaultValue) {
+        Object object = get(name);
+        Double result = doubleConvert.convert(object, defaultValue);
         if (result == null) {
             throw Json.typeMismatch(name, object, "double");
         }
@@ -846,6 +1090,39 @@ public class JsonObject implements Cloneable, Serializable, InvocationHandler, M
     }
 
     /**
+     * 返回name映射的值，（如果它存在并且是 {@link Character} 或可以强制为 {@link Character} ）
+     *
+     * @param name - 属性的名称
+     * @param characterConvert - Character转换器
+     * @throws JsonException 如果不存在或无法强制转换则抛出异常{@link JsonException}
+     */
+    public Character getCharacter(String name, @NonNull CharacterConvert characterConvert) {
+        Object object = get(name);
+        Character result = characterConvert.convert(object);
+        if (result == null) {
+            throw Json.typeMismatch(name, object, "char");
+        }
+        return result;
+    }
+
+    /**
+     * 返回name映射的值，（如果它存在并且是 {@link Character} 或可以强制为 {@link Character} ），否则返回默认值
+     *
+     * @param name - 属性的名称
+     * @param characterConvert - Character转换器
+     * @param defaultValue - 默认值
+     * @throws JsonException 如果不存在或无法强制转换则抛出异常{@link JsonException}
+     */
+    public Character getCharacter(String name, @NonNull CharacterConvert characterConvert, Character defaultValue) {
+        Object object = get(name);
+        Character result = characterConvert.convert(object, defaultValue);
+        if (result == null) {
+            throw Json.typeMismatch(name, object, "char");
+        }
+        return result;
+    }
+
+    /**
      * 返回name映射的值，（如果它存在并且是char值或可以强制为char值），否则返回 '\u0000'（即空格）
      *
      * @param name - 属性的名称
@@ -877,6 +1154,39 @@ public class JsonObject implements Cloneable, Serializable, InvocationHandler, M
     public String getString(String name) {
         Object object = get(name);
         String result = Json.toString(object);
+        if (result == null) {
+            throw Json.typeMismatch(name, object, "String");
+        }
+        return result;
+    }
+
+    /**
+     * 返回name映射的值，（如果它存在 ）
+     *
+     * @param name - 属性的名称
+     * @param stringConvert - String转换器
+     * @throws JsonException 如果不存在或无法强制转换则抛出异常{@link JsonException}
+     */
+    public String getString(String name, @NonNull StringConvert stringConvert) {
+        Object object = get(name);
+        String result = stringConvert.convert(object);
+        if (result == null) {
+            throw Json.typeMismatch(name, object, "String");
+        }
+        return result;
+    }
+
+    /**
+     * 返回name映射的值，（如果它存在 ），否则返回默认值
+     *
+     * @param name - 属性的名称
+     * @param stringConvert - String转换器
+     * @param defaultValue - 默认值
+     * @throws JsonException 如果不存在或无法强制转换则抛出异常{@link JsonException}
+     */
+    public String getString(String name, @NonNull StringConvert stringConvert, String defaultValue) {
+        Object object = get(name);
+        String result = stringConvert.convert(object, defaultValue);
         if (result == null) {
             throw Json.typeMismatch(name, object, "String");
         }
@@ -922,6 +1232,39 @@ public class JsonObject implements Cloneable, Serializable, InvocationHandler, M
     }
 
     /**
+     * 返回name映射的值，（如果它存在并且是 {@link BigDecimal} 或可以强制为 {@link BigDecimal} ）
+     *
+     * @param name - 属性的名称
+     * @param bigDecimalConvert - BigDecimal转换器
+     * @throws JsonException 如果不存在或无法强制转换则抛出异常{@link JsonException}
+     */
+    public BigDecimal getBigDecimal(String name, @NonNull BigDecimalConvert bigDecimalConvert) {
+        Object object = get(name);
+        BigDecimal result = bigDecimalConvert.convert(object);
+        if (result == null) {
+            throw Json.typeMismatch(name, object, "BigDecimal");
+        }
+        return result;
+    }
+
+    /**
+     * 返回name映射的值，（如果它存在并且是 {@link BigDecimal} 或可以强制为 {@link BigDecimal} ），否则返回默认值
+     *
+     * @param name - 属性的名称
+     * @param bigDecimalConvert - BigDecimal转换器
+     * @param defaultValue - 默认值
+     * @throws JsonException 如果不存在或无法强制转换则抛出异常{@link JsonException}
+     */
+    public BigDecimal getBigDecimal(String name, @NonNull BigDecimalConvert bigDecimalConvert, BigDecimal defaultValue) {
+        Object object = get(name);
+        BigDecimal result = bigDecimalConvert.convert(object, defaultValue);
+        if (result == null) {
+            throw Json.typeMismatch(name, object, "BigDecimal");
+        }
+        return result;
+    }
+
+    /**
      * 返回name映射的值，（如果它存在并且是 {@link BigInteger} 或可以强制为 {@link BigInteger} ）
      *
      * @param name - 属性的名称
@@ -937,6 +1280,39 @@ public class JsonObject implements Cloneable, Serializable, InvocationHandler, M
     }
 
     /**
+     * 返回name映射的值，（如果它存在并且是 {@link BigInteger} 或可以强制为 {@link BigInteger} ）
+     *
+     * @param name - 属性的名称
+     * @param bigIntegerConvert - BigInteger转换器
+     * @throws JsonException 如果不存在或无法强制转换则抛出异常{@link JsonException}
+     */
+    public BigInteger getBigInteger(String name, @NonNull BigIntegerConvert bigIntegerConvert) {
+        Object object = get(name);
+        BigInteger result = bigIntegerConvert.convert(object);
+        if (result == null) {
+            throw Json.typeMismatch(name, object, "BigInteger");
+        }
+        return result;
+    }
+
+    /**
+     * 返回name映射的值，（如果它存在并且是 {@link BigInteger} 或可以强制为 {@link BigInteger} ），否则返回默认值
+     *
+     * @param name - 属性的名称
+     * @param bigIntegerConvert - BigInteger转换器
+     * @param defaultValue - 默认值
+     * @throws JsonException 如果不存在或无法强制转换则抛出异常{@link JsonException}
+     */
+    public BigInteger getBigInteger(String name, @NonNull BigIntegerConvert bigIntegerConvert, BigInteger defaultValue) {
+        Object object = get(name);
+        BigInteger result = bigIntegerConvert.convert(object, defaultValue);
+        if (result == null) {
+            throw Json.typeMismatch(name, object, "BigInteger");
+        }
+        return result;
+    }
+
+    /**
      * 返回name映射的值，（如果它存在并且是 {@link Date} 或可以强制为 {@link Date} ）
      *
      * @param name - 属性的名称
@@ -945,6 +1321,90 @@ public class JsonObject implements Cloneable, Serializable, InvocationHandler, M
     public Date getDate(String name) {
         Object object = get(name);
         Date result = Json.toDate(object);
+        if (result == null) {
+            throw Json.typeMismatch(name, object, "Date");
+        }
+        return result;
+    }
+
+    /**
+     * 返回name映射的值，（如果它存在并且是 {@link Date} 或可以强制为 {@link Date} ）
+     *
+     * @param name - 属性的名称
+     * @param dateConvert - Date解析器
+     * @throws JsonException 如果不存在或无法强制转换则抛出异常{@link JsonException}
+     */
+    public Date getDate(String name, @NonNull DateConvert dateConvert) {
+        Object object = get(name);
+        Date result = dateConvert.convert(object);
+        if (result == null) {
+            throw Json.typeMismatch(name, object, "Date");
+        }
+        return result;
+    }
+
+    /**
+     * 返回name映射的值，（如果它存在并且是 {@link Date} 或可以强制为 {@link Date} ），否则返回默认值
+     *
+     * @param name - 属性的名称
+     * @param dateConvert - Date解析器
+     * @param defaultValue - 默认值
+     * @throws JsonException 如果不存在或无法强制转换则抛出异常{@link JsonException}
+     */
+    public Date getDate(String name, @NonNull DateConvert dateConvert, Date defaultValue) {
+        Object object = get(name);
+        Date result = dateConvert.convert(object, defaultValue);
+        if (result == null) {
+            throw Json.typeMismatch(name, object, "Date");
+        }
+        return result;
+    }
+
+    /**
+     * 返回name映射的值，（如果它存在并且是 {@link Date} 或可以强制为 {@link Date} ）
+     *
+     * @param name - 属性的名称
+     * @param format - 解析格式
+     * @throws JsonException 如果不存在或无法强制转换则抛出异常{@link JsonException}
+     */
+    public Date getDate(String name, String format) {
+        Object object = get(name);
+        Date result = Json.toDate(object, format);
+        if (result == null) {
+            throw Json.typeMismatch(name, object, "Date");
+        }
+        return result;
+    }
+
+    /**
+     * 返回name映射的值，（如果它存在并且是 {@link Date} 或可以强制为 {@link Date} ）
+     *
+     * @param name - 属性的名称
+     * @param format - 解析格式
+     * @param dateConvert - Date解析器
+     * @throws JsonException 如果不存在或无法强制转换则抛出异常{@link JsonException}
+     */
+    public Date getDate(String name, String format, @NonNull DateConvert dateConvert) {
+        Object object = get(name);
+        Date result = dateConvert.convert(object, format);
+        if (result == null) {
+            throw Json.typeMismatch(name, object, "Date");
+        }
+        return result;
+    }
+
+    /**
+     * 返回name映射的值，（如果它存在并且是 {@link Date} 或可以强制为 {@link Date} ）
+     *
+     * @param name - 属性的名称
+     * @param format - 解析格式
+     * @param dateConvert - Date解析器
+     * @param defaultValue - 默认值
+     * @throws JsonException 如果不存在或无法强制转换则抛出异常{@link JsonException}
+     */
+    public Date getDate(String name, String format, @NonNull DateConvert dateConvert, Date defaultValue) {
+        Object object = get(name);
+        Date result = dateConvert.convert(object, format, defaultValue);
         if (result == null) {
             throw Json.typeMismatch(name, object, "Date");
         }
@@ -1068,6 +1528,37 @@ public class JsonObject implements Cloneable, Serializable, InvocationHandler, M
         for (int i = 0; i < length; i++) {
             String name = Json.toString(names.opt(i));
             result.put(opt(name));
+        }
+        return result;
+    }
+
+    /**
+     * 返回name映射的值，（使用实现的转换器）
+     * @param name - 属性的名称
+     * @param convertClass - 转换器
+     * @throws JsonException 如果不存在或无法强制转换则抛出异常{@link JsonException}
+     */
+    public <T> T getValue(String name, @NonNull ConvertClass<T> convertClass) {
+        Object object = get(name);
+        T result = convertClass.convert(object);
+        if (result == null) {
+            throw Json.typeMismatch(name, object, "T");
+        }
+        return result;
+    }
+
+    /**
+     * 返回name映射的值，（使用实现的转换器），若无法转换则返回默认值
+     * @param name - 属性的名称
+     * @param convertClass - 转换器
+     * @param defaultValue - 默认值
+     * @throws JsonException 如果不存在或无法强制转换则抛出异常{@link JsonException}
+     */
+    public <T> T getValue(String name, @NonNull ConvertClass<T> convertClass, T defaultValue) {
+        Object object = get(name);
+        T result = convertClass.convert(object, defaultValue);
+        if (result == null) {
+            throw Json.typeMismatch(name, object, "T");
         }
         return result;
     }
