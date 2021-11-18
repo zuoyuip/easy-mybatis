@@ -60,7 +60,7 @@ public class JsonArray {
      *
      * @param readFrom - 标记器
      */
-    public JsonArray(@NonNull JsonTokener readFrom) {
+    public JsonArray(@NonNull JsonParser readFrom) {
         Object object = readFrom.nextValue();
         if (object instanceof JsonArray) {
             this.values = ((JsonArray) object).values;
@@ -75,7 +75,7 @@ public class JsonArray {
      * @param json - JSON 字符串
      */
     public JsonArray(String json) {
-        this(new JsonTokener(json));
+        this(new JsonParser(json));
     }
 
     /**
@@ -584,8 +584,8 @@ public class JsonArray {
                 jsonObjects.add(new JsonObject((Map) value));
                 continue;
             }
-            if (value instanceof JsonTokener) {
-                jsonObjects.add(new JsonObject((JsonTokener) value));
+            if (value instanceof JsonParser) {
+                jsonObjects.add(new JsonObject((JsonParser) value));
                 continue;
             }
             if (value instanceof String) {

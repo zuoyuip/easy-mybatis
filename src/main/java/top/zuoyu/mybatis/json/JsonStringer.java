@@ -19,400 +19,335 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.springframework.lang.NonNull;
+
 import top.zuoyu.mybatis.exception.JsonException;
 
-
+/**
+ * Json字符串处理 .
+ *
+ * @author: zuoyu
+ * @create: 2021-11-05 10:00
+ */
 public class JsonStringer {
 
-	/**
-	 * The output data, containing at most one top-level array or object.
-	 */
-	final StringBuilder out = new StringBuilder();
+    final StringBuilder out = new StringBuilder();
+    private final List<Scope> stack = new ArrayList<>();
+    /**
+     * 用于单级缩进的完整空格集的字符串.
+     */
+    private final String indent;
 
-	/**
-	 * Lexical scoping elements within this stringer, necessary to insert the appropriate
-	 * separator characters (ie. commas and colons) and to detect nesting errors.
-	 */
-	enum Scope {
+    public JsonStringer() {
+        this.indent = null;
+    }
 
-		/**
-		 * An array with no elements requires no separators or newlines before it is
-		 * closed.
-		 */
-		EMPTY_ARRAY,
+    JsonStringer(int indentSpaces) {
+        char[] indentChars = new char[indentSpaces];
+        Arrays.fill(indentChars, ' ');
+        this.indent = new String(indentChars);
+    }
 
-		/**
-		 * An array with at least one value requires a comma and newline before the next
-		 * element.
-		 */
-		NONEMPTY_ARRAY,
+    /**
+     * 编码一个新数组，对该方法的每次调用都必须与对endArray的调用配对
+     */
+    public JsonStringer array() {
+        return open(Scope.EMPTY_ARRAY, "[");
+    }
 
-		/**
-		 * An object with no keys or values requires no separators or newlines before it
-		 * is closed.
-		 */
-		EMPTY_OBJECT,
+    /**
+     * 结束对当前数组的编码
+     */
+    public JsonStringer endArray() {
+        return close(Scope.EMPTY_ARRAY, Scope.NONEMPTY_ARRAY, "]");
+    }
 
-		/**
-		 * An object whose most recent element is a key. The next element must be a value.
-		 */
-		DANGLING_KEY,
+    /**
+     * 开始编码一个新对象，对该方法的每次调用都必须与对endObject的调用配对
+     */
+    public JsonStringer object() {
+        return open(Scope.EMPTY_OBJECT, "{");
+    }
 
-		/**
-		 * An object with at least one name/value pair requires a comma and newline before
-		 * the next element.
-		 */
-		NONEMPTY_OBJECT,
+    /**
+     * 结束对当前对象的编码
+     */
+    public JsonStringer endObject() {
+        return close(Scope.EMPTY_OBJECT, Scope.NONEMPTY_OBJECT, "}");
+    }
 
-		/**
-		 * A special bracketless array needed by JSONStringer.join() and
-		 * JSONObject.quote() only. Not used for JSON encoding.
-		 */
-		NULL
+    /**
+     * 通过附加任何必要的空格和给定的括号来输入新的范围
+     *
+     * @param empty       - 必要的空白范围 {@link Scope}
+     * @param openBracket - 左括号（开括号）
+     */
+    JsonStringer open(Scope empty, String openBracket) {
+        if (this.stack.isEmpty() && this.out.length() > 0) {
+            throw new JsonException("Nesting problem: multiple top-level roots");
+        }
+        beforeValue();
+        this.stack.add(empty);
+        this.out.append(openBracket);
+        return this;
+    }
 
-	}
+    /**
+     * 通过附加任何必要的空格和给定的括号来关闭当前范围
+     *
+     * @param empty        - 必要的空白范围 {@link Scope}
+     * @param nonempty     - 当前范围 {@link Scope}
+     * @param closeBracket - 右括号（闭括号）
+     */
+    JsonStringer close(Scope empty, Scope nonempty, String closeBracket) {
+        Scope context = peek();
+        if (context != nonempty && context != empty) {
+            throw new JsonException("Nesting problem");
+        }
 
-	/**
-	 * Unlike the original implementation, this stack isn't limited to 20 levels of
-	 * nesting.
-	 */
-	private final List<Scope> stack = new ArrayList<>();
+        this.stack.remove(this.stack.size() - 1);
+        if (context == nonempty) {
+            newline();
+        }
+        this.out.append(closeBracket);
+        return this;
+    }
 
-	/**
-	 * A string containing a full set of spaces for a single level of indentation, or null
-	 * for no pretty printing.
-	 */
-	private final String indent;
+    /**
+     * 返回堆栈顶部的值
+     */
+    private Scope peek() {
+        if (this.stack.isEmpty()) {
+            throw new JsonException("Nesting problem");
+        }
+        return this.stack.get(this.stack.size() - 1);
+    }
 
-	public JsonStringer() {
-		this.indent = null;
-	}
+    /**
+     * 用给定的值替换堆栈顶部的值
+     *
+     * @param topOfStack - 给定的值（替换现有值）
+     */
+    private void replaceTop(Scope topOfStack) {
+        this.stack.set(this.stack.size() - 1, topOfStack);
+    }
 
-	JsonStringer(int indentSpaces) {
-		char[] indentChars = new char[indentSpaces];
-		Arrays.fill(indentChars, ' ');
-		this.indent = new String(indentChars);
-	}
+    /**
+     * 对 {@code value} 进行编码
+     */
+    public JsonStringer value(Object value) {
+        if (this.stack.isEmpty()) {
+            throw new JsonException("Nesting problem");
+        }
 
-	/**
-	 * Begins encoding a new array. Each call to this method must be paired with a call to
-	 * {@link #endArray}.
-	 * @return this stringer.
-	 * @throws JsonException if processing of json failed
-	 */
-	public JsonStringer array() throws JsonException {
-		return open(Scope.EMPTY_ARRAY, "[");
-	}
+        if (value instanceof JsonArray) {
+            ((JsonArray) value).writeTo(this);
+            return this;
+        } else if (value instanceof JsonObject) {
+            ((JsonObject) value).writeTo(this);
+            return this;
+        }
 
-	/**
-	 * Ends encoding the current array.
-	 * @return this stringer.
-	 * @throws JsonException if processing of json failed
-	 */
-	public JsonStringer endArray() throws JsonException {
-		return close(Scope.EMPTY_ARRAY, Scope.NONEMPTY_ARRAY, "]");
-	}
+        beforeValue();
 
-	/**
-	 * Begins encoding a new object. Each call to this method must be paired with a call
-	 * to {@link #endObject}.
-	 * @return this stringer.
-	 * @throws JsonException if processing of json failed
-	 */
-	public JsonStringer object() throws JsonException {
-		return open(Scope.EMPTY_OBJECT, "{");
-	}
+        if (value == null || value instanceof Boolean || value == JsonObject.NULL) {
+            this.out.append(value);
 
-	/**
-	 * Ends encoding the current object.
-	 * @return this stringer.
-	 * @throws JsonException if processing of json failed
-	 */
-	public JsonStringer endObject() throws JsonException {
-		return close(Scope.EMPTY_OBJECT, Scope.NONEMPTY_OBJECT, "}");
-	}
+        } else if (value instanceof Number) {
+            this.out.append(JsonObject.numberToString((Number) value));
 
-	/**
-	 * Enters a new scope by appending any necessary whitespace and the given bracket.
-	 * @param empty any necessary whitespace
-	 * @param openBracket the open bracket
-	 * @return this object
-	 * @throws JsonException if processing of json failed
-	 */
-	JsonStringer open(Scope empty, String openBracket) throws JsonException {
-		if (this.stack.isEmpty() && this.out.length() > 0) {
-			throw new JsonException("Nesting problem: multiple top-level roots");
-		}
-		beforeValue();
-		this.stack.add(empty);
-		this.out.append(openBracket);
-		return this;
-	}
+        } else {
+            string(value.toString());
+        }
 
-	/**
-	 * Closes the current scope by appending any necessary whitespace and the given
-	 * bracket.
-	 * @param empty any necessary whitespace
-	 * @param nonempty the current scope
-	 * @param closeBracket the close bracket
-	 * @return the JSON stringer
-	 * @throws JsonException if processing of json failed
-	 */
-	JsonStringer close(Scope empty, Scope nonempty, String closeBracket) throws JsonException {
-		Scope context = peek();
-		if (context != nonempty && context != empty) {
-			throw new JsonException("Nesting problem");
-		}
+        return this;
+    }
 
-		this.stack.remove(this.stack.size() - 1);
-		if (context == nonempty) {
-			newline();
-		}
-		this.out.append(closeBracket);
-		return this;
-	}
+    /**
+     * 对 {@code value} 进行编码
+     */
+    public JsonStringer value(boolean value) {
+        if (this.stack.isEmpty()) {
+            throw new JsonException("Nesting problem");
+        }
+        beforeValue();
+        this.out.append(value);
+        return this;
+    }
 
-	/**
-	 * Returns the value on the top of the stack.
-	 * @return the scope
-	 * @throws JsonException if processing of json failed
-	 */
-	private Scope peek() throws JsonException {
-		if (this.stack.isEmpty()) {
-			throw new JsonException("Nesting problem");
-		}
-		return this.stack.get(this.stack.size() - 1);
-	}
+    /**
+     * 对 {@code value} 进行编码
+     */
+    public JsonStringer value(double value) {
+        if (this.stack.isEmpty()) {
+            throw new JsonException("Nesting problem");
+        }
+        beforeValue();
+        this.out.append(JsonObject.numberToString(value));
+        return this;
+    }
 
-	/**
-	 * Replace the value on the top of the stack with the given value.
-	 * @param topOfStack the scope at the top of the stack
-	 */
-	private void replaceTop(Scope topOfStack) {
-		this.stack.set(this.stack.size() - 1, topOfStack);
-	}
+    /**
+     * 对 {@code value} 进行编码
+     */
+    public JsonStringer value(long value) {
+        if (this.stack.isEmpty()) {
+            throw new JsonException("Nesting problem");
+        }
+        beforeValue();
+        this.out.append(value);
+        return this;
+    }
 
-	/**
-	 * Encodes {@code value}.
-	 * @param value a {@link JsonObject}, {@link JsonArray}, String, Boolean, Integer,
-	 * Long, Double or null. May not be {@link Double#isNaN() NaNs} or
-	 * {@link Double#isInfinite() infinities}.
-	 * @return this stringer.
-	 * @throws JsonException if processing of json failed
-	 */
-	public JsonStringer value(Object value) throws JsonException {
-		if (this.stack.isEmpty()) {
-			throw new JsonException("Nesting problem");
-		}
+    private void string(@NonNull String value) {
+        this.out.append("\"");
+        for (int i = 0, length = value.length(); i < length; i++) {
+            char c = value.charAt(i);
 
-		if (value instanceof JsonArray) {
-			((JsonArray) value).writeTo(this);
-			return this;
-		}
-		else if (value instanceof JsonObject) {
-			((JsonObject) value).writeTo(this);
-			return this;
-		}
+            /*
+             * 所有 Unicode 字符都可以放在引号内，
+             * 但必须转义的字符除外：引号、反斜杠和控制字符（U+0000 到 U+001F）
+             */
+            switch (c) {
+                case '"':
+                case '\\':
+                case '/':
+                    this.out.append('\\').append(c);
+                    break;
 
-		beforeValue();
+                case '\t':
+                    this.out.append("\\t");
+                    break;
 
-		if (value == null || value instanceof Boolean || value == JsonObject.NULL) {
-			this.out.append(value);
+                case '\b':
+                    this.out.append("\\b");
+                    break;
 
-		}
-		else if (value instanceof Number) {
-			this.out.append(JsonObject.numberToString((Number) value));
+                case '\n':
+                    this.out.append("\\n");
+                    break;
 
-		}
-		else {
-			string(value.toString());
-		}
+                case '\r':
+                    this.out.append("\\r");
+                    break;
 
-		return this;
-	}
+                case '\f':
+                    this.out.append("\\f");
+                    break;
 
-	/**
-	 * Encodes {@code value} to this stringer.
-	 * @param value the value to encode
-	 * @return this stringer.
-	 * @throws JsonException if processing of json failed
-	 */
-	public JsonStringer value(boolean value) throws JsonException {
-		if (this.stack.isEmpty()) {
-			throw new JsonException("Nesting problem");
-		}
-		beforeValue();
-		this.out.append(value);
-		return this;
-	}
+                default:
+                    if (c <= 0x1F) {
+                        this.out.append(String.format("\\u%04x", (int) c));
+                    } else {
+                        this.out.append(c);
+                    }
+                    break;
+            }
 
-	/**
-	 * Encodes {@code value} to this stringer.
-	 * @param value a finite value. May not be {@link Double#isNaN() NaNs} or
-	 * {@link Double#isInfinite() infinities}.
-	 * @return this stringer.
-	 * @throws JsonException if processing of json failed
-	 */
-	public JsonStringer value(double value) throws JsonException {
-		if (this.stack.isEmpty()) {
-			throw new JsonException("Nesting problem");
-		}
-		beforeValue();
-		this.out.append(JsonObject.numberToString(value));
-		return this;
-	}
+        }
+        this.out.append("\"");
+    }
 
-	/**
-	 * Encodes {@code value} to this stringer.
-	 * @param value the value to encode
-	 * @return this stringer.
-	 * @throws JsonException if processing of json failed
-	 */
-	public JsonStringer value(long value) throws JsonException {
-		if (this.stack.isEmpty()) {
-			throw new JsonException("Nesting problem");
-		}
-		beforeValue();
-		this.out.append(value);
-		return this;
-	}
+    private void newline() {
+        if (this.indent == null) {
+            return;
+        }
 
-	private void string(String value) {
-		this.out.append("\"");
-		for (int i = 0, length = value.length(); i < length; i++) {
-			char c = value.charAt(i);
+        this.out.append("\n");
+        for (int i = 0; i < this.stack.size(); i++) {
+            this.out.append(this.indent);
+        }
+    }
 
-			/*
-			 * From RFC 4627, "All Unicode characters may be placed within the quotation
-			 * marks except for the characters that must be escaped: quotation mark,
-			 * reverse solidus, and the control characters (U+0000 through U+001F)."
-			 */
-			switch (c) {
-			case '"':
-			case '\\':
-			case '/':
-				this.out.append('\\').append(c);
-				break;
+    /**
+     * 对 {@code name} 进行编码
+     */
+    public JsonStringer key(String name) {
+        if (name == null) {
+            throw new JsonException("Names must be non-null");
+        }
+        beforeKey();
+        string(name);
+        return this;
+    }
 
-			case '\t':
-				this.out.append("\\t");
-				break;
+    /**
+     * 前置插入必要的元素（Key）
+     */
+    private void beforeKey() {
+        Scope context = peek();
+        if (context == Scope.NONEMPTY_OBJECT) {
+            this.out.append(',');
+        } else if (context != Scope.EMPTY_OBJECT) {
+            throw new JsonException("Nesting problem");
+        }
+        newline();
+        replaceTop(Scope.DANGLING_KEY);
+    }
 
-			case '\b':
-				this.out.append("\\b");
-				break;
+    /**
+     * 前置插入必要的元素（Value）
+     */
+    private void beforeValue() {
+        if (this.stack.isEmpty()) {
+            return;
+        }
 
-			case '\n':
-				this.out.append("\\n");
-				break;
+        Scope context = peek();
+        if (context == Scope.EMPTY_ARRAY) {
+            replaceTop(Scope.NONEMPTY_ARRAY);
+            newline();
+        } else if (context == Scope.NONEMPTY_ARRAY) {
+            this.out.append(',');
+            newline();
+        } else if (context == Scope.DANGLING_KEY) {
+            this.out.append(this.indent == null ? ":" : ": ");
+            replaceTop(Scope.NONEMPTY_OBJECT);
+        } else if (context != Scope.NULL) {
+            throw new JsonException("Nesting problem");
+        }
+    }
 
-			case '\r':
-				this.out.append("\\r");
-				break;
+    @Override
+    public String toString() {
+        return this.out.length() == 0 ? null : this.out.toString();
+    }
 
-			case '\f':
-				this.out.append("\\f");
-				break;
+    /**
+     * 字符串中的词法范围元素.
+     */
+    enum Scope {
 
-			default:
-				if (c <= 0x1F) {
-					this.out.append(String.format("\\u%04x", (int) c));
-				}
-				else {
-					this.out.append(c);
-				}
-				break;
-			}
+        /**
+         * 空数组.
+         */
+        EMPTY_ARRAY,
 
-		}
-		this.out.append("\"");
-	}
+        /**
+         * 非空数组.
+         */
+        NONEMPTY_ARRAY,
 
-	private void newline() {
-		if (this.indent == null) {
-			return;
-		}
+        /**
+         * 空对象.
+         */
+        EMPTY_OBJECT,
 
-		this.out.append("\n");
-		for (int i = 0; i < this.stack.size(); i++) {
-			this.out.append(this.indent);
-		}
-	}
+        /**
+         * An object whose most recent element is a key. The next element must be a value.
+         */
+        DANGLING_KEY,
 
-	/**
-	 * Encodes the key (property name) to this stringer.
-	 * @param name the name of the forthcoming value. May not be null.
-	 * @return this stringer.
-	 * @throws JsonException if processing of json failed
-	 */
-	public JsonStringer key(String name) throws JsonException {
-		if (name == null) {
-			throw new JsonException("Names must be non-null");
-		}
-		beforeKey();
-		string(name);
-		return this;
-	}
+        /**
+         * 非空对象.
+         */
+        NONEMPTY_OBJECT,
 
-	/**
-	 * Inserts any necessary separators and whitespace before a name. Also adjusts the
-	 * stack to expect the key's value.
-	 * @throws JsonException if processing of json failed
-	 */
-	private void beforeKey() throws JsonException {
-		Scope context = peek();
-		if (context == Scope.NONEMPTY_OBJECT) { // first in object
-			this.out.append(',');
-		}
-		else if (context != Scope.EMPTY_OBJECT) { // not in an object!
-			throw new JsonException("Nesting problem");
-		}
-		newline();
-		replaceTop(Scope.DANGLING_KEY);
-	}
+        /**
+         * NULL.
+         */
+        NULL
 
-	/**
-	 * Inserts any necessary separators and whitespace before a literal value, inline
-	 * array, or inline object. Also adjusts the stack to expect either a closing bracket
-	 * or another element.
-	 * @throws JsonException if processing of json failed
-	 */
-	private void beforeValue() throws JsonException {
-		if (this.stack.isEmpty()) {
-			return;
-		}
-
-		Scope context = peek();
-		if (context == Scope.EMPTY_ARRAY) { // first in array
-			replaceTop(Scope.NONEMPTY_ARRAY);
-			newline();
-		}
-		else if (context == Scope.NONEMPTY_ARRAY) { // another in array
-			this.out.append(',');
-			newline();
-		}
-		else if (context == Scope.DANGLING_KEY) { // value for key
-			this.out.append(this.indent == null ? ":" : ": ");
-			replaceTop(Scope.NONEMPTY_OBJECT);
-		}
-		else if (context != Scope.NULL) {
-			throw new JsonException("Nesting problem");
-		}
-	}
-
-	/**
-	 * Returns the encoded JSON string.
-	 * <p>
-	 * If invoked with unterminated arrays or unclosed objects, this method's return value
-	 * is undefined.
-	 * <p>
-	 * <strong>Warning:</strong> although it contradicts the general contract of
-	 * {@link Object#toString}, this method returns null if the stringer contains no data.
-	 * @return the encoded JSON string.
-	 */
-	@Override
-	public String toString() {
-		return this.out.length() == 0 ? null : this.out.toString();
-	}
+    }
 
 }

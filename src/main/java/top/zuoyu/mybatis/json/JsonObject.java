@@ -16,12 +16,15 @@
 package top.zuoyu.mybatis.json;
 
 import java.io.Serializable;
+import java.lang.reflect.Array;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -31,7 +34,7 @@ import org.springframework.lang.NonNull;
 import top.zuoyu.mybatis.exception.JsonException;
 
 /**
- * Json数组 .
+ * Json对象 .
  *
  * @author: zuoyu
  * @create: 2021-11-05 10:00
@@ -86,7 +89,7 @@ public class JsonObject implements Cloneable, Serializable, InvocationHandler, M
      *
      * @param readFrom – 一个标记器，用 nextValue() 方法的值生成一个JsonObject
      */
-    public JsonObject(@NonNull JsonTokener readFrom) {
+    public JsonObject(@NonNull JsonParser readFrom) {
         Object object = readFrom.nextValue();
         if (object instanceof JsonObject) {
             this.nameValuePairs = ((JsonObject) object).nameValuePairs;
@@ -101,7 +104,7 @@ public class JsonObject implements Cloneable, Serializable, InvocationHandler, M
      * @param json – 包含对象的 JSON 编码字符串
      */
     public JsonObject(String json) {
-        this(new JsonTokener(json));
+        this(new JsonParser(json));
     }
 
     /**
@@ -179,8 +182,8 @@ public class JsonObject implements Cloneable, Serializable, InvocationHandler, M
      * @param o - 给定的对象
      */
     @SuppressWarnings("rawtypes")
-    public static Object wrap(@NonNull Object o) {
-        if (o == null) {
+    public static Object wrap(Object o) {
+        if (Objects.isNull(o)) {
             return NULL;
         }
         if (o instanceof JsonArray || o instanceof JsonObject) {
@@ -771,6 +774,52 @@ public class JsonObject implements Cloneable, Serializable, InvocationHandler, M
     public JsonArray optJsonArray(String name) {
         Object object = opt(name);
         return object instanceof JsonArray ? (JsonArray) object : null;
+    }
+
+    /**
+     * 返回name映射的值，（如果它存在并且是 {@link List<JsonObject>} ）
+     *
+     * @param name - 属性的名称
+     * @throws JsonException 如果不存在或无法强制转换则抛出异常{@link JsonException}
+     */
+    public List<JsonObject> getJsonObjects(String name) {
+        Object array = get(name);
+        if (!array.getClass().isArray()) {
+            throw new JsonException("Not a primitive array: " + array.getClass());
+        }
+        final int length = Array.getLength(array);
+        List<JsonObject> jsonObjects = new ArrayList<>(length);
+        for (int i = 0; i < length; ++i) {
+            Object o = Array.get(array, i);
+            if (o instanceof JsonObject) {
+                jsonObjects.add((JsonObject) o);
+            } else {
+                throw Json.typeMismatch(name, o, "JSONObject");
+            }
+        }
+        return jsonObjects;
+    }
+
+    /**
+     * 返回name映射的值，（如果它存在），否则返回 empty
+     *
+     * @param name - 属性的名称
+     * @return 值或 empty
+     */
+    public List<JsonObject> optJsonObjects(String name) {
+        Object array = get(name);
+        if (!array.getClass().isArray()) {
+            return Collections.emptyList();
+        }
+        final int length = Array.getLength(array);
+        List<JsonObject> jsonObjects = new ArrayList<>(length);
+        for (int i = 0; i < length; ++i) {
+            Object o = Array.get(array, i);
+            if (o instanceof JsonObject) {
+                jsonObjects.add((JsonObject) o);
+            }
+        }
+        return jsonObjects;
     }
 
     /**
