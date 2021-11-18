@@ -16,8 +16,11 @@
 package top.zuoyu.mybatis.json;
 
 import java.lang.reflect.Array;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -333,43 +336,83 @@ public class JsonArray {
     }
 
     /**
-     * 返回索引处的值为 {@link Double}
+     * 返回索引处的值为 {@link Byte}
      *
      * @param index - 索引
      * @return 对应的值
      * @throws JsonException - 如果index处的值不存在或无法强制转换则抛出异常
      */
-    public Double getDouble(int index) {
+    public Byte getByte(int index) {
         Object object = get(index);
-        Double result = Json.toDouble(object);
-        if (Objects.isNull(result)) {
-            throw Json.typeMismatch(index, object, "double");
+        Byte result = Json.toByte(object);
+        if (result == null) {
+            throw Json.typeMismatch(index, object, "byte");
         }
         return result;
     }
 
     /**
-     * 返回索引处的值（如果它存在并且是双精度值或可以强制为双精度值）,否则返回 NaN
+     * 返回name映射的值，（如果它存在并且是byte值或可以强制为byte值），否则返回 0
      *
      * @param index - 索引
-     * @return 对应的值
+     * @return 值或 0
      */
-    public double optDouble(int index) {
-        return optDouble(index, Double.NaN);
+    public byte optByte(int index) {
+        return optByte(index, (byte) 0);
     }
 
     /**
-     * 返回索引处的值（如果它存在并且是双精度值或可以强制为双精度值）,否则返回 {@code fallback}
+     * 返回name映射的值，（如果它存在并且是byte值或可以强制为byte值），否则返回 {@code fallback}
      *
-     * @param index    - 索引
+     * @param index - 索引
      * @param fallback - 备选值
      * @return 对应的值或 {@code fallback}
      */
-    public double optDouble(int index, double fallback) {
+    public byte optByte(int index, byte fallback) {
         Object object = opt(index);
-        Double result = Json.toDouble(object);
+        Byte result = Json.toByte(object);
         return result != null ? result : fallback;
     }
+
+    /**
+     * 返回索引处的值为 {@link Short}
+     *
+     * @param index - 索引
+     * @return 对应的值
+     * @throws JsonException - 如果index处的值不存在或无法强制转换则抛出异常
+     */
+    public Short getShort(int index) {
+        Object object = get(index);
+        Short result = Json.toShort(object);
+        if (result == null) {
+            throw Json.typeMismatch(index, object, "short");
+        }
+        return result;
+    }
+
+    /**
+     * 返回name映射的值，（如果它存在并且是short值或可以强制为short值），否则返回 0
+     *
+     * @param index - 索引
+     * @return 值或 NaN
+     */
+    public short optShort(int index) {
+        return optShort(index, (short) 0);
+    }
+
+    /**
+     * 返回name映射的值，（如果它存在并且是short值或可以强制为short值），否则返回 {@code fallback}
+     *
+     * @param index - 索引
+     * @param fallback - 备选值
+     * @return 对应的值或 {@code fallback}
+     */
+    public Short optShort(int index, short fallback) {
+        Object object = opt(index);
+        Short result = Json.toShort(object);
+        return result != null ? result : fallback;
+    }
+
 
     /**
      * 返回索引处的值为 {@link Integer}
@@ -450,6 +493,123 @@ public class JsonArray {
     }
 
     /**
+     * 返回索引处的值为 {@link Float}
+     *
+     * @param index - 索引
+     * @return 对应的值
+     * @throws JsonException - 如果index处的值不存在或无法强制转换则抛出异常
+     */
+    public Float getFloat(int index) {
+        Object object = get(index);
+        Float result = Json.toFloat(object);
+        if (result == null) {
+            throw Json.typeMismatch(index, object, "float");
+        }
+        return result;
+    }
+
+    /**
+     * 返回name映射的值，（如果它存在并且是一个 float 或可以强制为一个 float ），否则返回 0
+     *
+     * @param index - 索引
+     * @return 值或 0
+     */
+    public float optFloat(int index) {
+        return optFloat(index, 0F);
+    }
+
+    /**
+     * 返回name映射的值，（如果它存在并且是一个 float 或可以强制为一个 float ），否则返回 {@code fallback}
+     *
+     * @param index - 索引
+     * @param fallback - 备选值
+     * @return 对应的值或 {@code fallback}
+     */
+    public float optFloat(int index, float fallback) {
+        Object object = opt(index);
+        Float result = Json.toFloat(object);
+        return result != null ? result : fallback;
+    }
+
+    /**
+     * 返回索引处的值为 {@link Double}
+     *
+     * @param index - 索引
+     * @return 对应的值
+     * @throws JsonException - 如果index处的值不存在或无法强制转换则抛出异常
+     */
+    public Double getDouble(int index) {
+        Object object = get(index);
+        Double result = Json.toDouble(object);
+        if (Objects.isNull(result)) {
+            throw Json.typeMismatch(index, object, "double");
+        }
+        return result;
+    }
+
+    /**
+     * 返回索引处的值（如果它存在并且是双精度值或可以强制为双精度值）,否则返回 NaN
+     *
+     * @param index - 索引
+     * @return 对应的值
+     */
+    public double optDouble(int index) {
+        return optDouble(index, Double.NaN);
+    }
+
+    /**
+     * 返回索引处的值（如果它存在并且是双精度值或可以强制为双精度值）,否则返回 {@code fallback}
+     *
+     * @param index    - 索引
+     * @param fallback - 备选值
+     * @return 对应的值或 {@code fallback}
+     */
+    public double optDouble(int index, double fallback) {
+        Object object = opt(index);
+        Double result = Json.toDouble(object);
+        return result != null ? result : fallback;
+    }
+
+    /**
+     * 返回索引处的值为 {@link Character}
+     *
+     * @param index - 索引
+     * @return 对应的值
+     * @throws JsonException - 如果index处的值不存在或无法强制转换则抛出异常
+     */
+    public Character getCharacter(int index) {
+        Object object = get(index);
+        Character result = Json.toCharacter(object);
+        if (result == null) {
+            throw Json.typeMismatch(index, object, "char");
+        }
+        return result;
+    }
+
+    /**
+     * 返回name映射的值，（如果它存在并且是char值或可以强制为char值），否则返回 '\u0000'（即空格）
+     *
+     * @param index - 索引
+     * @return 值或 NaN
+     */
+    public char optCharacter(int index) {
+        return optCharacter(index, Character.MIN_VALUE);
+    }
+
+    /**
+     * 返回name映射的值，（如果它存在并且是char值或可以强制为char值），否则返回 {@code fallback}
+     *
+     * @param index - 索引
+     * @param fallback - 备选值
+     * @return 对应的值或 {@code fallback}
+     */
+    public char optCharacter(int index, char fallback) {
+        Object object = opt(index);
+        Character result = Json.toCharacter(object);
+        return result != null ? result : fallback;
+    }
+
+    /**
      * 返回索引处的值为 {@link String}
      *
      * @param index - 索引
@@ -486,6 +646,51 @@ public class JsonArray {
         Object object = opt(index);
         String result = Json.toString(object);
         return result != null ? result : fallback;
+    }
+
+    /**
+     * 返回index索引的值，（如果它存在并且是 {@link BigDecimal} 或可以强制为 {@link BigDecimal} ）
+     *
+     * @param index    - 索引
+     * @throws JsonException 如果不存在或无法强制转换则抛出异常{@link JsonException}
+     */
+    public BigDecimal getBigDecimal(int index) {
+        Object object = get(index);
+        BigDecimal result = Json.toBigDecimal(object);
+        if (result == null) {
+            throw Json.typeMismatch(index, object, "BigDecimal");
+        }
+        return result;
+    }
+
+    /**
+     * 返回index索引的值，（如果它存在并且是 {@link BigInteger} 或可以强制为 {@link BigInteger} ）
+     *
+     * @param index    - 索引
+     * @throws JsonException 如果不存在或无法强制转换则抛出异常{@link JsonException}
+     */
+    public BigInteger getBigInteger(int index) {
+        Object object = get(index);
+        BigInteger result = Json.toBigInteger(object);
+        if (result == null) {
+            throw Json.typeMismatch(index, object, "BigInteger");
+        }
+        return result;
+    }
+
+    /**
+     * 返回index索引的值，（如果它存在并且是 {@link Date} 或可以强制为 {@link Date} ）
+     *
+     * @param index    - 索引
+     * @throws JsonException 如果不存在或无法强制转换则抛出异常{@link JsonException}
+     */
+    public Date getDate(int index) {
+        Object object = get(index);
+        Date result = Json.toDate(object);
+        if (result == null) {
+            throw Json.typeMismatch(index, object, "Date");
+        }
+        return result;
     }
 
     /**

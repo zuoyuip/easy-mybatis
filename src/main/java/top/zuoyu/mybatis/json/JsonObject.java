@@ -19,9 +19,12 @@ import java.io.Serializable;
 import java.lang.reflect.Array;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -599,42 +602,81 @@ public class JsonObject implements Cloneable, Serializable, InvocationHandler, M
     }
 
     /**
-     * 返回name映射的值，（如果它存在并且是 {@link Double} 或可以强制为 {@link Double} ）
+     * 返回name映射的值，（如果它存在并且是 {@link Byte} 或可以强制为 {@link Byte} ）
      *
      * @param name - 属性的名称
      * @throws JsonException 如果不存在或无法强制转换则抛出异常{@link JsonException}
      */
-    public Double getDouble(String name) {
+    public Byte getByte(String name) {
         Object object = get(name);
-        Double result = Json.toDouble(object);
+        Byte result = Json.toByte(object);
         if (result == null) {
-            throw Json.typeMismatch(name, object, "double");
+            throw Json.typeMismatch(name, object, "byte");
         }
         return result;
     }
 
     /**
-     * 返回name映射的值，（如果它存在并且是双精度值或可以强制为双精度值），否则返回 NaN
+     * 返回name映射的值，（如果它存在并且是byte值或可以强制为byte值），否则返回 0
      *
      * @param name - 属性的名称
-     * @return 值或 NaN
+     * @return 值或 0
      */
-    public double optDouble(String name) {
-        return optDouble(name, Double.NaN);
+    public byte optByte(String name) {
+        return optByte(name, (byte) 0);
     }
 
     /**
-     * 返回name映射的值，（如果它存在并且是双精度值或可以强制为双精度值），否则返回 {@code fallback}
+     * 返回name映射的值，（如果它存在并且是byte值或可以强制为byte值），否则返回 {@code fallback}
      *
      * @param name     - 属性的名称
      * @param fallback - 备选值
      * @return 对应的值或 {@code fallback}
      */
-    public double optDouble(String name, double fallback) {
+    public byte optByte(String name, byte fallback) {
         Object object = opt(name);
-        Double result = Json.toDouble(object);
+        Byte result = Json.toByte(object);
         return result != null ? result : fallback;
     }
+
+    /**
+     * 返回name映射的值，（如果它存在并且是 {@link Short} 或可以强制为 {@link Short} ）
+     *
+     * @param name - 属性的名称
+     * @throws JsonException 如果不存在或无法强制转换则抛出异常{@link JsonException}
+     */
+    public Short getShort(String name) {
+        Object object = get(name);
+        Short result = Json.toShort(object);
+        if (result == null) {
+            throw Json.typeMismatch(name, object, "short");
+        }
+        return result;
+    }
+
+    /**
+     * 返回name映射的值，（如果它存在并且是short值或可以强制为short值），否则返回 0
+     *
+     * @param name - 属性的名称
+     * @return 值或 0
+     */
+    public short optShort(String name) {
+        return optShort(name, (short) 0);
+    }
+
+    /**
+     * 返回name映射的值，（如果它存在并且是short值或可以强制为short值），否则返回 {@code fallback}
+     *
+     * @param name     - 属性的名称
+     * @param fallback - 备选值
+     * @return 对应的值或 {@code fallback}
+     */
+    public Short optShort(String name, short fallback) {
+        Object object = opt(name);
+        Short result = Json.toShort(object);
+        return result != null ? result : fallback;
+    }
+
 
     /**
      * 返回name映射的值，（如果它存在并且是 {@link Integer} 或可以强制为 {@link Integer} ）
@@ -713,6 +755,120 @@ public class JsonObject implements Cloneable, Serializable, InvocationHandler, M
     }
 
     /**
+     * 返回name映射的值，（如果它存在并且是 {@link Float} 或可以强制为 {@link Float} ）
+     *
+     * @param name - 属性的名称
+     * @throws JsonException 如果不存在或无法强制转换则抛出异常{@link JsonException}
+     */
+    public Float getFloat(String name) {
+        Object object = get(name);
+        Float result = Json.toFloat(object);
+        if (result == null) {
+            throw Json.typeMismatch(name, object, "float");
+        }
+        return result;
+    }
+
+    /**
+     * 返回name映射的值，（如果它存在并且是一个 float 或可以强制为一个 float ），否则返回 0
+     *
+     * @param name - 属性的名称
+     * @return 值或 0
+     */
+    public float optFloat(String name) {
+        return optFloat(name, 0F);
+    }
+
+    /**
+     * 返回name映射的值，（如果它存在并且是一个 float 或可以强制为一个 float ），否则返回 {@code fallback}
+     *
+     * @param name     - 属性的名称
+     * @param fallback - 备选值
+     * @return 对应的值或 {@code fallback}
+     */
+    public float optFloat(String name, float fallback) {
+        Object object = opt(name);
+        Float result = Json.toFloat(object);
+        return result != null ? result : fallback;
+    }
+
+    /**
+     * 返回name映射的值，（如果它存在并且是 {@link Double} 或可以强制为 {@link Double} ）
+     *
+     * @param name - 属性的名称
+     * @throws JsonException 如果不存在或无法强制转换则抛出异常{@link JsonException}
+     */
+    public Double getDouble(String name) {
+        Object object = get(name);
+        Double result = Json.toDouble(object);
+        if (result == null) {
+            throw Json.typeMismatch(name, object, "double");
+        }
+        return result;
+    }
+
+    /**
+     * 返回name映射的值，（如果它存在并且是双精度值或可以强制为双精度值），否则返回 NaN
+     *
+     * @param name - 属性的名称
+     * @return 值或 NaN
+     */
+    public double optDouble(String name) {
+        return optDouble(name, Double.NaN);
+    }
+
+    /**
+     * 返回name映射的值，（如果它存在并且是双精度值或可以强制为双精度值），否则返回 {@code fallback}
+     *
+     * @param name     - 属性的名称
+     * @param fallback - 备选值
+     * @return 对应的值或 {@code fallback}
+     */
+    public double optDouble(String name, double fallback) {
+        Object object = opt(name);
+        Double result = Json.toDouble(object);
+        return result != null ? result : fallback;
+    }
+
+    /**
+     * 返回name映射的值，（如果它存在并且是 {@link Character} 或可以强制为 {@link Character} ）
+     *
+     * @param name - 属性的名称
+     * @throws JsonException 如果不存在或无法强制转换则抛出异常{@link JsonException}
+     */
+    public Character getCharacter(String name) {
+        Object object = get(name);
+        Character result = Json.toCharacter(object);
+        if (result == null) {
+            throw Json.typeMismatch(name, object, "char");
+        }
+        return result;
+    }
+
+    /**
+     * 返回name映射的值，（如果它存在并且是char值或可以强制为char值），否则返回 '\u0000'（即空格）
+     *
+     * @param name - 属性的名称
+     * @return 值或 NaN
+     */
+    public char optCharacter(String name) {
+        return optCharacter(name, Character.MIN_VALUE);
+    }
+
+    /**
+     * 返回name映射的值，（如果它存在并且是char值或可以强制为char值），否则返回 {@code fallback}
+     *
+     * @param name     - 属性的名称
+     * @param fallback - 备选值
+     * @return 对应的值或 {@code fallback}
+     */
+    public char optCharacter(String name, char fallback) {
+        Object object = opt(name);
+        Character result = Json.toCharacter(object);
+        return result != null ? result : fallback;
+    }
+
+    /**
      * 返回name映射的值，（如果它存在 ）
      *
      * @param name - 属性的名称
@@ -748,6 +904,51 @@ public class JsonObject implements Cloneable, Serializable, InvocationHandler, M
         Object object = opt(name);
         String result = Json.toString(object);
         return result != null ? result : fallback;
+    }
+
+    /**
+     * 返回name映射的值，（如果它存在并且是 {@link BigDecimal} 或可以强制为 {@link BigDecimal} ）
+     *
+     * @param name - 属性的名称
+     * @throws JsonException 如果不存在或无法强制转换则抛出异常{@link JsonException}
+     */
+    public BigDecimal getBigDecimal(String name) {
+        Object object = get(name);
+        BigDecimal result = Json.toBigDecimal(object);
+        if (result == null) {
+            throw Json.typeMismatch(name, object, "BigDecimal");
+        }
+        return result;
+    }
+
+    /**
+     * 返回name映射的值，（如果它存在并且是 {@link BigInteger} 或可以强制为 {@link BigInteger} ）
+     *
+     * @param name - 属性的名称
+     * @throws JsonException 如果不存在或无法强制转换则抛出异常{@link JsonException}
+     */
+    public BigInteger getBigInteger(String name) {
+        Object object = get(name);
+        BigInteger result = Json.toBigInteger(object);
+        if (result == null) {
+            throw Json.typeMismatch(name, object, "BigInteger");
+        }
+        return result;
+    }
+
+    /**
+     * 返回name映射的值，（如果它存在并且是 {@link Date} 或可以强制为 {@link Date} ）
+     *
+     * @param name - 属性的名称
+     * @throws JsonException 如果不存在或无法强制转换则抛出异常{@link JsonException}
+     */
+    public Date getDate(String name) {
+        Object object = get(name);
+        Date result = Json.toDate(object);
+        if (result == null) {
+            throw Json.typeMismatch(name, object, "Date");
+        }
+        return result;
     }
 
     /**
@@ -917,7 +1118,7 @@ public class JsonObject implements Cloneable, Serializable, InvocationHandler, M
     }
 
     @Override
-    public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+    public Object invoke(Object proxy, Method method, Object[] args) {
         return null;
     }
 }

@@ -17,6 +17,7 @@ package top.zuoyu.mybatis.json;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.Date;
 
 import org.springframework.lang.NonNull;
 
@@ -243,6 +244,11 @@ class Json {
         }
         return new BigInteger(strVal);
     }
+
+    static Date toDate(Object value) {
+        return (Date) value;
+    }
+
 
     public static JsonException typeMismatch(Object indexOrName, Object actual, String requiredType)
             throws JsonException {
