@@ -902,7 +902,6 @@ public class JsonObject implements Cloneable, Serializable, InvocationHandler, M
      *
      * @param name - 属性的名称
      * @param floatConvert - Float转换器
-     * @throws JsonException 如果不存在或无法强制转换则抛出异常{@link JsonException}
      */
     public Float getFloat(String name, @NonNull FloatConvert floatConvert) {
         Object object = get(name);
@@ -1025,7 +1024,6 @@ public class JsonObject implements Cloneable, Serializable, InvocationHandler, M
      *
      * @param name - 属性的名称
      * @param characterConvert - Character转换器
-     * @throws JsonException 如果不存在或无法强制转换则抛出异常{@link JsonException}
      */
     public Character getCharacter(String name, @NonNull CharacterConvert characterConvert) {
         Object object = get(name);

@@ -28,6 +28,18 @@ import java.util.Objects;
 import org.springframework.lang.NonNull;
 
 import top.zuoyu.mybatis.exception.JsonException;
+import top.zuoyu.mybatis.json.convert.BigDecimalConvert;
+import top.zuoyu.mybatis.json.convert.BigIntegerConvert;
+import top.zuoyu.mybatis.json.convert.BooleanConvert;
+import top.zuoyu.mybatis.json.convert.ByteConvert;
+import top.zuoyu.mybatis.json.convert.CharacterConvert;
+import top.zuoyu.mybatis.json.convert.DateConvert;
+import top.zuoyu.mybatis.json.convert.DoubleConvert;
+import top.zuoyu.mybatis.json.convert.FloatConvert;
+import top.zuoyu.mybatis.json.convert.IntegerConvert;
+import top.zuoyu.mybatis.json.convert.LongConvert;
+import top.zuoyu.mybatis.json.convert.ShortConvert;
+import top.zuoyu.mybatis.json.convert.StringConvert;
 
 /**
  * Json数组 .
@@ -253,7 +265,7 @@ public class JsonArray {
     }
 
     /**
-     * 返回索引处的值
+     * 返回index索引的值
      *
      * @param index - 索引
      * @return 对应的值
@@ -271,7 +283,7 @@ public class JsonArray {
     }
 
     /**
-     * 返回索引处的值，如果数组在index处没有值，则返回 null
+     * 返回index索引的值，如果数组在index处没有值，则返回 null
      *
      * @param index - 索引
      * @return 对应的值
@@ -297,7 +309,7 @@ public class JsonArray {
     }
 
     /**
-     * 返回索引处的值为 {@link Boolean}
+     * 返回index索引的值为 {@link Boolean}
      *
      * @param index - 索引
      * @return 对应的值
@@ -313,7 +325,30 @@ public class JsonArray {
     }
 
     /**
-     * 返回索引处的值（如果它存在并且是布尔值或可以强制为布尔值）,否则返回 false
+     * 返回index索引的值，（使用自定义转换器 {@link BooleanConvert} 进行值的转换 ）
+     *
+     * @param index - 索引
+     * @param booleanConvert - Boolean转换器
+     */
+    public Boolean getBoolean(int index, @NonNull BooleanConvert booleanConvert) {
+        Object object = get(index);
+        return booleanConvert.convert(object);
+    }
+
+    /**
+     * 返回index索引的值，（使用自定义转换器 {@link BooleanConvert} 进行值的转换 ）， 并定义返回默认值的触发条件
+     *
+     * @param index - 索引
+     * @param booleanConvert - Boolean转换器
+     * @param defaultValue  - 默认值
+     */
+    public Boolean getBoolean(int index, @NonNull BooleanConvert booleanConvert, Boolean defaultValue) {
+        Object object = get(index);
+        return booleanConvert.convert(object, defaultValue);
+    }
+
+    /**
+     * 返回index索引的值（如果它存在并且是布尔值或可以强制为布尔值）,否则返回 false
      *
      * @param index - 索引
      * @return 对应的值
@@ -323,7 +358,7 @@ public class JsonArray {
     }
 
     /**
-     * 返回索引处的值（如果它存在并且是布尔值或可以强制为布尔值）,否则返回 {@code fallback}
+     * 返回index索引的值（如果它存在并且是布尔值或可以强制为布尔值）,否则返回 {@code fallback}
      *
      * @param index    - 索引
      * @param fallback - 备选值
@@ -336,7 +371,7 @@ public class JsonArray {
     }
 
     /**
-     * 返回索引处的值为 {@link Byte}
+     * 返回index索引的值为 {@link Byte}
      *
      * @param index - 索引
      * @return 对应的值
@@ -352,7 +387,30 @@ public class JsonArray {
     }
 
     /**
-     * 返回name映射的值，（如果它存在并且是byte值或可以强制为byte值），否则返回 0
+     * 返回index索引的值，（使用自定义转换器 {@link ByteConvert} 进行值的转换 ）
+     *
+     * @param index - 索引
+     * @param byteConvert - Byte转换器
+     */
+    public Byte getByte(int index, @NonNull ByteConvert byteConvert) {
+        Object object = get(index);
+        return byteConvert.convert(object);
+    }
+
+    /**
+     * 返回index索引的值，（使用自定义转换器 {@link ByteConvert} 进行值的转换 ）， 并定义返回默认值的触发条件
+     *
+     * @param index - 索引
+     * @param byteConvert - Byte转换器
+     * @param defaultValue - 默认值
+     */
+    public Byte getByte(int index, @NonNull ByteConvert byteConvert, Byte defaultValue) {
+        Object object = get(index);
+        return byteConvert.convert(object, defaultValue);
+    }
+
+    /**
+     * 返回index索引的值，（如果它存在并且是byte值或可以强制为byte值），否则返回 0
      *
      * @param index - 索引
      * @return 值或 0
@@ -362,7 +420,7 @@ public class JsonArray {
     }
 
     /**
-     * 返回name映射的值，（如果它存在并且是byte值或可以强制为byte值），否则返回 {@code fallback}
+     * 返回index索引的值，（如果它存在并且是byte值或可以强制为byte值），否则返回 {@code fallback}
      *
      * @param index - 索引
      * @param fallback - 备选值
@@ -375,7 +433,7 @@ public class JsonArray {
     }
 
     /**
-     * 返回索引处的值为 {@link Short}
+     * 返回index索引的值为 {@link Short}
      *
      * @param index - 索引
      * @return 对应的值
@@ -391,7 +449,30 @@ public class JsonArray {
     }
 
     /**
-     * 返回name映射的值，（如果它存在并且是short值或可以强制为short值），否则返回 0
+     * 返回index索引的值，（使用自定义转换器 {@link ShortConvert} 进行值的转换 ）
+     *
+     * @param index - 索引
+     * @param shortConvert - Short转换器
+     */
+    public Short getShort(int index, @NonNull ShortConvert shortConvert) {
+        Object object = get(index);
+        return shortConvert.convert(object);
+    }
+
+    /**
+     * 返回index索引的值，（使用自定义转换器 {@link ShortConvert} 进行值的转换 ）， 并定义返回默认值的触发条件
+     *
+     * @param index - 索引
+     * @param shortConvert - Short转换器
+     * @param defaultValue - 默认值
+     */
+    public Short getShort(int index, @NonNull ShortConvert shortConvert, Short defaultValue) {
+        Object object = get(index);
+        return shortConvert.convert(object, defaultValue);
+    }
+
+    /**
+     * 返回index索引的值，（如果它存在并且是short值或可以强制为short值），否则返回 0
      *
      * @param index - 索引
      * @return 值或 NaN
@@ -401,7 +482,7 @@ public class JsonArray {
     }
 
     /**
-     * 返回name映射的值，（如果它存在并且是short值或可以强制为short值），否则返回 {@code fallback}
+     * 返回index索引的值，（如果它存在并且是short值或可以强制为short值），否则返回 {@code fallback}
      *
      * @param index - 索引
      * @param fallback - 备选值
@@ -415,7 +496,7 @@ public class JsonArray {
 
 
     /**
-     * 返回索引处的值为 {@link Integer}
+     * 返回index索引的值为 {@link Integer}
      *
      * @param index - 索引
      * @return 对应的值
@@ -431,7 +512,30 @@ public class JsonArray {
     }
 
     /**
-     * 返回索引处的值（如果它存在并且是一个 int 或者可以被强制转换为一个 int）,否则返回 0
+     * 返回index索引的值，（使用自定义转换器 {@link IntegerConvert} 进行值的转换 ）
+     *
+     * @param index - 索引
+     * @param integerConvert - Integer转换器
+     */
+    public Integer getInteger(int index, @NonNull IntegerConvert integerConvert) {
+        Object object = get(index);
+        return integerConvert.convert(object);
+    }
+
+    /**
+     * 返回index索引的值，（使用自定义转换器 {@link IntegerConvert} 进行值的转换 ）， 并定义返回默认值的触发条件
+     *
+     * @param index - 索引
+     * @param integerConvert - Integer转换器
+     * @param defaultValue - 默认值
+     */
+    public Integer getInteger(int index, @NonNull IntegerConvert integerConvert, Integer defaultValue) {
+        Object object = get(index);
+        return integerConvert.convert(object, defaultValue);
+    }
+
+    /**
+     * 返回index索引的值（如果它存在并且是一个 int 或者可以被强制转换为一个 int）,否则返回 0
      *
      * @param index - 索引
      * @return 对应的值或 0
@@ -441,7 +545,7 @@ public class JsonArray {
     }
 
     /**
-     * 返回索引处的值（如果它存在并且是一个 int 或者可以被强制转换为一个 int）,否则返回否则返回 {@code fallback}
+     * 返回index索引的值（如果它存在并且是一个 int 或者可以被强制转换为一个 int）,否则返回否则返回 {@code fallback}
      *
      * @param index    - 索引
      * @param fallback - 备选值
@@ -454,7 +558,7 @@ public class JsonArray {
     }
 
     /**
-     * 返回索引处的值为 {@link Long}
+     * 返回index索引的值为 {@link Long}
      *
      * @param index - 索引
      * @return 对应的值
@@ -470,7 +574,31 @@ public class JsonArray {
     }
 
     /**
-     * 返回索引处的值（如果它存在并且是一个 long 或者可以被强制转换为一个 long）,否则返回 0
+     * 返回index索引的值，（使用自定义转换器 {@link LongConvert} 进行值的转换 ）
+     *
+     * @param index - 索引
+     * @param longConvert - Long转换器
+     */
+    public Long getLong(int index, @NonNull LongConvert longConvert) {
+        Object object = get(index);
+        return longConvert.convert(object);
+    }
+
+    /**
+     * 返回index索引的值，（使用自定义转换器 {@link LongConvert} 进行值的转换 ）， 并定义返回默认值的触发条件
+     *
+     * @param index - 索引
+     * @param longConvert - Long转换器
+     * @param defaultValue - 默认值
+     */
+    public Long getLong(int index, @NonNull LongConvert longConvert, Long defaultValue) {
+        Object object = get(index);
+        return longConvert.convert(object, defaultValue);
+    }
+
+
+    /**
+     * 返回index索引的值（如果它存在并且是一个 long 或者可以被强制转换为一个 long）,否则返回 0
      *
      * @param index - 索引
      * @return 对应的值或 0
@@ -480,7 +608,7 @@ public class JsonArray {
     }
 
     /**
-     * 返回索引处的值（如果它存在并且是一个 long 或者可以被强制转换为一个 long）,否则返回 {@code fallback}
+     * 返回index索引的值（如果它存在并且是一个 long 或者可以被强制转换为一个 long）,否则返回 {@code fallback}
      *
      * @param index    - 索引
      * @param fallback - 备选值
@@ -493,7 +621,7 @@ public class JsonArray {
     }
 
     /**
-     * 返回索引处的值为 {@link Float}
+     * 返回index索引的值为 {@link Float}
      *
      * @param index - 索引
      * @return 对应的值
@@ -509,7 +637,30 @@ public class JsonArray {
     }
 
     /**
-     * 返回name映射的值，（如果它存在并且是一个 float 或可以强制为一个 float ），否则返回 0
+     * 返回index索引的值，（使用自定义转换器 {@link FloatConvert} 进行值的转换 ）
+     *
+     * @param index - 索引
+     * @param floatConvert - Float转换器
+     */
+    public Float getFloat(int index, @NonNull FloatConvert floatConvert) {
+        Object object = get(index);
+        return floatConvert.convert(object);
+    }
+
+    /**
+     * 返回index索引的值，（使用自定义转换器 {@link FloatConvert} 进行值的转换 ）， 并定义返回默认值的触发条件
+     *
+     * @param index - 索引
+     * @param floatConvert - Float转换器
+     * @param defaultValue - 默认值
+     */
+    public Float getFloat(int index, @NonNull FloatConvert floatConvert, Float defaultValue) {
+        Object object = get(index);
+        return floatConvert.convert(object, defaultValue);
+    }
+
+    /**
+     * 返回index索引的值，（如果它存在并且是一个 float 或可以强制为一个 float ），否则返回 0
      *
      * @param index - 索引
      * @return 值或 0
@@ -519,7 +670,7 @@ public class JsonArray {
     }
 
     /**
-     * 返回name映射的值，（如果它存在并且是一个 float 或可以强制为一个 float ），否则返回 {@code fallback}
+     * 返回index索引的值，（如果它存在并且是一个 float 或可以强制为一个 float ），否则返回 {@code fallback}
      *
      * @param index - 索引
      * @param fallback - 备选值
@@ -532,7 +683,7 @@ public class JsonArray {
     }
 
     /**
-     * 返回索引处的值为 {@link Double}
+     * 返回index索引的值为 {@link Double}
      *
      * @param index - 索引
      * @return 对应的值
@@ -548,7 +699,30 @@ public class JsonArray {
     }
 
     /**
-     * 返回索引处的值（如果它存在并且是双精度值或可以强制为双精度值）,否则返回 NaN
+     * 返回index索引的值，（使用自定义转换器 {@link DoubleConvert} 进行值的转换 ）
+     *
+     * @param index - 索引
+     * @param doubleConvert - Double转换器
+     */
+    public Double getDouble(int index, @NonNull DoubleConvert doubleConvert) {
+        Object object = get(index);
+        return doubleConvert.convert(object);
+    }
+
+    /**
+     * 返回index索引的值，（使用自定义转换器 {@link DoubleConvert} 进行值的转换 ）， 并定义返回默认值的触发条件
+     *
+     * @param index - 索引
+     * @param doubleConvert - Double转换器
+     * @param defaultValue - 默认值
+     */
+    public Double getDouble(int index, @NonNull DoubleConvert doubleConvert, Double defaultValue) {
+        Object object = get(index);
+        return doubleConvert.convert(object, defaultValue);
+    }
+
+    /**
+     * 返回index索引的值（如果它存在并且是双精度值或可以强制为双精度值）,否则返回 NaN
      *
      * @param index - 索引
      * @return 对应的值
@@ -558,7 +732,7 @@ public class JsonArray {
     }
 
     /**
-     * 返回索引处的值（如果它存在并且是双精度值或可以强制为双精度值）,否则返回 {@code fallback}
+     * 返回index索引的值（如果它存在并且是双精度值或可以强制为双精度值）,否则返回 {@code fallback}
      *
      * @param index    - 索引
      * @param fallback - 备选值
@@ -571,7 +745,7 @@ public class JsonArray {
     }
 
     /**
-     * 返回索引处的值为 {@link Character}
+     * 返回index索引的值为 {@link Character}
      *
      * @param index - 索引
      * @return 对应的值
@@ -587,7 +761,30 @@ public class JsonArray {
     }
 
     /**
-     * 返回name映射的值，（如果它存在并且是char值或可以强制为char值），否则返回 '\u0000'（即空格）
+     * 返回index索引的值，（使用自定义转换器 {@link CharacterConvert} 进行值的转换 ）
+     *
+     * @param index - 索引
+     * @param characterConvert - Character转换器
+     */
+    public Character getCharacter(int index, @NonNull CharacterConvert characterConvert) {
+        Object object = get(index);
+        return characterConvert.convert(object);
+    }
+
+    /**
+     * 返回index索引的值，（使用自定义转换器 {@link CharacterConvert} 进行值的转换 ）， 并定义返回默认值的触发条件
+     *
+     * @param index - 索引
+     * @param characterConvert - Character转换器
+     * @param defaultValue - 默认值
+     */
+    public Character getCharacter(int index, @NonNull CharacterConvert characterConvert, Character defaultValue) {
+        Object object = get(index);
+        return characterConvert.convert(object, defaultValue);
+    }
+
+    /**
+     * 返回index索引的值，（如果它存在并且是char值或可以强制为char值），否则返回 '\u0000'（即空格）
      *
      * @param index - 索引
      * @return 值或 NaN
@@ -597,7 +794,7 @@ public class JsonArray {
     }
 
     /**
-     * 返回name映射的值，（如果它存在并且是char值或可以强制为char值），否则返回 {@code fallback}
+     * 返回index索引的值，（如果它存在并且是char值或可以强制为char值），否则返回 {@code fallback}
      *
      * @param index - 索引
      * @param fallback - 备选值
@@ -610,7 +807,7 @@ public class JsonArray {
     }
 
     /**
-     * 返回索引处的值为 {@link String}
+     * 返回index索引的值为 {@link String}
      *
      * @param index - 索引
      * @return 对应的值
@@ -626,7 +823,30 @@ public class JsonArray {
     }
 
     /**
-     * 返回索引处的值（必要时对其进行强制转换。 如果不存在这样的值，则返回空字符串）
+     * 返回index索引的值，（使用自定义转换器 {@link StringConvert} 进行值的转换 ）
+     *
+     * @param index - 索引
+     * @param stringConvert - String转换器
+     */
+    public String getString(int index, @NonNull StringConvert stringConvert) {
+        Object object = get(index);
+        return stringConvert.convert(object);
+    }
+
+    /**
+     * 返回index索引的值，（使用自定义转换器 {@link StringConvert} 进行值的转换 ）， 并定义返回默认值的触发条件
+     *
+     * @param index - 索引
+     * @param stringConvert - String转换器
+     * @param defaultValue - 默认值
+     */
+    public String getString(int index, @NonNull StringConvert stringConvert, String defaultValue) {
+        Object object = get(index);
+        return stringConvert.convert(object, defaultValue);
+    }
+
+    /**
+     * 返回index索引的值（必要时对其进行强制转换。 如果不存在这样的值，则返回空字符串）
      *
      * @param index - 索引
      * @return 对应的值或空字符串
@@ -636,7 +856,7 @@ public class JsonArray {
     }
 
     /**
-     * 返回索引处的值（必要时对其进行强制转换。 如果不存在这样的值，则返回 {@code fallback}）
+     * 返回index索引的值（必要时对其进行强制转换。 如果不存在这样的值，则返回 {@code fallback}）
      *
      * @param index    - 索引
      * @param fallback - 备选值
@@ -664,6 +884,29 @@ public class JsonArray {
     }
 
     /**
+     * 返回index索引的值，（使用自定义转换器 {@link BigDecimalConvert} 进行值的转换 ）
+     *
+     * @param index    - 索引
+     * @param bigDecimalConvert - BigDecimal转换器
+     */
+    public BigDecimal getBigDecimal(int index, @NonNull BigDecimalConvert bigDecimalConvert) {
+        Object object = get(index);
+        return bigDecimalConvert.convert(object);
+    }
+
+    /**
+     * 返回index索引的值，（使用自定义转换器 {@link BigDecimalConvert} 进行值的转换 ）， 并定义返回默认值的触发条件
+     *
+     * @param index    - 索引
+     * @param bigDecimalConvert - BigDecimal转换器
+     * @param defaultValue - 默认值
+     */
+    public BigDecimal getBigDecimal(int index, @NonNull BigDecimalConvert bigDecimalConvert, BigDecimal defaultValue) {
+        Object object = get(index);
+        return bigDecimalConvert.convert(object, defaultValue);
+    }
+
+    /**
      * 返回index索引的值，（如果它存在并且是 {@link BigInteger} 或可以强制为 {@link BigInteger} ）
      *
      * @param index    - 索引
@@ -676,6 +919,29 @@ public class JsonArray {
             throw Json.typeMismatch(index, object, "BigInteger");
         }
         return result;
+    }
+
+    /**
+     * 返回index索引的值，（使用自定义转换器 {@link BigIntegerConvert} 进行值的转换 ）
+     *
+     * @param index    - 索引
+     * @param bigIntegerConvert - BigInteger转换器
+     */
+    public BigInteger getBigInteger(int index, @NonNull BigIntegerConvert bigIntegerConvert) {
+        Object object = get(index);
+        return bigIntegerConvert.convert(object);
+    }
+
+    /**
+     * 返回index索引的值，（使用自定义转换器 {@link BigIntegerConvert} 进行值的转换 ）， 并定义返回默认值的触发条件
+     *
+     * @param index    - 索引
+     * @param bigIntegerConvert - BigInteger转换器
+     * @param defaultValue - 默认值
+     */
+    public BigInteger getBigInteger(int index, @NonNull BigIntegerConvert bigIntegerConvert, BigInteger defaultValue) {
+        Object object = get(index);
+        return bigIntegerConvert.convert(object, defaultValue);
     }
 
     /**
@@ -694,7 +960,71 @@ public class JsonArray {
     }
 
     /**
-     * 返回索引处的值为 {@link JsonArray}
+     * 返回index索引的值，（使用自定义转换器 {@link DateConvert} 进行值的转换 ）
+     *
+     * @param index    - 索引
+     * @param dateConvert - Date解析器
+     */
+    public Date getDate(int index, @NonNull DateConvert dateConvert) {
+        Object object = get(index);
+        return dateConvert.convert(object);
+    }
+
+    /**
+     * 返回index索引的值，（使用自定义转换器 {@link DateConvert} 进行值的转换 ）， 并定义返回默认值的触发条件
+     *
+     * @param index    - 索引
+     * @param dateConvert - Date解析器
+     * @param defaultValue - 默认值
+     */
+    public Date getDate(int index, @NonNull DateConvert dateConvert, Date defaultValue) {
+        Object object = get(index);
+        return dateConvert.convert(object, defaultValue);
+    }
+
+    /**
+     * 返回index索引的值，（如果它存在并且是 {@link Date} 或可以强制为 {@link Date} ）
+     *
+     * @param index    - 索引
+     * @param format - 解析格式
+     * @throws JsonException 如果不存在或无法强制转换则抛出异常{@link JsonException}
+     */
+    public Date getDate(int index, String format) {
+        Object object = get(index);
+        Date result = Json.toDate(object, format);
+        if (result == null) {
+            throw Json.typeMismatch(index, object, "Date");
+        }
+        return result;
+    }
+
+    /**
+     * 返回index索引的值，（使用自定义转换器 {@link DateConvert} 进行值的转换 ）
+     *
+     * @param index    - 索引
+     * @param format - 解析格式
+     * @param dateConvert - Date解析器
+     */
+    public Date getDate(int index, String format, @NonNull DateConvert dateConvert) {
+        Object object = get(index);
+        return dateConvert.convert(object, format);
+    }
+
+    /**
+     * 返回index索引的值，（使用自定义转换器 {@link DateConvert} 进行值的转换 ）， 并定义返回默认值的触发条件
+     *
+     * @param index    - 索引
+     * @param format - 解析格式
+     * @param dateConvert - Date解析器
+     * @param defaultValue - 默认值
+     */
+    public Date getDate(int index, String format, @NonNull DateConvert dateConvert, Date defaultValue) {
+        Object object = get(index);
+        return dateConvert.convert(object, format, defaultValue);
+    }
+
+    /**
+     * 返回index索引的值为 {@link JsonArray}
      *
      * @param index - 索引
      * @return 对应的值
@@ -710,7 +1040,7 @@ public class JsonArray {
     }
 
     /**
-     * 返回索引处的值（如果它存在并且是JSONArray）,否则返回 null
+     * 返回index索引的值（如果它存在并且是JSONArray）,否则返回 null
      *
      * @param index - 索引
      * @return 对应的值
@@ -721,7 +1051,7 @@ public class JsonArray {
     }
 
     /**
-     * 返回索引处的值为 {@link JsonObject}
+     * 返回index索引的值为 {@link JsonObject}
      *
      * @param index - 索引
      * @return 对应的值
@@ -737,7 +1067,7 @@ public class JsonArray {
     }
 
     /**
-     * 返回索引处的值（如果它存在并且是JsonObject）,否则返回 null
+     * 返回index索引的值（如果它存在并且是JsonObject）,否则返回 null
      *
      * @param index - 索引
      * @return 对应的值
