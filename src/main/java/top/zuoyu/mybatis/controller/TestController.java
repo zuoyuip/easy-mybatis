@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import top.zuoyu.mybatis.annotation.Magic;
+import top.zuoyu.mybatis.json.JsonArray;
 import top.zuoyu.mybatis.json.JsonObject;
 import top.zuoyu.mybatis.service.UnifyService;
 
@@ -40,8 +41,9 @@ public class TestController {
 
 
     @GetMapping
-    public List<JsonObject> testUnifyService() {
-        return unifyService.selectList();
+    public JsonArray testUnifyService() {
+        List<JsonObject> jsonObjects = unifyService.selectList();
+        return new JsonArray(jsonObjects);
     }
 
 }

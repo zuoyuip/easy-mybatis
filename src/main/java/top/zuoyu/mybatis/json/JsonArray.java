@@ -15,15 +15,19 @@
  */
 package top.zuoyu.mybatis.json;
 
+import java.io.Serializable;
 import java.lang.reflect.Array;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.Objects;
+import java.util.RandomAccess;
 
 import org.springframework.lang.NonNull;
 
@@ -47,12 +51,17 @@ import top.zuoyu.mybatis.json.convert.StringConvert;
  * @author: zuoyu
  * @create: 2021-11-05 10:00
  */
-public class JsonArray {
+public class JsonArray implements List<Object>, Cloneable, RandomAccess, Serializable {
 
+    private static final long serialVersionUID = -261413003600010487L;
     private final List<Object> values;
 
     public JsonArray() {
-        this.values = new ArrayList<>();
+        this.values = new ArrayList<Object>();
+    }
+
+    public JsonArray(int size) {
+        this.values = new ArrayList<Object>(size);
     }
 
     /**
@@ -61,12 +70,10 @@ public class JsonArray {
      * @param copyFrom – 一个集合
      */
     @SuppressWarnings("rawtypes")
-    public JsonArray(Collection copyFrom) {
-        this();
-        if (Objects.nonNull(copyFrom)) {
-            for (Object o : copyFrom) {
-                put(JsonObject.wrap(o));
-            }
+    public JsonArray(@NonNull Collection copyFrom) {
+        this(copyFrom.size());
+        for (Object o : copyFrom) {
+            put(JsonObject.wrap(o));
         }
     }
 
@@ -103,7 +110,7 @@ public class JsonArray {
             throw new JsonException("Not a primitive array: " + array.getClass());
         }
         final int length = Array.getLength(array);
-        this.values = new ArrayList<>(length);
+        this.values = new ArrayList<Object>(length);
         for (int i = 0; i < length; ++i) {
             put(JsonObject.wrap(Array.get(array, i)));
         }
@@ -115,9 +122,8 @@ public class JsonArray {
      * @param array - 给定数组
      */
     public JsonArray(@NonNull Object[] array) {
-        final int length = Array.getLength(array);
-        this.values = new ArrayList<>(length);
-        for (int i = 0; i < length; ++i) {
+        this(Array.getLength(array));
+        for (int i = 0; i < Array.getLength(array); ++i) {
             put(JsonObject.wrap(array[i]));
         }
     }
@@ -270,6 +276,7 @@ public class JsonArray {
      * @param index - 索引
      * @return 对应的值
      */
+    @Override
     public Object get(int index) {
         try {
             Object value = this.values.get(index);
@@ -280,6 +287,16 @@ public class JsonArray {
         } catch (IndexOutOfBoundsException e) {
             throw new JsonException("Index " + index + " out of range [0.." + this.values.size() + ")");
         }
+    }
+
+    @Override
+    public Object set(int index, Object element) {
+        return this.values.set(index, element);
+    }
+
+    @Override
+    public void add(int index, Object element) {
+        this.values.add(index, element);
     }
 
     /**
@@ -301,11 +318,37 @@ public class JsonArray {
      * @param index - 索引
      * @return 对应的值
      */
+    @Override
     public Object remove(int index) {
         if (index < 0 || index >= this.values.size()) {
             return null;
         }
         return this.values.remove(index);
+    }
+
+    @Override
+    public int indexOf(Object o) {
+        return this.values.indexOf(o);
+    }
+
+    @Override
+    public int lastIndexOf(Object o) {
+        return this.values.lastIndexOf(o);
+    }
+
+    @Override
+    public ListIterator<Object> listIterator() {
+        return this.values.listIterator();
+    }
+
+    @Override
+    public ListIterator<Object> listIterator(int index) {
+        return this.values.listIterator(index);
+    }
+
+    @Override
+    public List<Object> subList(int fromIndex, int toIndex) {
+        return this.values.subList(fromIndex, toIndex);
     }
 
     /**
@@ -327,7 +370,7 @@ public class JsonArray {
     /**
      * 返回index索引的值，（使用自定义转换器 {@link BooleanConvert} 进行值的转换 ）
      *
-     * @param index - 索引
+     * @param index          - 索引
      * @param booleanConvert - Boolean转换器
      */
     public Boolean getBoolean(int index, @NonNull BooleanConvert booleanConvert) {
@@ -338,9 +381,9 @@ public class JsonArray {
     /**
      * 返回index索引的值，（使用自定义转换器 {@link BooleanConvert} 进行值的转换 ）， 并定义返回默认值的触发条件
      *
-     * @param index - 索引
+     * @param index          - 索引
      * @param booleanConvert - Boolean转换器
-     * @param defaultValue  - 默认值
+     * @param defaultValue   - 默认值
      */
     public Boolean getBoolean(int index, @NonNull BooleanConvert booleanConvert, Boolean defaultValue) {
         Object object = get(index);
@@ -389,7 +432,7 @@ public class JsonArray {
     /**
      * 返回index索引的值，（使用自定义转换器 {@link ByteConvert} 进行值的转换 ）
      *
-     * @param index - 索引
+     * @param index       - 索引
      * @param byteConvert - Byte转换器
      */
     public Byte getByte(int index, @NonNull ByteConvert byteConvert) {
@@ -400,8 +443,8 @@ public class JsonArray {
     /**
      * 返回index索引的值，（使用自定义转换器 {@link ByteConvert} 进行值的转换 ）， 并定义返回默认值的触发条件
      *
-     * @param index - 索引
-     * @param byteConvert - Byte转换器
+     * @param index        - 索引
+     * @param byteConvert  - Byte转换器
      * @param defaultValue - 默认值
      */
     public Byte getByte(int index, @NonNull ByteConvert byteConvert, Byte defaultValue) {
@@ -422,7 +465,7 @@ public class JsonArray {
     /**
      * 返回index索引的值，（如果它存在并且是byte值或可以强制为byte值），否则返回 {@code fallback}
      *
-     * @param index - 索引
+     * @param index    - 索引
      * @param fallback - 备选值
      * @return 对应的值或 {@code fallback}
      */
@@ -451,7 +494,7 @@ public class JsonArray {
     /**
      * 返回index索引的值，（使用自定义转换器 {@link ShortConvert} 进行值的转换 ）
      *
-     * @param index - 索引
+     * @param index        - 索引
      * @param shortConvert - Short转换器
      */
     public Short getShort(int index, @NonNull ShortConvert shortConvert) {
@@ -462,7 +505,7 @@ public class JsonArray {
     /**
      * 返回index索引的值，（使用自定义转换器 {@link ShortConvert} 进行值的转换 ）， 并定义返回默认值的触发条件
      *
-     * @param index - 索引
+     * @param index        - 索引
      * @param shortConvert - Short转换器
      * @param defaultValue - 默认值
      */
@@ -484,7 +527,7 @@ public class JsonArray {
     /**
      * 返回index索引的值，（如果它存在并且是short值或可以强制为short值），否则返回 {@code fallback}
      *
-     * @param index - 索引
+     * @param index    - 索引
      * @param fallback - 备选值
      * @return 对应的值或 {@code fallback}
      */
@@ -514,7 +557,7 @@ public class JsonArray {
     /**
      * 返回index索引的值，（使用自定义转换器 {@link IntegerConvert} 进行值的转换 ）
      *
-     * @param index - 索引
+     * @param index          - 索引
      * @param integerConvert - Integer转换器
      */
     public Integer getInteger(int index, @NonNull IntegerConvert integerConvert) {
@@ -525,9 +568,9 @@ public class JsonArray {
     /**
      * 返回index索引的值，（使用自定义转换器 {@link IntegerConvert} 进行值的转换 ）， 并定义返回默认值的触发条件
      *
-     * @param index - 索引
+     * @param index          - 索引
      * @param integerConvert - Integer转换器
-     * @param defaultValue - 默认值
+     * @param defaultValue   - 默认值
      */
     public Integer getInteger(int index, @NonNull IntegerConvert integerConvert, Integer defaultValue) {
         Object object = get(index);
@@ -576,7 +619,7 @@ public class JsonArray {
     /**
      * 返回index索引的值，（使用自定义转换器 {@link LongConvert} 进行值的转换 ）
      *
-     * @param index - 索引
+     * @param index       - 索引
      * @param longConvert - Long转换器
      */
     public Long getLong(int index, @NonNull LongConvert longConvert) {
@@ -587,8 +630,8 @@ public class JsonArray {
     /**
      * 返回index索引的值，（使用自定义转换器 {@link LongConvert} 进行值的转换 ）， 并定义返回默认值的触发条件
      *
-     * @param index - 索引
-     * @param longConvert - Long转换器
+     * @param index        - 索引
+     * @param longConvert  - Long转换器
      * @param defaultValue - 默认值
      */
     public Long getLong(int index, @NonNull LongConvert longConvert, Long defaultValue) {
@@ -639,7 +682,7 @@ public class JsonArray {
     /**
      * 返回index索引的值，（使用自定义转换器 {@link FloatConvert} 进行值的转换 ）
      *
-     * @param index - 索引
+     * @param index        - 索引
      * @param floatConvert - Float转换器
      */
     public Float getFloat(int index, @NonNull FloatConvert floatConvert) {
@@ -650,7 +693,7 @@ public class JsonArray {
     /**
      * 返回index索引的值，（使用自定义转换器 {@link FloatConvert} 进行值的转换 ）， 并定义返回默认值的触发条件
      *
-     * @param index - 索引
+     * @param index        - 索引
      * @param floatConvert - Float转换器
      * @param defaultValue - 默认值
      */
@@ -672,7 +715,7 @@ public class JsonArray {
     /**
      * 返回index索引的值，（如果它存在并且是一个 float 或可以强制为一个 float ），否则返回 {@code fallback}
      *
-     * @param index - 索引
+     * @param index    - 索引
      * @param fallback - 备选值
      * @return 对应的值或 {@code fallback}
      */
@@ -701,7 +744,7 @@ public class JsonArray {
     /**
      * 返回index索引的值，（使用自定义转换器 {@link DoubleConvert} 进行值的转换 ）
      *
-     * @param index - 索引
+     * @param index         - 索引
      * @param doubleConvert - Double转换器
      */
     public Double getDouble(int index, @NonNull DoubleConvert doubleConvert) {
@@ -712,9 +755,9 @@ public class JsonArray {
     /**
      * 返回index索引的值，（使用自定义转换器 {@link DoubleConvert} 进行值的转换 ）， 并定义返回默认值的触发条件
      *
-     * @param index - 索引
+     * @param index         - 索引
      * @param doubleConvert - Double转换器
-     * @param defaultValue - 默认值
+     * @param defaultValue  - 默认值
      */
     public Double getDouble(int index, @NonNull DoubleConvert doubleConvert, Double defaultValue) {
         Object object = get(index);
@@ -763,7 +806,7 @@ public class JsonArray {
     /**
      * 返回index索引的值，（使用自定义转换器 {@link CharacterConvert} 进行值的转换 ）
      *
-     * @param index - 索引
+     * @param index            - 索引
      * @param characterConvert - Character转换器
      */
     public Character getCharacter(int index, @NonNull CharacterConvert characterConvert) {
@@ -774,9 +817,9 @@ public class JsonArray {
     /**
      * 返回index索引的值，（使用自定义转换器 {@link CharacterConvert} 进行值的转换 ）， 并定义返回默认值的触发条件
      *
-     * @param index - 索引
+     * @param index            - 索引
      * @param characterConvert - Character转换器
-     * @param defaultValue - 默认值
+     * @param defaultValue     - 默认值
      */
     public Character getCharacter(int index, @NonNull CharacterConvert characterConvert, Character defaultValue) {
         Object object = get(index);
@@ -796,7 +839,7 @@ public class JsonArray {
     /**
      * 返回index索引的值，（如果它存在并且是char值或可以强制为char值），否则返回 {@code fallback}
      *
-     * @param index - 索引
+     * @param index    - 索引
      * @param fallback - 备选值
      * @return 对应的值或 {@code fallback}
      */
@@ -825,7 +868,7 @@ public class JsonArray {
     /**
      * 返回index索引的值，（使用自定义转换器 {@link StringConvert} 进行值的转换 ）
      *
-     * @param index - 索引
+     * @param index         - 索引
      * @param stringConvert - String转换器
      */
     public String getString(int index, @NonNull StringConvert stringConvert) {
@@ -836,9 +879,9 @@ public class JsonArray {
     /**
      * 返回index索引的值，（使用自定义转换器 {@link StringConvert} 进行值的转换 ）， 并定义返回默认值的触发条件
      *
-     * @param index - 索引
+     * @param index         - 索引
      * @param stringConvert - String转换器
-     * @param defaultValue - 默认值
+     * @param defaultValue  - 默认值
      */
     public String getString(int index, @NonNull StringConvert stringConvert, String defaultValue) {
         Object object = get(index);
@@ -871,7 +914,7 @@ public class JsonArray {
     /**
      * 返回index索引的值，（如果它存在并且是 {@link BigDecimal} 或可以强制为 {@link BigDecimal} ）
      *
-     * @param index    - 索引
+     * @param index - 索引
      * @throws JsonException 如果不存在或无法强制转换则抛出异常{@link JsonException}
      */
     public BigDecimal getBigDecimal(int index) {
@@ -886,7 +929,7 @@ public class JsonArray {
     /**
      * 返回index索引的值，（使用自定义转换器 {@link BigDecimalConvert} 进行值的转换 ）
      *
-     * @param index    - 索引
+     * @param index             - 索引
      * @param bigDecimalConvert - BigDecimal转换器
      */
     public BigDecimal getBigDecimal(int index, @NonNull BigDecimalConvert bigDecimalConvert) {
@@ -897,9 +940,9 @@ public class JsonArray {
     /**
      * 返回index索引的值，（使用自定义转换器 {@link BigDecimalConvert} 进行值的转换 ）， 并定义返回默认值的触发条件
      *
-     * @param index    - 索引
+     * @param index             - 索引
      * @param bigDecimalConvert - BigDecimal转换器
-     * @param defaultValue - 默认值
+     * @param defaultValue      - 默认值
      */
     public BigDecimal getBigDecimal(int index, @NonNull BigDecimalConvert bigDecimalConvert, BigDecimal defaultValue) {
         Object object = get(index);
@@ -909,7 +952,7 @@ public class JsonArray {
     /**
      * 返回index索引的值，（如果它存在并且是 {@link BigInteger} 或可以强制为 {@link BigInteger} ）
      *
-     * @param index    - 索引
+     * @param index - 索引
      * @throws JsonException 如果不存在或无法强制转换则抛出异常{@link JsonException}
      */
     public BigInteger getBigInteger(int index) {
@@ -924,7 +967,7 @@ public class JsonArray {
     /**
      * 返回index索引的值，（使用自定义转换器 {@link BigIntegerConvert} 进行值的转换 ）
      *
-     * @param index    - 索引
+     * @param index             - 索引
      * @param bigIntegerConvert - BigInteger转换器
      */
     public BigInteger getBigInteger(int index, @NonNull BigIntegerConvert bigIntegerConvert) {
@@ -935,9 +978,9 @@ public class JsonArray {
     /**
      * 返回index索引的值，（使用自定义转换器 {@link BigIntegerConvert} 进行值的转换 ）， 并定义返回默认值的触发条件
      *
-     * @param index    - 索引
+     * @param index             - 索引
      * @param bigIntegerConvert - BigInteger转换器
-     * @param defaultValue - 默认值
+     * @param defaultValue      - 默认值
      */
     public BigInteger getBigInteger(int index, @NonNull BigIntegerConvert bigIntegerConvert, BigInteger defaultValue) {
         Object object = get(index);
@@ -947,7 +990,7 @@ public class JsonArray {
     /**
      * 返回index索引的值，（如果它存在并且是 {@link Date} 或可以强制为 {@link Date} ）
      *
-     * @param index    - 索引
+     * @param index - 索引
      * @throws JsonException 如果不存在或无法强制转换则抛出异常{@link JsonException}
      */
     public Date getDate(int index) {
@@ -962,7 +1005,7 @@ public class JsonArray {
     /**
      * 返回index索引的值，（使用自定义转换器 {@link DateConvert} 进行值的转换 ）
      *
-     * @param index    - 索引
+     * @param index       - 索引
      * @param dateConvert - Date解析器
      */
     public Date getDate(int index, @NonNull DateConvert dateConvert) {
@@ -973,8 +1016,8 @@ public class JsonArray {
     /**
      * 返回index索引的值，（使用自定义转换器 {@link DateConvert} 进行值的转换 ）， 并定义返回默认值的触发条件
      *
-     * @param index    - 索引
-     * @param dateConvert - Date解析器
+     * @param index        - 索引
+     * @param dateConvert  - Date解析器
      * @param defaultValue - 默认值
      */
     public Date getDate(int index, @NonNull DateConvert dateConvert, Date defaultValue) {
@@ -985,7 +1028,7 @@ public class JsonArray {
     /**
      * 返回index索引的值，（如果它存在并且是 {@link Date} 或可以强制为 {@link Date} ）
      *
-     * @param index    - 索引
+     * @param index  - 索引
      * @param format - 解析格式
      * @throws JsonException 如果不存在或无法强制转换则抛出异常{@link JsonException}
      */
@@ -1001,8 +1044,8 @@ public class JsonArray {
     /**
      * 返回index索引的值，（使用自定义转换器 {@link DateConvert} 进行值的转换 ）
      *
-     * @param index    - 索引
-     * @param format - 解析格式
+     * @param index       - 索引
+     * @param format      - 解析格式
      * @param dateConvert - Date解析器
      */
     public Date getDate(int index, String format, @NonNull DateConvert dateConvert) {
@@ -1013,9 +1056,9 @@ public class JsonArray {
     /**
      * 返回index索引的值，（使用自定义转换器 {@link DateConvert} 进行值的转换 ）， 并定义返回默认值的触发条件
      *
-     * @param index    - 索引
-     * @param format - 解析格式
-     * @param dateConvert - Date解析器
+     * @param index        - 索引
+     * @param format       - 解析格式
+     * @param dateConvert  - Date解析器
      * @param defaultValue - 默认值
      */
     public Date getDate(int index, String format, @NonNull DateConvert dateConvert, Date defaultValue) {
@@ -1178,6 +1221,76 @@ public class JsonArray {
             stringer.value(value);
         }
         stringer.endArray();
+    }
+
+    @Override
+    public int size() {
+        return this.values.size();
+    }
+
+    @Override
+    public boolean isEmpty() {
+        return this.values.isEmpty();
+    }
+
+    @Override
+    public boolean contains(Object o) {
+        return this.values.contains(o);
+    }
+
+    @Override
+    public Iterator<Object> iterator() {
+        return this.values.iterator();
+    }
+
+    @Override
+    public Object[] toArray() {
+        return this.values.toArray();
+    }
+
+    @Override
+    public <T> T[] toArray(T[] a) {
+        return this.values.toArray(a);
+    }
+
+    @Override
+    public boolean add(Object o) {
+        return this.values.add(o);
+    }
+
+    @Override
+    public boolean remove(Object o) {
+        return this.values.remove(o);
+    }
+
+    @Override
+    public boolean containsAll(Collection<?> c) {
+        return this.values.containsAll(c);
+    }
+
+    @Override
+    public boolean addAll(Collection<?> c) {
+        return this.values.addAll(c);
+    }
+
+    @Override
+    public boolean addAll(int index, Collection<?> c) {
+        return this.values.addAll(index, c);
+    }
+
+    @Override
+    public boolean removeAll(Collection<?> c) {
+        return this.values.removeAll(c);
+    }
+
+    @Override
+    public boolean retainAll(Collection<?> c) {
+        return this.values.retainAll(c);
+    }
+
+    @Override
+    public void clear() {
+        this.values.clear();
     }
 
     @Override

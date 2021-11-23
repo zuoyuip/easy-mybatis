@@ -79,7 +79,7 @@ public class JsonObject implements Cloneable, Serializable, InvocationHandler, M
     private final Map<String, Object> nameValuePairs;
 
     public JsonObject() {
-        this.nameValuePairs = new LinkedHashMap<>();
+        this.nameValuePairs = new LinkedHashMap<String, Object>();
     }
 
     /**
