@@ -1,7 +1,7 @@
 /*
  * 数据库信息获取
  *
- * Copyright (c) 2021, zuoyu (zuoyuip@foxmil.com).
+ * Copyright (c) 2021, zuoyu (zuoyuip@foxmail.com).
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
