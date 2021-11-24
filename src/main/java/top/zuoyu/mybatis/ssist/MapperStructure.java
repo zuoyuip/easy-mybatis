@@ -15,6 +15,7 @@
  */
 package top.zuoyu.mybatis.ssist;
 
+import java.io.Serializable;
 import java.util.List;
 
 import org.springframework.lang.NonNull;
@@ -54,17 +55,42 @@ class MapperStructure {
             CtClass unifyService = classPool.get(UnifyService.class.getTypeName());
             ctClass.addInterface(unifyService);
 
-            CtClass modelClass = classPool.get(JsonObject.class.getTypeName());
+            CtClass listClass = classPool.get(List.class.getTypeName());
+            CtClass jsonObjectClass = classPool.get(JsonObject.class.getTypeName());
+            CtClass serializableClass = classPool.get(Serializable.class.getTypeName());
+            CtClass serializableArrayClass = classPool.get(Serializable[].class.getTypeName());
+            CtClass intClass = classPool.get(Integer.TYPE.getTypeName());
 
 
             // 创建方法
-            CtClass listClass = classPool.get(List.class.getTypeName());
 
+            // 查询所有
             CtMethod selectList = new CtMethod(listClass, "selectList", new CtClass[]{}, ctClass);
             ctClass.addMethod(selectList);
 
-            CtMethod selectListByExample = new CtMethod(listClass, "selectListByExample", new CtClass[]{modelClass}, ctClass);
+            // 根据已有键值查询
+            CtMethod selectListByExample = new CtMethod(listClass, "selectListByExample", new CtClass[]{jsonObjectClass}, ctClass);
             ctClass.addMethod(selectListByExample);
+
+            // 根据主键查询唯一对象
+            CtMethod selectByPrimaryKey = new CtMethod(jsonObjectClass, "selectByPrimaryKey", new CtClass[]{serializableClass}, ctClass);
+            ctClass.addMethod(selectByPrimaryKey);
+
+            // 新增对象
+            CtMethod insert = new CtMethod(intClass, "insert", new CtClass[]{jsonObjectClass}, ctClass);
+            ctClass.addMethod(insert);
+
+            // 根据主键修改对象属性
+            CtMethod updateByPrimaryKey = new CtMethod(intClass, "updateByPrimaryKey", new CtClass[]{jsonObjectClass}, ctClass);
+            ctClass.addMethod(updateByPrimaryKey);
+
+            // 根据主键删除对象
+            CtMethod deleteByPrimaryKey = new CtMethod(intClass, "deleteByPrimaryKey", new CtClass[]{serializableClass}, ctClass);
+            ctClass.addMethod(deleteByPrimaryKey);
+
+            // 批量根据主键删除对象
+            CtMethod deleteByPrimaryKeys = new CtMethod(intClass, "deleteByPrimaryKeys", new CtClass[]{serializableArrayClass}, ctClass);
+            ctClass.addMethod(deleteByPrimaryKeys);
 
         } catch (NotFoundException | CannotCompileException e) {
             e.printStackTrace();

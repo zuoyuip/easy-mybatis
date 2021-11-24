@@ -15,14 +15,20 @@
  */
 package top.zuoyu.mybatis.controller;
 
+import java.io.Serializable;
 import java.util.List;
 
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import top.zuoyu.mybatis.annotation.Magic;
-import top.zuoyu.mybatis.json.JsonArray;
 import top.zuoyu.mybatis.json.JsonObject;
 import top.zuoyu.mybatis.service.UnifyService;
 
@@ -41,9 +47,37 @@ public class TestController {
 
 
     @GetMapping
-    public JsonArray testUnifyService() {
-        List<JsonObject> jsonObjects = unifyService.selectList();
-        return new JsonArray(jsonObjects);
+    public ResponseEntity<List<JsonObject>> selectList() {
+        return ResponseEntity.ok(unifyService.selectList());
     }
 
+    @GetMapping("/selectListByExample")
+    public ResponseEntity<List<JsonObject>> selectListByExample(JsonObject jsonObject) {
+        return ResponseEntity.ok(unifyService.selectListByExample(jsonObject));
+    }
+
+    @GetMapping("/{primaryKey}")
+    public ResponseEntity<JsonObject> selectByPrimaryKey(@PathVariable Integer primaryKey) {
+        return ResponseEntity.ok(unifyService.selectByPrimaryKey(primaryKey));
+    }
+
+    @PostMapping
+    public ResponseEntity<Integer> insert(@RequestBody JsonObject jsonObject) {
+        return ResponseEntity.ok(unifyService.insert(jsonObject));
+    }
+
+    @PutMapping
+    public ResponseEntity<Integer> updateByPrimaryKey(@RequestBody JsonObject jsonObject) {
+        return ResponseEntity.ok(unifyService.updateByPrimaryKey(jsonObject));
+    }
+
+    @DeleteMapping("/{primaryKey}")
+    public ResponseEntity<Integer> deleteByPrimaryKey(@PathVariable Integer primaryKey) {
+        return ResponseEntity.ok(unifyService.deleteByPrimaryKey(primaryKey));
+    }
+
+    @DeleteMapping("/deleteByPrimaryKeys/{primaryKeys}")
+    public ResponseEntity<Integer> deleteByPrimaryKeys(@PathVariable Integer[] primaryKeys) {
+        return ResponseEntity.ok(unifyService.deleteByPrimaryKeys(primaryKeys));
+    }
 }

@@ -15,6 +15,7 @@
  */
 package top.zuoyu.mybatis.service;
 
+import java.io.Serializable;
 import java.util.List;
 
 import top.zuoyu.mybatis.json.JsonObject;
@@ -41,4 +42,39 @@ public interface UnifyService {
     List<JsonObject> selectListByExample(JsonObject jsonObject);
 
 
+    /**
+     * 根据主键查询唯一对象
+     * @param primaryKey - 主键
+     * @return 唯一对象
+     */
+    JsonObject selectByPrimaryKey(Serializable primaryKey);
+
+
+    /**
+     * 新增对象
+     * @param jsonObject - 对象键值
+     * @return 结果
+     */
+    int insert(JsonObject jsonObject);
+
+    /**
+     * 根据主键修改对象属性
+     * @param jsonObject - 包含主键对象键值
+     * @return 结果
+     */
+    int updateByPrimaryKey(JsonObject jsonObject);
+
+    /**
+     * 根据主键删除对象
+     * @param primaryKey - 主键
+     * @return 结果
+     */
+    int deleteByPrimaryKey(Serializable primaryKey);
+
+    /**
+     * 批量根据主键删除对象
+     * @param primaryKeys - 主键组
+     * @return 结果
+     */
+    int deleteByPrimaryKeys(Serializable[] primaryKeys);
 }

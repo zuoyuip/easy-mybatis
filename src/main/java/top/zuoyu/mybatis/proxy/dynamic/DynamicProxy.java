@@ -17,6 +17,7 @@ package top.zuoyu.mybatis.proxy.dynamic;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 import java.lang.reflect.Proxy;
 
 import org.springframework.lang.NonNull;
@@ -45,7 +46,20 @@ class DynamicProxy implements InvocationHandler {
         this.subject = subject;
         this.dynamicAround = new DynamicAround() {
             @Override
-            public void before(Object proxy, Method method, Object[] args) {}
+            public void before(Object proxy, Method method, Object[] args) {
+                System.out.println("---------------args-------------------");
+                for (Object arg : args) {
+                    System.out.println(arg.getClass().getTypeName());
+                }
+
+                System.out.println("---------------method---------------------");
+                for (Parameter parameter : method.getParameters()) {
+                    System.out.println(parameter.getName() + "---------------" + parameter.getType().getTypeName());
+                }
+
+                System.out.println("---------------proxy---------------------------");
+                System.out.println(proxy.getClass().getTypeName());
+            }
 
             @Override
             public void after(Object proxy, Method method, Object[] args) {}

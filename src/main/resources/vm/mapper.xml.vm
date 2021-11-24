@@ -34,7 +34,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         </where>
     </select>
 
-    <select id="selectById" parameterType="${pkColumn.javaType}"  resultType="top.zuoyu.mybatis.json.JsonObject">
+    <select id="selectByPrimaryKey" parameterType="${pkColumn.javaType}"  resultType="top.zuoyu.mybatis.json.JsonObject">
         <include refid="select${className}Vo"/>
         where ${pkColumn.columnName} = #{${pkColumn.javaField}}
     </select>
@@ -57,7 +57,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
          </trim>
     </insert>
 
-    <update id="update" parameterType="top.zuoyu.mybatis.json.JsonObject">
+    <update id="updateByPrimaryKey" parameterType="top.zuoyu.mybatis.json.JsonObject">
         update ${tableName}
         <trim prefix="SET" suffixOverrides=",">
 #foreach($column in $columns)
@@ -69,11 +69,11 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         where ${pkColumn.columnName} = #{${pkColumn.javaField}}
     </update>
 
-    <delete id="deleteById" parameterType="${pkColumn.javaType}">
+    <delete id="deleteByPrimaryKey" parameterType="${pkColumn.javaType}">
         delete from ${tableName} where ${pkColumn.columnName} = #{${pkColumn.javaField}}
     </delete>
 
-    <delete id="deleteByIds" parameterType="String">
+    <delete id="deleteByPrimaryKeys" parameterType="java.io.Serializable">
         delete from ${tableName} where ${pkColumn.columnName} in
         <foreach item="${pkColumn.javaField}" collection="array" open="(" separator="," close=")">
             #{${pkColumn.javaField}}
