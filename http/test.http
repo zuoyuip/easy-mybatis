@@ -1,22 +1,17 @@
+###
 ### 测试请求
 
 ###
 GET http://localhost:8080/test
 
-<> 2021-11-24T223018.200.json
 
 ###
 GET http://localhost:8080/test/selectListByExample
 
-<> 2021-11-24T223101.500.json
 
 ###
 GET http://localhost:8080/test/1
 
-<> 2021-11-24T225954.200.json
-<> 2021-11-24T225657.200.json
-<> 2021-11-24T225556.500.json
-<> 2021-11-24T225509.200.json
 
 ###
 PUT http://localhost:8080/test
@@ -30,7 +25,7 @@ Content-Type: application/json
   "city": "焦作",
   "country": "中国",
   "headimgurl": "https://cn.vuejs.org/images/logo.png",
-  "language": "中文、英文",
+  "language": "中文",
   "nickname": "左羽",
   "openid": "1214804270",
   "province": "河南",
@@ -38,4 +33,21 @@ Content-Type: application/json
   "unionid": "1335282923"
 }
 
-<> 2021-11-24T225948.200.json
+###
+POST http://localhost:8080/test
+Content-Type: application/json
+
+{
+  "create_time": "2021-11-26T06:07:15.000+00:00",
+  "deleted": 0,
+  "update_time": "2021-11-26T06:07:15.000+00:00",
+  "city": "北京",
+  "country": "中国",
+  "headimgurl": "https://cn.vuejs.org/images/logo.png",
+  "language": "中文",
+  "nickname": "小喵喵",
+  "openid": "1214804270",
+  "province": "河南",
+  "sex": "1",
+  "unionid": "1335282923"
+}

@@ -58,6 +58,13 @@ public interface UnifyService {
     int insert(JsonObject jsonObject);
 
     /**
+     * 批量新增对象
+     * @param jsonObjects - 对象键值集合
+     * @return 结果
+     */
+    int insertBatch(List<JsonObject> jsonObjects);
+
+    /**
      * 根据主键修改对象属性
      * @param jsonObject - 包含主键对象键值
      * @return 结果

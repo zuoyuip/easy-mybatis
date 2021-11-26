@@ -96,7 +96,12 @@ public class VelocityUtils {
         /**
          * 是否自增（1是）
          */
-        private String isIncrement;
+        private String increment;
+
+        /**
+         * 是否必须
+         */
+        private String required;
 
         @NonNull
         public static Column builder(@NonNull top.zuoyu.mybatis.data.model.Column column) {
@@ -104,7 +109,8 @@ public class VelocityUtils {
             newColumn.setColumnName(column.getColumnName());
             newColumn.setJavaType(column.getDataType().getTypeName());
             newColumn.setJavaField(column.getColumnName());
-            newColumn.setIsIncrement(YES.equalsIgnoreCase(column.getIsAutoincrement()) ? "1" : "0");
+            newColumn.setIncrement(YES.equalsIgnoreCase(column.getIsAutoincrement()) ? "1" : "0");
+            newColumn.setRequired(YES.equalsIgnoreCase(column.getNullable()) ? "0" : "1");
             return newColumn;
         }
 
@@ -132,12 +138,20 @@ public class VelocityUtils {
             this.javaField = javaField;
         }
 
-        public String getIsIncrement() {
-            return isIncrement;
+        public String getIncrement() {
+            return increment;
         }
 
-        public void setIsIncrement(String isIncrement) {
-            this.isIncrement = isIncrement;
+        public void setIncrement(String increment) {
+            this.increment = increment;
+        }
+
+        public String getRequired() {
+            return required;
+        }
+
+        public void setRequired(String required) {
+            this.required = required;
         }
     }
 

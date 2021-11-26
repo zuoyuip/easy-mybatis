@@ -80,6 +80,10 @@ class MapperStructure {
             CtMethod insert = new CtMethod(intClass, "insert", new CtClass[]{jsonObjectClass}, ctClass);
             ctClass.addMethod(insert);
 
+            // 批量新增对象
+            CtMethod insertBatch = new CtMethod(intClass, "insertBatch", new CtClass[]{listClass}, ctClass);
+            ctClass.addMethod(insertBatch);
+
             // 根据主键修改对象属性
             CtMethod updateByPrimaryKey = new CtMethod(intClass, "updateByPrimaryKey", new CtClass[]{jsonObjectClass}, ctClass);
             ctClass.addMethod(updateByPrimaryKey);

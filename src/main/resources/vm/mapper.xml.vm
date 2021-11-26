@@ -6,7 +6,11 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 
     <resultMap type="top.zuoyu.mybatis.json.JsonObject" id="${className}Result">
 #foreach ($column in $columns)
+    #if(${column.columnName} == ${pkColumn.columnName})
+        <id property="${column.javaField}"    column="${column.columnName}"       />
+    #else
         <result property="${column.javaField}"    column="${column.columnName}"    />
+    #end
 #end
     </resultMap>
 
@@ -57,6 +61,26 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
          </trim>
     </insert>
 
+    <insert id="insertBatch" parameterType="java.util.List"#if($pkColumn.increment) useGeneratedKeys="true" keyProperty="$pkColumn.javaField"#end>
+        insert into ${tableName}
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+#foreach($column in $columns)
+#if($column.columnName != $pkColumn.columnName || !$pkColumn.increment)
+            <if test="$column.javaField != null#if($column.javaType == 'String' && $column.required) and $column.javaField != ''#end">$column.columnName,</if>
+#end
+#end
+        </trim>
+        <foreach collection ="list" item="item" index= "index" separator =",">
+            <trim prefix="values (" suffix=")" suffixOverrides=",">
+#foreach($column in $columns)
+#if($column.columnName != $pkColumn.columnName || !$pkColumn.increment)
+            <if test="$column.javaField != null#if($column.javaType == 'String' && $column.required) and $column.javaField != ''#end">#{item.$column.javaField},</if>
+#end
+#end
+            </trim>
+        </foreach>
+    </insert>
+
     <update id="updateByPrimaryKey" parameterType="top.zuoyu.mybatis.json.JsonObject">
         update ${tableName}
         <trim prefix="SET" suffixOverrides=",">
@@ -69,7 +93,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         where ${pkColumn.columnName} = #{${pkColumn.javaField}}
     </update>
 
-    <delete id="deleteByPrimaryKey" parameterType="${pkColumn.javaType}">
+    <delete id="deleteByPrimaryKey" parameterType="java.io.Serializable">
         delete from ${tableName} where ${pkColumn.columnName} = #{${pkColumn.javaField}}
     </delete>
 
