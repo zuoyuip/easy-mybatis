@@ -6,11 +6,11 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 
     <resultMap type="top.zuoyu.mybatis.json.JsonObject" id="${className}Result">
 #foreach ($column in $columns)
-    #if(${column.columnName} == ${pkColumn.columnName})
-        <id property="${column.javaField}"    column="${column.columnName}"       />
-    #else
-        <result property="${column.javaField}"    column="${column.columnName}"    />
-    #end
+#if(${column.columnName} == ${pkColumn.columnName})
+        <id property="${column.javaField}"    column="${column.columnName}"    jdbcType="${column.jdbcType}" />
+#else
+        <result property="${column.javaField}"    column="${column.columnName}"   jdbcType="${column.jdbcType}" />
+#end
 #end
     </resultMap>
 
@@ -66,7 +66,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <trim prefix="(" suffix=")" suffixOverrides=",">
 #foreach($column in $columns)
 #if($column.columnName != $pkColumn.columnName || !$pkColumn.increment)
-            <if test="$column.javaField != null#if($column.javaType == 'String' && $column.required) and $column.javaField != ''#end">$column.columnName,</if>
+            $column.columnName,
 #end
 #end
         </trim>
@@ -74,7 +74,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <trim prefix="values (" suffix=")" suffixOverrides=",">
 #foreach($column in $columns)
 #if($column.columnName != $pkColumn.columnName || !$pkColumn.increment)
-            <if test="$column.javaField != null#if($column.javaType == 'String' && $column.required) and $column.javaField != ''#end">#{item.$column.javaField},</if>
+                #{item.$column.javaField},
 #end
 #end
             </trim>

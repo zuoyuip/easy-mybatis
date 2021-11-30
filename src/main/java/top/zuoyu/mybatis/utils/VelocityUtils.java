@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.apache.ibatis.type.JdbcType;
 import org.apache.velocity.VelocityContext;
 import org.springframework.lang.NonNull;
 import org.springframework.util.Assert;
@@ -89,6 +90,11 @@ public class VelocityUtils {
         private String javaType;
 
         /**
+         * JDBC类型
+         */
+        private String jdbcType;
+
+        /**
          * JAVA字段名
          */
         private String javaField;
@@ -109,6 +115,8 @@ public class VelocityUtils {
             newColumn.setColumnName(column.getColumnName());
             newColumn.setJavaType(column.getDataType().getTypeName());
             newColumn.setJavaField(column.getColumnName());
+            String sqlDataType = column.getSqlDataType();
+            newColumn.setJdbcType(JdbcType.forCode(Integer.parseInt(sqlDataType)).name());
             newColumn.setIncrement(YES.equalsIgnoreCase(column.getIsAutoincrement()) ? "1" : "0");
             newColumn.setRequired(YES.equalsIgnoreCase(column.getNullable()) ? "0" : "1");
             return newColumn;
@@ -128,6 +136,14 @@ public class VelocityUtils {
 
         public void setJavaType(String javaType) {
             this.javaType = javaType;
+        }
+
+        public String getJdbcType() {
+            return jdbcType;
+        }
+
+        public void setJdbcType(String jdbcType) {
+            this.jdbcType = jdbcType;
         }
 
         public String getJavaField() {

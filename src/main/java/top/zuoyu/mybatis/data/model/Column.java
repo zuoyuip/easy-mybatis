@@ -403,7 +403,7 @@ public class Column implements Serializable, Cloneable {
         this.setNullable(resultSet.getString(ColumnMeta.NULLABLE.value()));
         this.setRemarks(resultSet.getString(ColumnMeta.REMARKS.value()));
         this.setColumnDef(resultSet.getString(ColumnMeta.COLUMN_DEF.value()));
-        this.setSqlDataType(resultSet.getString(ColumnMeta.SQL_DATA_TYPE.value()));
+        this.setSqlDataType(resultSet.getString(ColumnMeta.DATA_TYPE.value()));
         this.setSqlDatetimeSub(resultSet.getString(ColumnMeta.SQL_DATETIME_SUB.value()));
         this.setCharOctetLength(resultSet.getString(ColumnMeta.CHAR_OCTET_LENGTH.value()));
         this.setOrdinalPosition(resultSet.getString(ColumnMeta.ORDINAL_POSITION.value()));

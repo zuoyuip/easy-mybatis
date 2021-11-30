@@ -18,6 +18,8 @@ package top.zuoyu.mybatis.service;
 import java.io.Serializable;
 import java.util.List;
 
+import org.apache.ibatis.annotations.Param;
+
 import top.zuoyu.mybatis.json.JsonObject;
 
 /**
@@ -62,7 +64,7 @@ public interface UnifyService {
      * @param jsonObjects - 对象键值集合
      * @return 结果
      */
-    int insertBatch(List<JsonObject> jsonObjects);
+    int insertBatch(@Param("list") List<JsonObject> jsonObjects);
 
     /**
      * 根据主键修改对象属性
@@ -83,5 +85,5 @@ public interface UnifyService {
      * @param primaryKeys - 主键组
      * @return 结果
      */
-    int deleteByPrimaryKeys(Serializable[] primaryKeys);
+    int deleteByPrimaryKeys(@Param("array") Serializable[] primaryKeys);
 }

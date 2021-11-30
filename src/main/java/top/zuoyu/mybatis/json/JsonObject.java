@@ -1482,4 +1482,5 @@ public class JsonObject implements Cloneable, Serializable, InvocationHandler, M
     public Object invoke(Object proxy, Method method, Object[] args) {
         return null;
     }
+
 }
