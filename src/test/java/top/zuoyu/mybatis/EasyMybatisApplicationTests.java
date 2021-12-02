@@ -17,6 +17,7 @@ package top.zuoyu.mybatis;
 
 import java.sql.SQLException;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
@@ -51,9 +52,9 @@ class EasyMybatisApplicationTests {
     @Test
     void contextLoads() throws SQLException, MetaDataAccessException {
         List<JsonObject> jsonObjects = Arrays.asList(
-                new JsonObject(json).put("city", "郑州").put("nickname", "小汪汪"),
-                new JsonObject(json).put("city", "焦作").put("nickname", "小旺旺"),
-                new JsonObject(json).put("city", "漯河").put("nickname", "小汪汪")
+                new JsonObject(json).put("city", "郑州").put("nickname", "小汪汪").put("create_time", new Date()).put("update_time", new Date()),
+                new JsonObject(json).put("city", "焦作").put("nickname", "小哞哞").put("create_time", new Date()).put("update_time", new Date()),
+                new JsonObject(json).put("city", "漯河").put("nickname", "小咩咩").put("create_time", new Date()).put("update_time", new Date())
         );
         System.out.println(jsonObjects);
         int i = unifyService.insertBatch(jsonObjects);

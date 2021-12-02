@@ -24,96 +24,249 @@ import java.sql.Clob;
 import java.sql.Ref;
 import java.sql.RowId;
 import java.sql.Struct;
+import java.sql.Types;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * JDBC中字段类型枚举 .
+ * JDBC中字段类型 .
  *
  * @author: zuoyu
- * @create: 2021-10-17 12:13
+ * @create: 2021-12-02 16:01
  */
 public enum JdbcType {
 
-    ARRAY(java.sql.Types.ARRAY, Array.class), //
-    BIT(java.sql.Types.BIT, Boolean.class), //
-    TINYINT(java.sql.Types.TINYINT, Byte.class), //
-    SMALLINT(java.sql.Types.SMALLINT, Short.class), //
-    INTEGER(java.sql.Types.INTEGER, Integer.class), //
-    BIGINT(java.sql.Types.BIGINT, Long.class), //
-    FLOAT(java.sql.Types.FLOAT, Double.class), //
-    REAL(java.sql.Types.REAL, Float.class), //
-    DOUBLE(java.sql.Types.DOUBLE, Double.class), //
-    NUMERIC(java.sql.Types.NUMERIC, BigDecimal.class), //
-    DECIMAL(java.sql.Types.DECIMAL, BigDecimal.class), //
-    CHAR(java.sql.Types.CHAR, String.class), //
-    VARCHAR(java.sql.Types.VARCHAR, String.class), //
-    LONGVARCHAR(java.sql.Types.LONGVARCHAR, String.class), //
-    DATE(java.sql.Types.DATE, Date.class), //
-    TIME(java.sql.Types.TIME, Date.class), //
-    TIMESTAMP(java.sql.Types.TIMESTAMP, Date.class), //
-    BINARY(java.sql.Types.BINARY, Byte[].class), //
-    VARBINARY(java.sql.Types.VARBINARY, Byte[].class), //
-    LONGVARBINARY(java.sql.Types.LONGVARBINARY, Byte[].class), //
-    NULL(java.sql.Types.NULL, null), //
-    OTHER(java.sql.Types.OTHER, Object.class), //
-    BLOB(java.sql.Types.BLOB, Blob.class), //
-    CLOB(java.sql.Types.CLOB, Clob.class), //
-    BOOLEAN(java.sql.Types.BOOLEAN, Boolean.class), //
-    CURSOR(-10, Cursor.class), // Oracle
-    UNDEFINED(Integer.MIN_VALUE + 1000, null), //
-    NVARCHAR(java.sql.Types.NVARCHAR, String.class), // JDK6
-    NCHAR(java.sql.Types.NCHAR, String.class), // JDK6
-    NCLOB(java.sql.Types.NCLOB, String.class), // JDK6
-    STRUCT(java.sql.Types.STRUCT, Struct.class), //
-    JAVA_OBJECT(java.sql.Types.JAVA_OBJECT, Object.class), //
-    DISTINCT(java.sql.Types.DISTINCT, Object.class), //
-    REF(java.sql.Types.REF, Ref.class), //
-    DATALINK(java.sql.Types.DATALINK, URL.class), //
-    ROWID(java.sql.Types.ROWID, RowId.class), // JDK6
-    LONGNVARCHAR(java.sql.Types.LONGNVARCHAR, String.class), // JDK6
-    SQLXML(java.sql.Types.SQLXML, java.sql.SQLXML.class), // JDK6
-    TIME_WITH_TIMEZONE(2013, Date.class), // JDBC 4.2 JDK8
-    TIMESTAMP_WITH_TIMEZONE(2014, Date.class); // JDBC 4.2 JDK8
+    /**
+     * ARRAY
+     */
+    ARRAY(Types.ARRAY, Array.class),
 
-    private static final Map<Integer, JdbcType> CODE_MAP = new ConcurrentHashMap<>(100, 1);
+    /**
+     * BIT
+     */
+    BIT(Types.BIT, Boolean.class),
+
+    /**
+     * TINYINT
+     */
+    TINYINT(Types.TINYINT, Byte.class),
+
+    /**
+     * SMALLINT
+     */
+    SMALLINT(Types.SMALLINT, Short.class),
+
+    /**
+     * INTEGER
+     */
+    INTEGER(Types.INTEGER, Integer.class),
+
+    /**
+     * BIGINT
+     */
+    BIGINT(Types.BIGINT, Long.class),
+
+    /**
+     * FLOAT
+     */
+    FLOAT(Types.FLOAT, Double.class),
+
+    /**
+     * REAL
+     */
+    REAL(Types.REAL, Float.class),
+
+    /**
+     * DOUBLE
+     */
+    DOUBLE(Types.DOUBLE, Double.class),
+
+    /**
+     * NUMERIC
+     */
+    NUMERIC(Types.NUMERIC, BigDecimal.class),
+
+    /**
+     * DECIMAL
+     */
+    DECIMAL(Types.DECIMAL, BigDecimal.class),
+
+    /**
+     * CHAR
+     */
+    CHAR(Types.CHAR, String.class),
+
+    /**
+     * VARCHAR
+     */
+    VARCHAR(Types.VARCHAR, String.class),
+
+    /**
+     * LONGVARCHAR
+     */
+    LONGVARCHAR(Types.LONGVARCHAR, String.class),
+
+    /**
+     * DATE
+     */
+    DATE(Types.DATE, Date.class),
+
+    /**
+     * TIME
+     */
+    TIME(Types.TIME, Date.class),
+
+    /**
+     * TIMESTAMP
+     */
+    TIMESTAMP(Types.TIMESTAMP, Date.class),
+
+    /**
+     * BINARY
+     */
+    BINARY(Types.BINARY, Byte[].class),
+
+    /**
+     * VARBINARY
+     */
+    VARBINARY(Types.VARBINARY, Byte[].class),
+
+    /**
+     * LONGVARBINARY
+     */
+    LONGVARBINARY(Types.LONGVARBINARY, Byte[].class),
+
+    /**
+     * NULL
+     */
+    NULL(Types.NULL, null),
+
+    /**
+     * OTHER
+     */
+    OTHER(Types.OTHER, Object.class),
+
+    /**
+     * BLOB
+     */
+    BLOB(Types.BLOB, Blob.class),
+
+    /**
+     * CLOB
+     */
+    CLOB(Types.CLOB, Clob.class),
+
+    /**
+     * BOOLEAN
+     */
+    BOOLEAN(Types.BOOLEAN, Boolean.class),
+
+    /**
+     * CURSOR
+     */
+    CURSOR(-10, Cursor.class), // Oracle
+
+    /**
+     * UNDEFINED
+     */
+    UNDEFINED(Integer.MIN_VALUE + 1000, null),
+
+    /**
+     * NVARCHAR
+     */
+    NVARCHAR(Types.NVARCHAR, String.class), // JDK6
+
+    /**
+     * NCHAR
+     */
+    NCHAR(Types.NCHAR, String.class), // JDK6
+
+    /**
+     * NCLOB
+     */
+    NCLOB(Types.NCLOB, String.class), // JDK6
+
+    /**
+     * STRUCT
+     */
+    STRUCT(Types.STRUCT, Struct.class),
+
+    /**
+     * JAVA_OBJECT
+     */
+    JAVA_OBJECT(Types.JAVA_OBJECT, Object.class),
+
+    /**
+     * DISTINCT
+     */
+    DISTINCT(Types.DISTINCT, Object.class),
+
+    /**
+     * REF
+     */
+    REF(Types.REF, Ref.class),
+
+    /**
+     * DATALINK
+     */
+    DATALINK(Types.DATALINK, URL.class),
+
+    /**
+     * ROWID
+     */
+    ROWID(Types.ROWID, RowId.class), // JDK6
+
+    /**
+     * LONGNVARCHAR
+     */
+    LONGNVARCHAR(Types.LONGNVARCHAR, String.class), // JDK6
+
+    /**
+     * SQLXML
+     */
+    SQLXML(Types.SQLXML, java.sql.SQLXML.class), // JDK6
+
+    /**
+     * DATETIMEOFFSET
+     */
+    DATETIMEOFFSET(-155, Date.class), // SQL Server 2008
+
+    /**
+     * TIME_WITH_TIMEZONE
+     */
+    TIME_WITH_TIMEZONE(Types.TIME_WITH_TIMEZONE, Date.class), // JDBC 4.2 JDK8
+
+    /**
+     * TIMESTAMP_WITH_TIMEZONE
+     */
+    TIMESTAMP_WITH_TIMEZONE(Types.TIMESTAMP_WITH_TIMEZONE, Date.class); // JDBC 4.2 JDK8
+
+    private static final Map<Integer, JdbcType> CODE_LOOKUP = new HashMap<>();
 
     static {
         for (JdbcType type : JdbcType.values()) {
-            CODE_MAP.put(type.typeCode, type);
+            CODE_LOOKUP.put(type.TYPE_CODE, type);
         }
     }
 
-    public final int typeCode;
-    public final Class<?> javaType;
+    public final int TYPE_CODE;
+    public final Class<?> JAVA_TYPE;
 
-    /**
-     * 构造
-     *
-     * @param code     {@link java.sql.Types} 中对应的值
-     * @param javaType
-     */
     JdbcType(int code, Class<?> javaType) {
-        this.typeCode = code;
-        this.javaType = javaType;
+        this.TYPE_CODE = code;
+        this.JAVA_TYPE = javaType;
     }
 
-    /**
-     * 通过{@link java.sql.Types}中对应int值找到enum值
-     *
-     * @param code Jdbc type值
-     * @return {@link JdbcType}
-     */
-    public static JdbcType valueOf(int code) {
-        return CODE_MAP.get(code);
+    public static JdbcType forCode(int code) {
+        return CODE_LOOKUP.get(code);
     }
 
     public int getTypeCode() {
-        return typeCode;
+        return this.TYPE_CODE;
     }
 
     public Class<?> getJavaType() {
-        return javaType;
+        return this.JAVA_TYPE;
     }
 }

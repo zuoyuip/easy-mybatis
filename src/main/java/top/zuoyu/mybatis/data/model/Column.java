@@ -226,7 +226,7 @@ public class Column implements Serializable, Cloneable {
 
     public void setDataType(String dataType) {
         int type = Integer.parseInt(dataType);
-        this.dataType = JdbcType.valueOf(type).getJavaType();
+        this.dataType = JdbcType.forCode(type).getJavaType();
     }
 
     public String getTypeName() {

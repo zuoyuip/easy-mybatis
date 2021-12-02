@@ -22,12 +22,12 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.apache.ibatis.type.JdbcType;
 import org.apache.velocity.VelocityContext;
 import org.springframework.lang.NonNull;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
+import top.zuoyu.mybatis.data.enums.JdbcType;
 import top.zuoyu.mybatis.data.model.Table;
 import top.zuoyu.mybatis.temp.mapper.BaseMapper;
 
