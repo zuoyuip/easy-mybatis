@@ -17,6 +17,8 @@ package top.zuoyu.mybatis.nocontext;
 
 import org.junit.jupiter.api.Test;
 
+import top.zuoyu.mybatis.json.JsonObject;
+
 /**
  * 无环境测试 .
  *
@@ -25,8 +27,24 @@ import org.junit.jupiter.api.Test;
  */
 public class NoContext {
 
+    String json = "{\n" +
+            "  \"create_time\": \"2021-11-26T06:07:15.000+00:00\",\n" +
+            "  \"deleted\": 0,\n" +
+            "  \"update_time\": \"2021-11-26T06:07:15.000+00:00\",\n" +
+            "  \"city\": \"北京\",\n" +
+            "  \"country\": \"中国\",\n" +
+            "  \"headimgurl\": \"https://cn.vuejs.org/images/logo.png\",\n" +
+            "  \"language\": \"中文\",\n" +
+            "  \"nickname\": \"小喵喵\",\n" +
+            "  \"openid\": \"1214804270\",\n" +
+            "  \"province\": \"河南\",\n" +
+            "  \"sex\": \"1\",\n" +
+            "  \"unionid\": \"1335282923\"\n" +
+            "}";
+
     @Test
     public void testClassName() {
-
+        JsonObject jsonObject = new JsonObject(json).put("nickname", "小哞哞");
+        System.out.println(jsonObject.toString());
     }
 }

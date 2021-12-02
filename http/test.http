@@ -18,7 +18,7 @@ PUT http://localhost:8080/test
 Content-Type: application/json
 
 {
-  "id": 1,
+  "id": 6,
   "create_time": "2020-07-07T06:07:15.000+00:00",
   "deleted": 0,
   "update_time": "2020-07-07T06:07:15.000+00:00",
@@ -26,7 +26,7 @@ Content-Type: application/json
   "country": "中国",
   "headimgurl": "https://cn.vuejs.org/images/logo.png",
   "language": "中文",
-  "nickname": "左羽",
+  "nickname": "小咩咩",
   "openid": "1214804270",
   "province": "河南",
   "sex": "1",
@@ -45,7 +45,7 @@ Content-Type: application/json
   "country": "中国",
   "headimgurl": "https://cn.vuejs.org/images/logo.png",
   "language": "中文",
-  "nickname": "小喵喵",
+  "nickname": "小汪汪",
   "openid": "1214804270",
   "province": "河南",
   "sex": "1",

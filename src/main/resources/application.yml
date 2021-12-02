@@ -20,3 +20,8 @@ spring:
     password: root
 mybatis:
   config-location: classpath:mybatis/mybatis-config.xml
+
+logging:
+  level:
+    top.zuoyu.mybatis.temp.mapper: debug
+

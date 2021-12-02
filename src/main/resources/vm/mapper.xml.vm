@@ -7,9 +7,9 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     <resultMap type="top.zuoyu.mybatis.json.JsonObject" id="${tableName}Result">
 #foreach ($column in $columns)
 #if(${column.columnName} == ${pkColumn.columnName})
-        <id property="${column.javaField}"    column="${column.columnName}"    jdbcType="${column.jdbcType}" />
+        <id property="${column.javaField}" column="${column.columnName}" jdbcType="${column.jdbcType}" javaType="${column.javaType}"/>
 #else
-        <result property="${column.javaField}"    column="${column.columnName}"   jdbcType="${column.jdbcType}" />
+        <result property="${column.javaField}" column="${column.columnName}" jdbcType="${column.jdbcType}" javaType="${column.javaType}" />
 #end
 #end
     </resultMap>
@@ -70,8 +70,9 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 #end
 #end
         </trim>
+        values
         <foreach collection ="list" item="item" index= "index" separator =",">
-            <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <trim prefix="(" suffix=")" suffixOverrides=",">
 #foreach($column in $columns)
 #if($column.columnName != $pkColumn.columnName || !$pkColumn.increment)
                 #{item.$column.javaField},
