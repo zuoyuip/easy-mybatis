@@ -22,6 +22,7 @@ import java.util.List;
 
 import org.apache.ibatis.annotations.Param;
 import org.springframework.lang.NonNull;
+import org.springframework.stereotype.Repository;
 
 import javassist.CannotCompileException;
 import javassist.ClassPool;
@@ -30,6 +31,7 @@ import javassist.CtMethod;
 import javassist.Modifier;
 import javassist.NotFoundException;
 import javassist.bytecode.AnnotationsAttribute;
+import javassist.bytecode.ClassFile;
 import javassist.bytecode.ConstPool;
 import javassist.bytecode.MethodInfo;
 import javassist.bytecode.ParameterAnnotationsAttribute;
@@ -58,6 +60,14 @@ class MapperStructure {
         // 创建一个接口
         CtClass ctClass = classPool.makeInterface(Constant.MAPPER_PACKAGE_NAME + Constant.PACKAGE_SEPARATOR + String.format(Constant.MAPPER_SUFFIX, StrUtil.captureName(table.getTableName())));
         ctClass.setModifiers(Modifier.setPublic(Modifier.INTERFACE));
+        ClassFile classFile = ctClass.getClassFile();
+        ConstPool constPool = classFile.getConstPool();
+
+        // 接口注解
+        AnnotationsAttribute classAttr = new AnnotationsAttribute(constPool, AnnotationsAttribute.visibleTag);
+        Annotation interfaceAnn = new Annotation(Repository.class.getTypeName(), constPool);
+        classAttr.addAnnotation(interfaceAnn);
+        classFile.addAttribute(classAttr);
 
         try {
 

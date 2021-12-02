@@ -17,7 +17,7 @@ package top.zuoyu.mybatis.autoconfigure;
 
 import java.lang.reflect.Field;
 
-import org.apache.ibatis.session.SqlSession;
+import org.mybatis.spring.SqlSessionTemplate;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
@@ -39,8 +39,8 @@ import top.zuoyu.mybatis.service.UnifyService;
 @AutoConfigureAfter(EasyMybatisAutoConfiguration.class)
 public class MapperInitAutoConfiguration {
 
-    public MapperInitAutoConfiguration(SqlSession sqlSession) {
-        Mappers.getInstance().init(sqlSession);
+    public MapperInitAutoConfiguration(SqlSessionTemplate sqlSessionTemplate) {
+        Mappers.getInstance().init(sqlSessionTemplate);
     }
 
     /**

@@ -21,7 +21,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
-import org.apache.ibatis.session.SqlSession;
+import org.mybatis.spring.SqlSessionTemplate;
 import org.springframework.util.CollectionUtils;
 
 import top.zuoyu.mybatis.exception.EasyMybatisException;
@@ -70,9 +70,9 @@ public class Mappers {
     /**
      * 初始化
      *
-     * @param sqlSession - {@link SqlSession}
+     * @param sqlSessionTemplate - {@link SqlSessionTemplate}
      */
-    public void init(SqlSession sqlSession) {
+    public void init(SqlSessionTemplate sqlSessionTemplate) {
         Map<String, Class<?>> tableNameClass = StructureInit.getTableNameClass();
         if (CollectionUtils.isEmpty(tableNameClass)) {
             return;
@@ -81,7 +81,7 @@ public class Mappers {
         for (Map.Entry<String, Class<?>> entry : entries) {
             String tableName = entry.getKey();
             Class<?> mapperInterfaceClass = entry.getValue();
-            Object mapper = sqlSession.getMapper(mapperInterfaceClass);
+            Object mapper = sqlSessionTemplate.getMapper(mapperInterfaceClass);
             Class<?> mapperClass = mapper.getClass();
             CglibProxy cglibProxy = new CglibProxy();
             UnifyService unifyService = cglibProxy.getBean(mapperClass);
