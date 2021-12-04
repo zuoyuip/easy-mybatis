@@ -4,7 +4,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="${packageName}.${className}Mapper">
 
-    <resultMap type="top.zuoyu.mybatis.json.JsonObject" id="${tableName}Result">
+    <resultMap type="top.zuoyu.mybatis.json.JsonObject" id="${tableName}ResultByZuoyu">
 #foreach ($column in $columns)
 #if(${column.columnName} == ${pkColumn.columnName})
         <id property="${column.javaField}" column="${column.columnName}" jdbcType="${column.jdbcType}" javaType="${column.javaType}"/>
@@ -18,11 +18,11 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         select#foreach($column in $columns) $column.columnName#if($velocityCount != $columns.size()),#end#end from ${tableName}
     </sql>
 
-    <select id="selectList" resultMap="${tableName}Result">
+    <select id="selectList" resultMap="${tableName}ResultByZuoyu">
         <include refid="select${className}Vo"/>
     </select>
 
-    <select id="selectListByExample" parameterType="top.zuoyu.mybatis.json.JsonObject" resultMap="${tableName}Result">
+    <select id="selectListByExample" parameterType="top.zuoyu.mybatis.json.JsonObject" resultMap="${tableName}ResultByZuoyu">
         <include refid="select${className}Vo"/>
         <where>
 #foreach($column in $columns)
@@ -30,17 +30,17 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 #set($javaType=$column.javaType)
 #set($columnName=$column.columnName)
 #if($javaType == "java.lang.String")
-        <if test="$javaField != null #if($javaType == 'String' ) and $javaField.trim() != ''#end"> and $columnName like concat('%', #{$javaField}, '%')</if>
+            <if test="$javaField != null #if($javaType == 'String' ) and $javaField.trim() != ''#end"> and $columnName like concat('%', #{$javaField}, '%')</if>
 #else
-        <if test="$javaField != null #if($javaType == 'String' ) and $javaField.trim() != ''#end"> and $columnName = #{$javaField}</if>
+            <if test="$javaField != null #if($javaType == 'String' ) and $javaField.trim() != ''#end"> and $columnName = #{$javaField}</if>
 #end
 #end
         </where>
     </select>
 
-    <select id="selectByPrimaryKey" parameterType="java.io.Serializable" resultMap="${tableName}Result">
+    <select id="selectByPrimaryKey" parameterType="java.io.Serializable" resultMap="${tableName}ResultByZuoyu">
         <include refid="select${className}Vo"/>
-        where ${pkColumn.columnName} = #{${pkColumn.javaField}}
+        where ${pkColumn.columnName} = #{${pkColumn.javaField}, jdbcType=$pkColumn.jdbcType}
     </select>
 
     <insert id="insert" parameterType="top.zuoyu.mybatis.json.JsonObject"#if($pkColumn.increment) useGeneratedKeys="true" keyProperty="$pkColumn.javaField"#end>
@@ -48,14 +48,14 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <trim prefix="(" suffix=")" suffixOverrides=",">
 #foreach($column in $columns)
 #if($column.columnName != $pkColumn.columnName || !$pkColumn.increment)
-            <if test="$column.javaField != null#if($column.javaType == 'String' && $column.required) and $column.javaField != ''#end">$column.columnName,</if>
+            <if test="$column.javaField != null#if($column.javaType == 'java.lang.String' && $column.required) and $column.javaField != ''#end">$column.columnName,</if>
 #end
 #end
          </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
 #foreach($column in $columns)
 #if($column.columnName != $pkColumn.columnName || !$pkColumn.increment)
-            <if test="$column.javaField != null#if($column.javaType == 'String' && $column.required) and $column.javaField != ''#end">#{$column.javaField},</if>
+            <if test="$column.javaField != null#if($column.javaType == 'java.lang.String' && $column.required) and $column.javaField != ''#end">#{$column.javaField},</if>
 #end
 #end
          </trim>
@@ -75,7 +75,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <trim prefix="(" suffix=")" suffixOverrides=",">
 #foreach($column in $columns)
 #if($column.columnName != $pkColumn.columnName || !$pkColumn.increment)
-                #{item.$column.javaField},
+                #{item.${column.javaField}, jdbcType=$column.jdbcType},
 #end
 #end
             </trim>
@@ -87,21 +87,45 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <trim prefix="SET" suffixOverrides=",">
 #foreach($column in $columns)
 #if($column.columnName != $pkColumn.columnName)
-            <if test="$column.javaField != null#if($column.javaType == 'String' && $column.required) and $column.javaField != ''#end">$column.columnName = #{$column.javaField},</if>
+            <if test="$column.javaField != null#if($column.javaType == 'java.lang.String' && $column.required) and $column.javaField != ''#end">$column.columnName = #{$column.javaField, jdbcType=$column.jdbcType},</if>
 #end
 #end
         </trim>
-        where ${pkColumn.columnName} = #{${pkColumn.javaField}}
+        where ${pkColumn.columnName} = #{${pkColumn.javaField}, jdbcType=$pkColumn.jdbcType}
+    </update>
+
+    <update id="updateByPrimaryKeyBatch" parameterType="java.util.List">
+        update ${tableName}
+        <trim prefix="SET" suffixOverrides=",">
+#foreach($column in $columns)
+#if($column.columnName != $pkColumn.columnName)
+            <trim prefix="$column.javaField = case" suffix="end,">
+                <foreach collection="list" item="item" index="index">
+                    <if test="item.${column.javaField} != null#if($column.javaType == 'java.lang.String' && $column.required) and item.${column.javaField} != ''#end">
+                        when ${pkColumn.columnName} = #{item.${pkColumn.javaField}} then #{item.${column.javaField}, jdbcType=$column.jdbcType}
+                    </if>
+                    <if test="item.${column.javaField} == null#if($column.javaType == 'java.lang.String' && $column.required) and item.${column.javaField} == ''#end">
+                        when ${pkColumn.columnName} = #{item.${pkColumn.javaField}} then ${tableName}.${column.javaField}
+                    </if>
+                </foreach>
+            </trim>
+#end
+#end
+        </trim>
+        where ${pkColumn.columnName} in
+        <foreach collection="list" index="index" item="item" separator="," open="(" close=")">
+            #{item.${pkColumn.javaField}, jdbcType=$pkColumn.jdbcType}
+        </foreach>
     </update>
 
     <delete id="deleteByPrimaryKey" parameterType="java.io.Serializable">
-        delete from ${tableName} where ${pkColumn.columnName} = #{${pkColumn.javaField}}
+        delete from ${tableName} where ${pkColumn.columnName} = #{${pkColumn.javaField}, jdbcType=$pkColumn.jdbcType}
     </delete>
 
     <delete id="deleteByPrimaryKeys" parameterType="java.io.Serializable">
         delete from ${tableName} where ${pkColumn.columnName} in
         <foreach item="${pkColumn.javaField}" collection="array" open="(" separator="," close=")">
-            #{${pkColumn.javaField}}
+            #{${pkColumn.javaField}, jdbcType=$pkColumn.jdbcType}
         </foreach>
     </delete>
 </mapper>

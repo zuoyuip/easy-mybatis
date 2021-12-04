@@ -27,7 +27,7 @@ import org.springframework.lang.NonNull;
 import top.zuoyu.mybatis.annotation.Magic;
 import top.zuoyu.mybatis.exception.EasyMybatisException;
 import top.zuoyu.mybatis.proxy.dynamic.Mappers;
-import top.zuoyu.mybatis.service.UnifyService;
+import top.zuoyu.mybatis.service.MapperRepository;
 
 /**
  * Mapper加载自动配置 .
@@ -55,12 +55,12 @@ public class MapperInitAutoConfiguration {
             Field[] declaredFields = beanClass.getDeclaredFields();
             for (Field field : declaredFields) {
                 if (field.isAnnotationPresent(Magic.class)) {
-                    if (!field.getType().isAssignableFrom(UnifyService.class)) {
-                        throw new EasyMybatisException("Magic field must be declared as an interface:" + UnifyService.class.getTypeName());
+                    if (!field.getType().isAssignableFrom(MapperRepository.class)) {
+                        throw new EasyMybatisException("Magic field must be declared as an interface:" + MapperRepository.class.getTypeName());
                     }
                     field.setAccessible(true);
                     String tableName = field.getAnnotation(Magic.class).value();
-                    UnifyService unifyService = Mappers.getUnifyService(tableName);
+                    MapperRepository unifyService = Mappers.getUnifyService(tableName);
                     try {
                         field.set(bean, unifyService);
                     } catch (IllegalAccessException e) {

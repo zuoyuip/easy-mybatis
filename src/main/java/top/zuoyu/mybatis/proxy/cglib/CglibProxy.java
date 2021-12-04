@@ -22,7 +22,7 @@ import org.springframework.cglib.proxy.MethodInterceptor;
 import org.springframework.cglib.proxy.MethodProxy;
 import org.springframework.lang.NonNull;
 
-import top.zuoyu.mybatis.service.UnifyService;
+import top.zuoyu.mybatis.service.MapperRepository;
 
 /**
  * CGLib动态代理 .
@@ -52,10 +52,10 @@ class CglibProxy implements MethodInterceptor {
 
 
 
-    public UnifyService getBean(Class<?> beanClass) {
+    public MapperRepository getBean(Class<?> beanClass) {
         this.enhancer.setSuperclass(beanClass);
-        this.enhancer.setInterfaces(new Class[]{UnifyService.class});
+        this.enhancer.setInterfaces(new Class[]{MapperRepository.class});
         this.enhancer.setCallback(this);
-        return (UnifyService) this.enhancer.create();
+        return (MapperRepository) this.enhancer.create();
     }
 }

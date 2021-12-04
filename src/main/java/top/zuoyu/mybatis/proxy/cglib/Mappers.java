@@ -25,7 +25,7 @@ import org.mybatis.spring.SqlSessionTemplate;
 import org.springframework.util.CollectionUtils;
 
 import top.zuoyu.mybatis.exception.EasyMybatisException;
-import top.zuoyu.mybatis.service.UnifyService;
+import top.zuoyu.mybatis.service.MapperRepository;
 import top.zuoyu.mybatis.ssist.StructureInit;
 
 /**
@@ -36,16 +36,16 @@ import top.zuoyu.mybatis.ssist.StructureInit;
  */
 public class Mappers {
 
-    protected static final Map<String, UnifyService> TABLE_NAME_UNIFY_SERVICE = Collections.synchronizedMap(new HashMap<>());
+    protected static final Map<String, MapperRepository> TABLE_NAME_UNIFY_SERVICE = Collections.synchronizedMap(new HashMap<>());
     private volatile static Mappers MAPPERS;
 
     /**
-     * 根据表名获取相应的 {@link UnifyService}
+     * 根据表名获取相应的 {@link MapperRepository}
      *
      * @param tableName - 表名
-     * @return 相应的 {@link UnifyService}
+     * @return 相应的 {@link MapperRepository}
      */
-    public static UnifyService getUnifyService(String tableName) {
+    public static MapperRepository getUnifyService(String tableName) {
         if (TABLE_NAME_UNIFY_SERVICE.containsKey(tableName)) {
             return TABLE_NAME_UNIFY_SERVICE.get(tableName);
         }
@@ -84,7 +84,7 @@ public class Mappers {
             Object mapper = sqlSessionTemplate.getMapper(mapperInterfaceClass);
             Class<?> mapperClass = mapper.getClass();
             CglibProxy cglibProxy = new CglibProxy();
-            UnifyService unifyService = cglibProxy.getBean(mapperClass);
+            MapperRepository unifyService = cglibProxy.getBean(mapperClass);
             TABLE_NAME_UNIFY_SERVICE.put(tableName, unifyService);
         }
     }

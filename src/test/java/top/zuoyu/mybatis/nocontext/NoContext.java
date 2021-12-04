@@ -15,6 +15,8 @@
  */
 package top.zuoyu.mybatis.nocontext;
 
+import java.util.Date;
+
 import org.junit.jupiter.api.Test;
 
 import top.zuoyu.mybatis.json.JsonObject;
@@ -42,9 +44,58 @@ public class NoContext {
             "  \"unionid\": \"1335282923\"\n" +
             "}";
 
+
+
     @Test
-    public void testClassName() {
+    public void testJson() {
         JsonObject jsonObject = new JsonObject(json).put("nickname", "小哞哞");
         System.out.println(jsonObject.toString());
+    }
+
+    @Test
+    public void testClass() {
+        JsonObject jsonObject = new JsonObject().put("num", 1).put("name", "小蜗牛").put("birthday", new Date());
+        assert jsonObject != null;
+        Student student = jsonObject.toClass(Student.class);
+        System.out.println(student);
+    }
+
+    public static class Student{
+        private Integer num;
+        private String name;
+        private Date birthday;
+
+        public Integer getNum() {
+            return num;
+        }
+
+        public void setNum(Integer num) {
+            this.num = num;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public Date getBirthday() {
+            return birthday;
+        }
+
+        public void setBirthday(Date birthday) {
+            this.birthday = birthday;
+        }
+
+        @Override
+        public String toString() {
+            return "Student{" +
+                    "num=" + num +
+                    ", name='" + name + '\'' +
+                    ", birthday=" + birthday +
+                    '}';
+        }
     }
 }

@@ -41,7 +41,7 @@ import top.zuoyu.mybatis.common.Constant;
 import top.zuoyu.mybatis.data.model.Table;
 import top.zuoyu.mybatis.exception.CustomException;
 import top.zuoyu.mybatis.json.JsonObject;
-import top.zuoyu.mybatis.service.UnifyService;
+import top.zuoyu.mybatis.service.MapperRepository;
 import top.zuoyu.mybatis.utils.ClassUtil;
 import top.zuoyu.mybatis.utils.StrUtil;
 
@@ -71,7 +71,7 @@ class MapperStructure {
 
         try {
 
-            CtClass unifyService = classPool.get(UnifyService.class.getTypeName());
+            CtClass unifyService = classPool.get(MapperRepository.class.getTypeName());
             ctClass.addInterface(unifyService);
 
             CtClass listClass = classPool.get(List.class.getTypeName());
@@ -107,6 +107,11 @@ class MapperStructure {
             // 根据主键修改对象属性
             CtMethod updateByPrimaryKey = new CtMethod(intClass, "updateByPrimaryKey", new CtClass[]{jsonObjectClass}, ctClass);
             ctClass.addMethod(updateByPrimaryKey);
+
+            // 批量根据主键修改对象属性
+            CtMethod updateByPrimaryKeyBatch = new CtMethod(intClass, "updateByPrimaryKeyBatch", new CtClass[]{listClass}, ctClass);
+            param(updateByPrimaryKeyBatch, "list");
+            ctClass.addMethod(updateByPrimaryKeyBatch);
 
             // 根据主键删除对象
             CtMethod deleteByPrimaryKey = new CtMethod(intClass, "deleteByPrimaryKey", new CtClass[]{serializableClass}, ctClass);

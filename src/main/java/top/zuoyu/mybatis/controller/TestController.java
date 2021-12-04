@@ -29,7 +29,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import top.zuoyu.mybatis.annotation.Magic;
 import top.zuoyu.mybatis.json.JsonObject;
-import top.zuoyu.mybatis.service.UnifyService;
+import top.zuoyu.mybatis.service.MapperRepository;
 
 /**
  * 测试 .
@@ -42,7 +42,7 @@ import top.zuoyu.mybatis.service.UnifyService;
 public class TestController {
 
     @Magic("wechatinfo")
-    private UnifyService unifyService;
+    private MapperRepository unifyService;
 
 
     @GetMapping

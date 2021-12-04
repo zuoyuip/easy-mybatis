@@ -32,6 +32,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
+import org.springframework.beans.BeanUtils;
 import org.springframework.lang.NonNull;
 
 import top.zuoyu.mybatis.exception.JsonException;
@@ -1431,6 +1432,16 @@ public class JsonObject implements Cloneable, Serializable, InvocationHandler, M
             throw Json.typeMismatch(name, object, "T");
         }
         return result;
+    }
+
+    public <T> T toClass(@NonNull Class<T> tClass) {
+        try {
+            T instance = tClass.newInstance();
+            // TODO 转换
+            return instance;
+        } catch (InstantiationException | IllegalAccessException e) {
+            throw new JsonException(e.getMessage(), e);
+        }
     }
 
     /**

@@ -28,7 +28,7 @@ import top.zuoyu.mybatis.json.JsonObject;
  * @author: zuoyu
  * @create: 2021-11-02 17:33
  */
-public interface UnifyService {
+public interface MapperRepository {
 
     /**
      * 查询所有
@@ -72,6 +72,13 @@ public interface UnifyService {
      * @return 结果
      */
     int updateByPrimaryKey(JsonObject jsonObject);
+
+    /**
+     * 批量根据主键修改对象属性
+     * @param jsonObjects - 对象键值集合
+     * @return 结果
+     */
+    int updateByPrimaryKeyBatch(@Param("list") List<JsonObject> jsonObjects);
 
     /**
      * 根据主键删除对象

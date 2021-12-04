@@ -16,7 +16,7 @@
 package top.zuoyu.mybatis;
 
 import java.sql.SQLException;
-import java.util.Arrays;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
@@ -26,13 +26,14 @@ import org.springframework.jdbc.support.MetaDataAccessException;
 
 import top.zuoyu.mybatis.annotation.Magic;
 import top.zuoyu.mybatis.json.JsonObject;
-import top.zuoyu.mybatis.service.UnifyService;
+import top.zuoyu.mybatis.json.convert.StringConvert;
+import top.zuoyu.mybatis.service.MapperRepository;
 
 @SpringBootTest
 class EasyMybatisApplicationTests {
 
     @Magic("wechatinfo")
-    private UnifyService unifyService;
+    private MapperRepository mapperRepository;
 
     String json = "{\n" +
             "  \"create_time\": \"2021-11-26T06:07:15.000+00:00\",\n" +
@@ -51,13 +52,12 @@ class EasyMybatisApplicationTests {
 
     @Test
     void contextLoads() throws SQLException, MetaDataAccessException {
-        List<JsonObject> jsonObjects = Arrays.asList(
-                new JsonObject(json).put("city", "郑州").put("nickname", "大汪汪").put("create_time", new Date()),
-                new JsonObject(json).put("city", "焦作").put("nickname", "大哞哞").put("create_time", new Date()),
-                new JsonObject(json).put("city", "漯河").put("nickname", "大咩咩").put("create_time", new Date())
-        );
-        int i = unifyService.insertBatch(jsonObjects);
-        System.out.println(i);
+        List<JsonObject> jsonObjects = mapperRepository.selectList();
+        jsonObjects.forEach(System.out::println);
+
+        System.out.println("--------------------------------------");
+
+//        jsonObjects.forEach(jsonObjvbszxwqqqaryKeyBatch(jsonObjects);
     }
 
 }

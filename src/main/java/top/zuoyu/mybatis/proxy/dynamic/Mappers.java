@@ -15,19 +15,14 @@
  */
 package top.zuoyu.mybatis.proxy.dynamic;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
-import org.apache.ibatis.mapping.ResultMap;
-import org.apache.ibatis.mapping.ResultMapping;
-import org.apache.ibatis.session.Configuration;
-import org.apache.ibatis.session.SqlSessionFactory;
 import org.mybatis.spring.SqlSessionTemplate;
 import org.springframework.util.CollectionUtils;
 
-import top.zuoyu.mybatis.service.UnifyService;
+import top.zuoyu.mybatis.service.MapperRepository;
 import top.zuoyu.mybatis.ssist.StructureInit;
 
 /**
@@ -70,8 +65,8 @@ public class Mappers extends top.zuoyu.mybatis.proxy.cglib.Mappers {
             String tableName = entry.getKey();
             Class<?> mapperInterfaceClass = entry.getValue();
             Object mapper = sqlSessionTemplate.getMapper(mapperInterfaceClass);
-            UnifyService unifyService = new DynamicProxy(mapper).getUnifyService();
-            TABLE_NAME_UNIFY_SERVICE.put(tableName, unifyService);
+            MapperRepository mapperRepository = new DynamicProxy(mapper).getUnifyService();
+            TABLE_NAME_UNIFY_SERVICE.put(tableName, mapperRepository);
         }
     }
 

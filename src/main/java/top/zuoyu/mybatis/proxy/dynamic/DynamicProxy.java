@@ -17,13 +17,12 @@ package top.zuoyu.mybatis.proxy.dynamic;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
-import java.lang.reflect.Parameter;
 import java.lang.reflect.Proxy;
 
 import org.springframework.lang.NonNull;
 
 import top.zuoyu.mybatis.exception.EasyMybatisException;
-import top.zuoyu.mybatis.service.UnifyService;
+import top.zuoyu.mybatis.service.MapperRepository;
 
 /**
  * JDK动态代理 .
@@ -61,12 +60,12 @@ class DynamicProxy implements InvocationHandler {
         return invoke;
     }
 
-    public UnifyService getUnifyService() {
+    public MapperRepository getUnifyService() {
         Class<?> subjectClass = subject.getClass();
         Object proxyInstance = Proxy.newProxyInstance(subjectClass.getClassLoader(), subjectClass.getInterfaces(), this);
-        if (proxyInstance instanceof UnifyService) {
-            return (UnifyService) proxyInstance;
+        if (proxyInstance instanceof MapperRepository) {
+            return (MapperRepository) proxyInstance;
         }
-        throw new EasyMybatisException(subjectClass.getTypeName() + " can't cast " + UnifyService.class.getTypeName());
+        throw new EasyMybatisException(subjectClass.getTypeName() + " can't cast " + MapperRepository.class.getTypeName());
     }
 }
