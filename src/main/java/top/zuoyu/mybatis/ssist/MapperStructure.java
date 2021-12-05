@@ -79,6 +79,8 @@ class MapperStructure {
             CtClass serializableClass = classPool.get(Serializable.class.getTypeName());
             CtClass serializableArrayClass = classPool.get(Serializable[].class.getTypeName());
             CtClass intClass = classPool.get(Integer.TYPE.getTypeName());
+            CtClass booleanClass = classPool.get(Boolean.TYPE.getTypeName());
+            CtClass stringClass = classPool.get(String.class.getTypeName());
 
 
             // 创建方法
@@ -94,6 +96,11 @@ class MapperStructure {
             // 根据主键查询唯一对象
             CtMethod selectByPrimaryKey = new CtMethod(jsonObjectClass, "selectByPrimaryKey", new CtClass[]{serializableClass}, ctClass);
             ctClass.addMethod(selectByPrimaryKey);
+
+            // 是否存在符合条件的数据
+            CtMethod existsBy = new CtMethod(booleanClass, "existsBy", new CtClass[]{stringClass}, ctClass);
+            param(existsBy, "params");
+            ctClass.addMethod(existsBy);
 
             // 新增对象
             CtMethod insert = new CtMethod(intClass, "insert", new CtClass[]{jsonObjectClass}, ctClass);

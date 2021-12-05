@@ -51,46 +51,52 @@ public interface MapperRepository {
      */
     JsonObject selectByPrimaryKey(Serializable primaryKey);
 
+    /**
+     * 是否存在符合条件的数据
+     * @param suffixSql - 条件语句（例如：where ...）
+     * @return 是否存在
+     */
+    boolean existsBy(@Param("params") String suffixSql);
 
     /**
      * 新增对象
      * @param jsonObject - 对象键值
-     * @return 结果
+     * @return 变动数据的数量
      */
     int insert(JsonObject jsonObject);
 
     /**
      * 批量新增对象
      * @param jsonObjects - 对象键值集合
-     * @return 结果
+     * @return 变动数据的数量
      */
     int insertBatch(@Param("list") List<JsonObject> jsonObjects);
 
     /**
      * 根据主键修改对象属性
      * @param jsonObject - 包含主键对象键值
-     * @return 结果
+     * @return 变动数据的数量
      */
     int updateByPrimaryKey(JsonObject jsonObject);
 
     /**
      * 批量根据主键修改对象属性
      * @param jsonObjects - 对象键值集合
-     * @return 结果
+     * @return 变动数据的数量
      */
     int updateByPrimaryKeyBatch(@Param("list") List<JsonObject> jsonObjects);
 
     /**
      * 根据主键删除对象
      * @param primaryKey - 主键
-     * @return 结果
+     * @return 变动数据的数量
      */
     int deleteByPrimaryKey(Serializable primaryKey);
 
     /**
      * 批量根据主键删除对象
      * @param primaryKeys - 主键组
-     * @return 结果
+     * @return 变动数据的数量
      */
     int deleteByPrimaryKeys(@Param("array") Serializable[] primaryKeys);
 

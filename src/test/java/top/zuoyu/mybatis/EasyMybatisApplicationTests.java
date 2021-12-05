@@ -52,12 +52,7 @@ class EasyMybatisApplicationTests {
 
     @Test
     void contextLoads() throws SQLException, MetaDataAccessException {
-        List<JsonObject> jsonObjects = mapperRepository.selectList();
-        jsonObjects.forEach(System.out::println);
-
-        System.out.println("--------------------------------------");
-
-//        jsonObjects.forEach(jsonObjvbszxwqqqaryKeyBatch(jsonObjects);
+        System.out.println(mapperRepository.existsBy("where city like '%上海%'"));
     }
 
 }
