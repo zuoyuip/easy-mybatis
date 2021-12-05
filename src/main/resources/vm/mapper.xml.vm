@@ -43,6 +43,10 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         where ${pkColumn.columnName} = #{${pkColumn.javaField}, jdbcType=$pkColumn.jdbcType}
     </select>
 
+    <select id="existsBy" parameterType="java.lang.String" resultType="java.lang.Boolean">
+        select exists(select 1 from ${tableName} where appearance_code = #{appearanceCode} and del_flag = '0')
+    </select>
+
     <insert id="insert" parameterType="top.zuoyu.mybatis.json.JsonObject"#if($pkColumn.increment) useGeneratedKeys="true" keyProperty="$pkColumn.javaField"#end>
         insert into ${tableName}
         <trim prefix="(" suffix=")" suffixOverrides=",">

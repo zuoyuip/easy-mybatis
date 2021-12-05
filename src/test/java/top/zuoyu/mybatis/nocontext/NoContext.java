@@ -50,6 +50,8 @@ public class NoContext {
     public void testJson() {
         JsonObject jsonObject = new JsonObject(json).put("nickname", "小哞哞");
         System.out.println(jsonObject.toString());
+
+        System.out.println(Boolean.TYPE.getTypeName());
     }
 
     @Test
@@ -58,6 +60,11 @@ public class NoContext {
         assert jsonObject != null;
         Student student = jsonObject.toClass(Student.class);
         System.out.println(student);
+
+        System.out.println("----------------------------------");
+
+        System.out.println(new JsonObject(student).put("name", "大蜗牛").toString());
+
     }
 
     public static class Student{

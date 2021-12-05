@@ -17,8 +17,6 @@ package top.zuoyu.mybatis.json;
 
 import java.io.Serializable;
 import java.lang.reflect.Array;
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -32,7 +30,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
-import org.springframework.beans.BeanUtils;
+import org.springframework.cglib.beans.BeanMap;
 import org.springframework.lang.NonNull;
 
 import top.zuoyu.mybatis.exception.JsonException;
@@ -56,7 +54,7 @@ import top.zuoyu.mybatis.json.convert.StringConvert;
  * @author: zuoyu
  * @create: 2021-11-05 10:00
  */
-public class JsonObject implements Cloneable, Serializable, InvocationHandler, Map<String, Object> {
+public class JsonObject implements Cloneable, Serializable, Map<String, Object> {
 
     /**
      * 用于显式定义没有值的名称的标记值
@@ -137,6 +135,22 @@ public class JsonObject implements Cloneable, Serializable, InvocationHandler, M
             Object value = copyFrom.opt(name);
             if (value != null) {
                 this.nameValuePairs.put(name, value);
+            }
+        }
+    }
+
+    /**
+     * 通过Bean对象创建创建一个新的JsonObject，
+     *
+     * @param bean - 对象
+     */
+    public JsonObject(Object bean) {
+        this();
+        if (Objects.nonNull(bean)) {
+            BeanMap beanMap = BeanMap.create(bean);
+            for (Object key : beanMap.keySet()) {
+                Object value = beanMap.get(key);
+                this.nameValuePairs.put(key.toString(), value);
             }
         }
     }
@@ -1438,6 +1452,8 @@ public class JsonObject implements Cloneable, Serializable, InvocationHandler, M
         try {
             T instance = tClass.newInstance();
             // TODO 转换
+            BeanMap beanMap = BeanMap.create(instance);
+            beanMap.putAll(this.nameValuePairs);
             return instance;
         } catch (InstantiationException | IllegalAccessException e) {
             throw new JsonException(e.getMessage(), e);
@@ -1489,9 +1505,7 @@ public class JsonObject implements Cloneable, Serializable, InvocationHandler, M
         stringer.endObject();
     }
 
-    @Override
-    public Object invoke(Object proxy, Method method, Object[] args) {
-        return null;
-    }
+
+
 
 }
