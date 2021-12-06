@@ -51,3 +51,9 @@ Content-Type: application/json
   "sex": "1",
   "unionid": "1335282923"
 }
+
+###
+DELETE http://localhost:8080/test/4
+
+###
+DELETE http://localhost:8080/test/deleteByPrimaryKeys/10,11,12

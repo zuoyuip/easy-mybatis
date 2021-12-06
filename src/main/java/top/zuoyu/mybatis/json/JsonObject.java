@@ -1306,6 +1306,10 @@ public class JsonObject implements Cloneable, Serializable, Map<String, Object> 
         Object object = get(name);
         if (object instanceof JsonArray) {
             return (JsonArray) object;
+        }  else if (object instanceof Collection) {
+            return new JsonArray(((Collection<?>) object));
+        } else if (object.getClass().isArray()) {
+            return new JsonArray(object);
         } else {
             throw Json.typeMismatch(name, object, "JSONArray");
         }

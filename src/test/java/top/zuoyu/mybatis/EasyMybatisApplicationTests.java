@@ -15,18 +15,11 @@
  */
 package top.zuoyu.mybatis;
 
-import java.sql.SQLException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.List;
-
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.jdbc.support.MetaDataAccessException;
 
 import top.zuoyu.mybatis.annotation.Magic;
 import top.zuoyu.mybatis.json.JsonObject;
-import top.zuoyu.mybatis.json.convert.StringConvert;
 import top.zuoyu.mybatis.service.MapperRepository;
 
 @SpringBootTest
@@ -51,8 +44,8 @@ class EasyMybatisApplicationTests {
             "}";
 
     @Test
-    void contextLoads() throws SQLException, MetaDataAccessException {
-        System.out.println(mapperRepository.existsBy("where city like '%上海%'"));
+    void contextLoads() {
+        System.out.println(mapperRepository.selectListBy("where city like '%焦作%'"));
     }
 
 }

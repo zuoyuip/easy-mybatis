@@ -42,41 +42,41 @@ import top.zuoyu.mybatis.service.MapperRepository;
 public class TestController {
 
     @Magic("wechatinfo")
-    private MapperRepository unifyService;
+    private MapperRepository mapperRepository;
 
 
     @GetMapping
     public ResponseEntity<List<JsonObject>> selectList() {
-        return ResponseEntity.ok(unifyService.selectList());
+        return ResponseEntity.ok(mapperRepository.selectList());
     }
 
     @GetMapping("/selectListByExample")
     public ResponseEntity<List<JsonObject>> selectListByExample(JsonObject jsonObject) {
-        return ResponseEntity.ok(unifyService.selectListByExample(jsonObject));
+        return ResponseEntity.ok(mapperRepository.selectListByExample(jsonObject));
     }
 
     @GetMapping("/{primaryKey}")
     public ResponseEntity<JsonObject> selectByPrimaryKey(@PathVariable Integer primaryKey) {
-        return ResponseEntity.ok(unifyService.selectByPrimaryKey(primaryKey));
+        return ResponseEntity.ok(mapperRepository.selectByPrimaryKey(primaryKey));
     }
 
     @PostMapping
     public ResponseEntity<Integer> insert(@RequestBody JsonObject jsonObject) {
-        return ResponseEntity.ok(unifyService.insert(jsonObject));
+        return ResponseEntity.ok(mapperRepository.insert(jsonObject));
     }
 
     @PutMapping
     public ResponseEntity<Integer> updateByPrimaryKey(@RequestBody JsonObject jsonObject) {
-        return ResponseEntity.ok(unifyService.updateByPrimaryKey(jsonObject));
+        return ResponseEntity.ok(mapperRepository.updateByPrimaryKey(jsonObject));
     }
 
     @DeleteMapping("/{primaryKey}")
     public ResponseEntity<Integer> deleteByPrimaryKey(@PathVariable Integer primaryKey) {
-        return ResponseEntity.ok(unifyService.deleteByPrimaryKey(primaryKey));
+        return ResponseEntity.ok(mapperRepository.deleteByPrimaryKey(primaryKey));
     }
 
     @DeleteMapping("/deleteByPrimaryKeys/{primaryKeys}")
     public ResponseEntity<Integer> deleteByPrimaryKeys(@PathVariable Integer[] primaryKeys) {
-        return ResponseEntity.ok(unifyService.deleteByPrimaryKeys(primaryKeys));
+        return ResponseEntity.ok(mapperRepository.deleteByPrimaryKeys(primaryKeys));
     }
 }

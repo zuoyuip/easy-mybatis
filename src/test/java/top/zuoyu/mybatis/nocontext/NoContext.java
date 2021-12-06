@@ -15,6 +15,7 @@
  */
 package top.zuoyu.mybatis.nocontext;
 
+import java.util.Arrays;
 import java.util.Date;
 
 import org.junit.jupiter.api.Test;
@@ -65,6 +66,12 @@ public class NoContext {
 
         System.out.println(new JsonObject(student).put("name", "大蜗牛").toString());
 
+    }
+
+    @Test
+    public void testArray() {
+        JsonObject array = new JsonObject().put("array", Arrays.asList(10, 11, 12));
+        System.out.println(array.getJsonArray("array"));
     }
 
     public static class Student{

@@ -23,6 +23,7 @@ import java.util.List;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Repository;
+import org.springframework.util.StringUtils;
 
 import javassist.CannotCompileException;
 import javassist.ClassPool;
@@ -40,6 +41,7 @@ import javassist.bytecode.annotation.StringMemberValue;
 import top.zuoyu.mybatis.common.Constant;
 import top.zuoyu.mybatis.data.model.Table;
 import top.zuoyu.mybatis.exception.CustomException;
+import top.zuoyu.mybatis.exception.EasyMybatisException;
 import top.zuoyu.mybatis.json.JsonObject;
 import top.zuoyu.mybatis.service.MapperRepository;
 import top.zuoyu.mybatis.utils.ClassUtil;
@@ -74,63 +76,11 @@ class MapperStructure {
             CtClass unifyService = classPool.get(MapperRepository.class.getTypeName());
             ctClass.addInterface(unifyService);
 
-            CtClass listClass = classPool.get(List.class.getTypeName());
-            CtClass jsonObjectClass = classPool.get(JsonObject.class.getTypeName());
-            CtClass serializableClass = classPool.get(Serializable.class.getTypeName());
-            CtClass serializableArrayClass = classPool.get(Serializable[].class.getTypeName());
-            CtClass intClass = classPool.get(Integer.TYPE.getTypeName());
-            CtClass booleanClass = classPool.get(Boolean.TYPE.getTypeName());
-            CtClass stringClass = classPool.get(String.class.getTypeName());
-
-
             // 创建方法
-
-            // 查询所有
-            CtMethod selectList = new CtMethod(listClass, "selectList", new CtClass[]{}, ctClass);
-            ctClass.addMethod(selectList);
-
-            // 根据已有键值查询
-            CtMethod selectListByExample = new CtMethod(listClass, "selectListByExample", new CtClass[]{jsonObjectClass}, ctClass);
-            ctClass.addMethod(selectListByExample);
-
-            // 根据主键查询唯一对象
-            CtMethod selectByPrimaryKey = new CtMethod(jsonObjectClass, "selectByPrimaryKey", new CtClass[]{serializableClass}, ctClass);
-            ctClass.addMethod(selectByPrimaryKey);
-
-            // 是否存在符合条件的数据
-            CtMethod existsBy = new CtMethod(booleanClass, "existsBy", new CtClass[]{stringClass}, ctClass);
-            param(existsBy, "params");
-            ctClass.addMethod(existsBy);
-
-            // 新增对象
-            CtMethod insert = new CtMethod(intClass, "insert", new CtClass[]{jsonObjectClass}, ctClass);
-            ctClass.addMethod(insert);
-
-            // 批量新增对象
-            CtMethod insertBatch = new CtMethod(intClass, "insertBatch", new CtClass[]{listClass}, ctClass);
-            param(insertBatch, "list");
-            ctClass.addMethod(insertBatch);
-
-            // 根据主键修改对象属性
-            CtMethod updateByPrimaryKey = new CtMethod(intClass, "updateByPrimaryKey", new CtClass[]{jsonObjectClass}, ctClass);
-            ctClass.addMethod(updateByPrimaryKey);
-
-            // 批量根据主键修改对象属性
-            CtMethod updateByPrimaryKeyBatch = new CtMethod(intClass, "updateByPrimaryKeyBatch", new CtClass[]{listClass}, ctClass);
-            param(updateByPrimaryKeyBatch, "list");
-            ctClass.addMethod(updateByPrimaryKeyBatch);
-
-            // 根据主键删除对象
-            CtMethod deleteByPrimaryKey = new CtMethod(intClass, "deleteByPrimaryKey", new CtClass[]{serializableClass}, ctClass);
-            ctClass.addMethod(deleteByPrimaryKey);
-
-            // 批量根据主键删除对象
-            CtMethod deleteByPrimaryKeys = new CtMethod(intClass, "deleteByPrimaryKeys", new CtClass[]{serializableArrayClass}, ctClass);
-            param(deleteByPrimaryKeys, "array");
-            ctClass.addMethod(deleteByPrimaryKeys);
+            methodList(ctClass, classPool);
 
         } catch (NotFoundException | CannotCompileException e) {
-            e.printStackTrace();
+            throw new EasyMybatisException(e.getMessage(), e);
         }
 
         URL basePath = ClassUtil.getBasePath();
@@ -144,21 +94,110 @@ class MapperStructure {
         try {
             return classPool.toClass(ctClass);
         } catch (CannotCompileException e) {
-            throw new CustomException("writeFile is fail!", e);
+            throw new EasyMybatisException("toClass is fail!", e);
         }
 
 
     }
 
-    private static void param(@NonNull CtMethod ctMethod, String value) {
+    private static void param(@NonNull CtMethod ctMethod, @NonNull String... values) {
         MethodInfo methodInfo = ctMethod.getMethodInfo();
         ConstPool constPool = methodInfo.getConstPool();
         ParameterAnnotationsAttribute parameterAnnotationsAttribute = new ParameterAnnotationsAttribute(constPool, ParameterAnnotationsAttribute.visibleTag);
-        Annotation annotation = new Annotation(Param.class.getTypeName(), constPool);
-        annotation.addMemberValue("value", new StringMemberValue(value, constPool));
-        Annotation[][] paramArrays = new Annotation[1][1];
-        paramArrays[0][0] = annotation;
+        Annotation[][] paramArrays = new Annotation[values.length][1];
+        for (int i = 0; i < values.length; i++) {
+            if (!StringUtils.hasLength(values[i])) {
+                paramArrays[i][0] = new Annotation(NonNull.class.getTypeName(), constPool);
+                continue;
+            }
+            Annotation annotation = new Annotation(Param.class.getTypeName(), constPool);
+            annotation.addMemberValue("value", new StringMemberValue(values[i], constPool));
+            paramArrays[i][0] = annotation;
+        }
         parameterAnnotationsAttribute.setAnnotations(paramArrays);
         methodInfo.addAttribute(parameterAnnotationsAttribute);
+    }
+
+    private static void methodList(@NonNull CtClass ctClass, @NonNull ClassPool classPool) throws CannotCompileException, NotFoundException {
+        CtClass listClass = classPool.get(List.class.getTypeName());
+        CtClass jsonObjectClass = classPool.get(JsonObject.class.getTypeName());
+        CtClass serializableClass = classPool.get(Serializable.class.getTypeName());
+        CtClass serializableArrayClass = classPool.get(Serializable[].class.getTypeName());
+        CtClass intClass = classPool.get(Integer.TYPE.getTypeName());
+        CtClass longClass = classPool.get(Long.TYPE.getTypeName());
+        CtClass booleanClass = classPool.get(Boolean.TYPE.getTypeName());
+        CtClass stringClass = classPool.get(String.class.getTypeName());
+
+        // 查询所有
+        CtMethod selectList = new CtMethod(listClass, "selectList", new CtClass[]{}, ctClass);
+        ctClass.addMethod(selectList);
+
+        // 根据已有键值查询
+        CtMethod selectListByExample = new CtMethod(listClass, "selectListByExample", new CtClass[]{jsonObjectClass}, ctClass);
+        ctClass.addMethod(selectListByExample);
+
+        // 根据主键查询唯一对象
+        CtMethod selectByPrimaryKey = new CtMethod(jsonObjectClass, "selectByPrimaryKey", new CtClass[]{serializableClass}, ctClass);
+        ctClass.addMethod(selectByPrimaryKey);
+
+        // 查询符合条件的数据
+        CtMethod selectListBy = new CtMethod(listClass, "selectListBy", new CtClass[]{stringClass}, ctClass);
+        param(selectListBy, "suffixSql");
+        ctClass.addMethod(selectListBy);
+
+        // 查询符合条件的数据数量
+        CtMethod countBy = new CtMethod(longClass, "countBy", new CtClass[]{stringClass}, ctClass);
+        param(countBy, "suffixSql");
+        ctClass.addMethod(countBy);
+
+        // 根据已有键值查询是否存在符合条件的数据数量
+        CtMethod countByExample = new CtMethod(longClass, "countByExample", new CtClass[]{jsonObjectClass}, ctClass);
+        ctClass.addMethod(countByExample);
+
+        // 是否存在符合条件的数据
+        CtMethod existsBy = new CtMethod(booleanClass, "existsBy", new CtClass[]{stringClass}, ctClass);
+        param(existsBy, "suffixSql");
+        ctClass.addMethod(existsBy);
+
+        // 根据已有键值查询是否存在符合条件的数据
+        CtMethod existsByExample = new CtMethod(booleanClass, "existsByExample", new CtClass[]{jsonObjectClass}, ctClass);
+        ctClass.addMethod(existsByExample);
+
+        // 新增对象
+        CtMethod insert = new CtMethod(intClass, "insert", new CtClass[]{jsonObjectClass}, ctClass);
+        ctClass.addMethod(insert);
+
+        // 批量新增对象
+        CtMethod insertBatch = new CtMethod(intClass, "insertBatch", new CtClass[]{listClass}, ctClass);
+        param(insertBatch, "list");
+        ctClass.addMethod(insertBatch);
+
+        // 根据主键修改对象属性
+        CtMethod updateByPrimaryKey = new CtMethod(intClass, "updateByPrimaryKey", new CtClass[]{jsonObjectClass}, ctClass);
+        ctClass.addMethod(updateByPrimaryKey);
+
+        // 修改符合条件的数据
+        CtMethod updateBy = new CtMethod(intClass, "updateBy", new CtClass[]{jsonObjectClass, stringClass}, ctClass);
+        param(updateBy, "jsonObject", "suffixSql");
+        ctClass.addMethod(updateBy);
+
+        // 批量根据主键修改对象属性
+        CtMethod updateByPrimaryKeyBatch = new CtMethod(intClass, "updateByPrimaryKeyBatch", new CtClass[]{listClass}, ctClass);
+        param(updateByPrimaryKeyBatch, "list");
+        ctClass.addMethod(updateByPrimaryKeyBatch);
+
+        // 根据主键删除对象
+        CtMethod deleteByPrimaryKey = new CtMethod(intClass, "deleteByPrimaryKey", new CtClass[]{serializableClass}, ctClass);
+        ctClass.addMethod(deleteByPrimaryKey);
+
+        // 删除符合条件的数据
+        CtMethod deleteBy = new CtMethod(intClass, "deleteBy", new CtClass[]{stringClass}, ctClass);
+        param(deleteBy, "suffixSql");
+        ctClass.addMethod(deleteBy);
+
+        // 批量根据主键删除对象
+        CtMethod deleteByPrimaryKeys = new CtMethod(intClass, "deleteByPrimaryKeys", new CtClass[]{serializableArrayClass}, ctClass);
+        param(deleteByPrimaryKeys, "array");
+        ctClass.addMethod(deleteByPrimaryKeys);
     }
 }
