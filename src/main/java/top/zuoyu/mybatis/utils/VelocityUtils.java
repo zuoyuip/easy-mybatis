@@ -83,7 +83,7 @@ public class VelocityUtils {
      */
     @NonNull
     public static String getTemplate() {
-        return "vm" + File.separator + "mapper.xml.vm";
+        return "mapper.xml.vm";
     }
 
     public static class Column {

@@ -38,4 +38,18 @@ public class ClassUtil {
     public static URL getBasePath() {
         return ClassUtil.class.getClassLoader().getResource(Strings.EMPTY);
     }
+
+    public static URL getResource() {
+        return ClassUtil.class.getResource(Strings.EMPTY);
+    }
+
+    public static URL getBasePath(String file) {
+        return ClassUtil.class.getClassLoader().getResource(file);
+    }
+
+    public static URL getResource(String file) {
+        return ClassUtil.class.getResource(file);
+    }
+
+
 }
