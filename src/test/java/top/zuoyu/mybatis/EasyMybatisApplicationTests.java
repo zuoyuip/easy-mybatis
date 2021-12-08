@@ -15,6 +15,8 @@
  */
 package top.zuoyu.mybatis;
 
+import java.io.Serializable;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -45,7 +47,8 @@ class EasyMybatisApplicationTests {
 
     @Test
     void contextLoads() {
-        System.out.println(mapperRepository.selectListBy("where city like '%焦作%'"));
+//        System.out.println(mapperRepository.selectListBy("where city like '%焦作%'"));
+        System.out.println(mapperRepository.selectFieldsBy("city, nickname", "where city like '%焦作%'"));
     }
 
 }

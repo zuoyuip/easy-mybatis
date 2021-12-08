@@ -47,6 +47,42 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <include refid="select${className}Vo"/> ${suffixSql}
     </select>
 
+    <select id="selectFields" resultType="top.zuoyu.mybatis.json.JsonObject">
+        SELECT ${fields} FROM ${tableName}
+    </select>
+
+    <select id="selectFieldsByExample" resultType="top.zuoyu.mybatis.json.JsonObject">
+        SELECT ${fields} FROM ${tableName}
+        <where>
+#foreach($column in $columns)
+#set($javaField=$column.javaField)
+#set($javaType=$column.javaType)
+#set($columnName=$column.columnName)
+#if($javaType == "java.lang.String")
+            <if test="jsonObject.$javaField != null #if($javaType == 'java.lang.String' ) and jsonObject.$javaField.trim() != ''#end"> and $columnName like concat('%', #{jsonObject.$javaField}, '%')</if>
+#else
+            <if test="jsonObject.$javaField != null #if($javaType == 'java.lang.String' ) and jsonObject.$javaField.trim() != ''#end"> and $columnName = #{jsonObject.$javaField}</if>
+#end
+#end
+        </where>
+    </select>
+
+    <select id="selectFieldsByPrimaryKey" resultType="top.zuoyu.mybatis.json.JsonObject">
+        SELECT ${fields} FROM ${tableName}
+        WHERE ${pkColumn.columnName} = #{primaryKey, jdbcType=$pkColumn.jdbcType}
+    </select>
+
+    <select id="selectFieldsByPrimaryKeys" resultType="top.zuoyu.mybatis.json.JsonObject">
+        SELECT ${fields} FROM ${tableName}
+        WHERE ${pkColumn.columnName} IN
+        <foreach item="primaryKey" collection="array" open="(" separator="," close=")">
+            #{primaryKey, jdbcType=$pkColumn.jdbcType}
+        </foreach>
+    </select>
+
+    <select id="selectFieldsBy" resultType="top.zuoyu.mybatis.json.JsonObject">
+        SELECT ${fields} FROM ${tableName} ${suffixSql}
+    </select>
 
     <select id="countByExample" parameterType="top.zuoyu.mybatis.json.JsonObject" resultType="java.lang.Long">
         SELECT COUNT(${pkColumn.columnName}) FROM ${tableName}
@@ -68,7 +104,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         SELECT COUNT(${pkColumn.columnName}) FROM ${tableName} ${suffixSql}
     </select>
 
-    <select id="existsByExample" parameterType="top.zuoyu.mybatis.json.JsonObject" resultType="java.lang.Boolean">
+    <select id="existsByExample" parameterType="top.zuoyu.mybatis.json.JsonObject" resultType="boolean">
         SELECT EXISTS(SELECT 1 FROM ${tableName}
         <where>
 #foreach($column in $columns)
@@ -85,7 +121,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         )
     </select>
 
-    <select id="existsBy" parameterType="java.lang.String" resultType="java.lang.Boolean">
+    <select id="existsBy" parameterType="java.lang.String" resultType="boolean">
         SELECT EXISTS(SELECT 1 FROM ${tableName} ${suffixSql})
     </select>
 
@@ -101,7 +137,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <trim prefix="values (" suffix=")" suffixOverrides=",">
 #foreach($column in $columns)
 #if($column.columnName != $pkColumn.columnName || !$pkColumn.increment)
-            <if test="$column.javaField != null#if($column.javaType == 'java.lang.String' && $column.required) and $column.javaField != ''#end">#{$column.javaField},</if>
+            <if test="$column.javaField != null#if($column.javaType == 'java.lang.String' && $column.required) and $column.javaField != ''#end">#{$column.javaField, jdbcType=$column.jdbcType},</if>
 #end
 #end
          </trim>

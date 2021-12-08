@@ -245,6 +245,25 @@ public class JsonObject implements Cloneable, Serializable, Map<String, Object> 
         return null;
     }
 
+    /**
+     * 对指定键进行重命名，不破坏键值关系
+     *
+     * @param oldKey - 指定键名称
+     * @param newKey – 赋予的新键名称
+     * @return {@link JsonObject}
+     */
+    public JsonObject renameKey(String oldKey, String newKey) {
+        if (this.nameValuePairs.containsKey(oldKey)) {
+            if (this.nameValuePairs.containsKey(newKey)) {
+                throw new JsonException("this " + newKey + " is exists");
+            }
+            Object value = this.nameValuePairs.get(oldKey);
+            this.nameValuePairs.put(newKey, value);
+            this.nameValuePairs.remove(oldKey, value);
+        }
+        return this;
+    }
+
 
     /**
      * 将value映射到name ，破坏任何具有相同名称的现有名称/值映射

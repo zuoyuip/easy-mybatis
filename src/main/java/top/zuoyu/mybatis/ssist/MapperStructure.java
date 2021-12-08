@@ -42,6 +42,7 @@ import top.zuoyu.mybatis.common.Constant;
 import top.zuoyu.mybatis.data.model.Table;
 import top.zuoyu.mybatis.exception.CustomException;
 import top.zuoyu.mybatis.exception.EasyMybatisException;
+import top.zuoyu.mybatis.json.JsonArray;
 import top.zuoyu.mybatis.json.JsonObject;
 import top.zuoyu.mybatis.service.MapperRepository;
 import top.zuoyu.mybatis.utils.ClassUtil;
@@ -121,6 +122,7 @@ class MapperStructure {
     private static void methodList(@NonNull CtClass ctClass, @NonNull ClassPool classPool) throws CannotCompileException, NotFoundException {
         CtClass listClass = classPool.get(List.class.getTypeName());
         CtClass jsonObjectClass = classPool.get(JsonObject.class.getTypeName());
+        CtClass jsonArrayClass = classPool.get(JsonArray.class.getTypeName());
         CtClass serializableClass = classPool.get(Serializable.class.getTypeName());
         CtClass serializableArrayClass = classPool.get(Serializable[].class.getTypeName());
         CtClass intClass = classPool.get(Integer.TYPE.getTypeName());
@@ -144,6 +146,31 @@ class MapperStructure {
         CtMethod selectListBy = new CtMethod(listClass, "selectListBy", new CtClass[]{stringClass}, ctClass);
         param(selectListBy, "suffixSql");
         ctClass.addMethod(selectListBy);
+
+        // 查询特定的字段或结果
+        CtMethod selectFields = new CtMethod(jsonArrayClass, "selectFields", new CtClass[]{stringClass}, ctClass);
+        param(selectFields, "fields");
+        ctClass.addMethod(selectFields);
+
+        // 根据已有键值查询特定的字段或结果
+        CtMethod selectFieldsByExample = new CtMethod(jsonArrayClass, "selectFieldsByExample", new CtClass[]{stringClass, jsonObjectClass}, ctClass);
+        param(selectFieldsByExample, "fields", "jsonObject");
+        ctClass.addMethod(selectFieldsByExample);
+
+        // 根据主键查询特定的字段或结果
+        CtMethod selectFieldsByPrimaryKey = new CtMethod(jsonArrayClass, "selectFieldsByPrimaryKey", new CtClass[]{stringClass, serializableClass}, ctClass);
+        param(selectFieldsByPrimaryKey, "fields", "primaryKey");
+        ctClass.addMethod(selectFieldsByPrimaryKey);
+
+        // 根据主键查询特定的字段或结果
+        CtMethod selectFieldsByPrimaryKeys = new CtMethod(jsonArrayClass, "selectFieldsByPrimaryKeys", new CtClass[]{stringClass, serializableArrayClass}, ctClass);
+        param(selectFieldsByPrimaryKeys, "fields", "array");
+        ctClass.addMethod(selectFieldsByPrimaryKeys);
+
+        // 查询符合条件的特定字段或结果
+        CtMethod selectFieldsBy = new CtMethod(jsonArrayClass, "selectFieldsBy", new CtClass[]{stringClass, stringClass}, ctClass);
+        param(selectFieldsBy, "fields", "suffixSql");
+        ctClass.addMethod(selectFieldsBy);
 
         // 查询符合条件的数据数量
         CtMethod countBy = new CtMethod(longClass, "countBy", new CtClass[]{stringClass}, ctClass);

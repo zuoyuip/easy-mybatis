@@ -18,6 +18,7 @@ package top.zuoyu.mybatis.service;
 import java.io.Serializable;
 import java.util.List;
 
+import top.zuoyu.mybatis.json.JsonArray;
 import top.zuoyu.mybatis.json.JsonObject;
 
 /**
@@ -36,10 +37,11 @@ public interface MapperRepository {
 
     /**
      * 根据已有键值查询
-     * @param jsonObject - 已有键值
+     *
+     * @param example - 已有键值
      * @return 符合要求的数据集合
      */
-    List<JsonObject> selectListByExample(JsonObject jsonObject);
+    List<JsonObject> selectListByExample(JsonObject example);
 
 
     /**
@@ -52,40 +54,89 @@ public interface MapperRepository {
     /**
      * 查询符合条件的数据
      *
-     * @param suffixSql - 条件语句（例如：where ...）
+     * @param suffixSql - 条件语句（例如：where field = xxx）
      * @return 数据数量
      */
     List<JsonObject> selectListBy(String suffixSql);
 
     /**
+     * 查询特定的字段或结果
+     * （例如："fieldA, fieldB, fieldC"）
+     * （例如："COUNT(field)"）
+     *
+     * @param fields - 特定的字段或结果
+     * @return 特定的字段或结果
+     */
+    JsonArray selectFields(String fields);
+
+    /**
+     * 根据已有键值查询特定的字段或结果
+     * （例如："fieldA, fieldB, fieldC"）
+     * （例如："COUNT(field)"）
+     *
+     * @param fields - 特定的字段或结果
+     * @param example - 已有键值
+     * @return 特定的字段或结果
+     */
+    JsonArray selectFieldsByExample(String fields, JsonObject example);
+
+    /**
+     * 根据主键查询特定的字段或结果
+     *
+     * @param fields    - 特定的字段或结果（例如："fieldA, fieldB, fieldC"）
+     * @param primaryKey - 主键
+     * @return 特定的字段或结果
+     */
+    JsonArray selectFieldsByPrimaryKey(String fields, Serializable primaryKey);
+
+    /**
+     * 根据主键集合查询特定的字段或结果
+     *
+     * @param fields    - 特定的字段或结果（例如："fieldA, fieldB, fieldC"）
+     * @param primaryKeys - 主键集合
+     * @return 特定的字段或结果
+     */
+    JsonArray selectFieldsByPrimaryKeys(String fields, Serializable[] primaryKeys);
+
+    /**
+     * 查询符合条件的数据
+     *
+     * @param fields   - 特定的字段或结果（例如："fieldA, fieldB, fieldC"）
+     * @param suffixSql - 条件语句（例如：where field = xxx）
+     * @return 特定的字段或结果
+     */
+    JsonArray selectFieldsBy(String fields, String suffixSql);
+
+    /**
      * 查询符合条件的数据数量
      *
-     * @param suffixSql - 条件语句（例如：where ...）
+     * @param suffixSql - 条件语句（例如：where field = xxx）
      * @return 数据数量
      */
     long countBy(String suffixSql);
 
     /**
      * 根据已有键值查询是否存在符合条件的数据数量
-     * @param jsonObject - 已有键值
+     *
+     * @param example - 已有键值
      * @return 数据数量
      */
-    long countByExample(JsonObject jsonObject);
+    long countByExample(JsonObject example);
 
     /**
      * 是否存在符合条件的数据
-     *
-     * @param suffixSql - 条件语句（例如：where ...）
+     * @param suffixSql - 条件语句（例如：where field = xxx）
      * @return 是否存在
      */
     boolean existsBy(String suffixSql);
 
     /**
      * 根据已有键值查询是否存在符合条件的数据
-     * @param jsonObject - 已有键值
+     *
+     * @param example - 已有键值
      * @return 是否存在
      */
-    boolean existsByExample(JsonObject jsonObject);
+    boolean existsByExample(JsonObject example);
 
     /**
      * 新增对象
@@ -96,7 +147,6 @@ public interface MapperRepository {
 
     /**
      * 批量新增对象
-     *
      * @param jsonObjects - 对象键值集合
      * @return 变动数据的数量
      */
@@ -112,14 +162,13 @@ public interface MapperRepository {
     /**
      * 修改特定条件的对象属性
      * @param jsonObject - 要修改的键值
-     * @param suffixSql - 条件语句（例如：where ...）
+     * @param suffixSql - 条件语句（例如：where field = xxx）
      * @return 变动数据的数量
      */
     int updateBy(JsonObject jsonObject, String suffixSql);
 
     /**
      * 批量根据主键修改对象属性
-     *
      * @param jsonObjects - 对象键值集合
      * @return 变动数据的数量
      */
@@ -134,15 +183,13 @@ public interface MapperRepository {
 
     /**
      * 删除符合条件的数据
-     *
-     * @param suffixSql - 条件语句（例如：where ...）
+     * @param suffixSql - 条件语句（例如：where field = xxx）
      * @return 变动数据的数量
      */
     int deleteBy(String suffixSql);
 
     /**
      * 批量根据主键删除对象
-     *
      * @param primaryKeys - 主键组
      * @return 变动数据的数量
      */
