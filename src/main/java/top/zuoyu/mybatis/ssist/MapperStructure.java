@@ -84,14 +84,6 @@ class MapperStructure {
             throw new EasyMybatisException(e.getMessage(), e);
         }
 
-        URL basePath = ClassUtil.getBasePath();
-        try {
-            ctClass.writeFile(basePath.getPath());
-        } catch (CannotCompileException | IOException e) {
-            throw new CustomException("writeFile is fail!", e);
-        }
-
-
         try {
             return classPool.toClass(ctClass);
         } catch (CannotCompileException e) {

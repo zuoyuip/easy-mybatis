@@ -49,7 +49,6 @@ class MapperXmlStructure {
         StringWriter stringWriter = new StringWriter();
         template.merge(context, stringWriter);
 
-        System.out.println(stringWriter);
         return stringWriter.toString();
     }
 }
