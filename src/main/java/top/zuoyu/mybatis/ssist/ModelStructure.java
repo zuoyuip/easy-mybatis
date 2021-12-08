@@ -19,16 +19,9 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.net.URL;
 import java.util.Collection;
-import java.util.Date;
 import java.util.concurrent.ThreadLocalRandom;
 
 import org.springframework.lang.NonNull;
-import org.springframework.util.StringUtils;
-
-import com.fasterxml.jackson.annotation.JsonAlias;
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonProperty;
 
 import javassist.CannotCompileException;
 import javassist.ClassPool;
@@ -42,7 +35,6 @@ import javassist.bytecode.ClassFile;
 import javassist.bytecode.ConstPool;
 import javassist.bytecode.FieldInfo;
 import javassist.bytecode.annotation.Annotation;
-import javassist.bytecode.annotation.EnumMemberValue;
 import javassist.bytecode.annotation.StringMemberValue;
 import top.zuoyu.mybatis.annotation.Model;
 import top.zuoyu.mybatis.common.Constant;
@@ -138,38 +130,6 @@ class ModelStructure {
             FieldInfo fieldInfo = field.getFieldInfo();
             AnnotationsAttribute fieldAttr = new AnnotationsAttribute(constPool, AnnotationsAttribute.visibleTag);
 
-
-            // 是否允许为NULL
-            Annotation includeAnn = new Annotation(JsonInclude.class.getTypeName(), constPool);
-            EnumMemberValue generationTypeValue = new EnumMemberValue(constPool);
-            generationTypeValue.setType(JsonInclude.Include.class.getTypeName());
-            if (isNullable) {
-                generationTypeValue.setValue(JsonInclude.Include.NON_NULL.name());
-            } else {
-                generationTypeValue.setValue(JsonInclude.Include.ALWAYS.name());
-            }
-            includeAnn.addMemberValue("value", generationTypeValue);
-            fieldAttr.addAnnotation(includeAnn);
-
-            // 统一列
-            Annotation columnAnn = new Annotation(JsonProperty.class.getTypeName(), constPool);
-            columnAnn.addMemberValue("value", new StringMemberValue(columnName, constPool));
-            if (StringUtils.hasLength(columnDef) && !dataType.isAssignableFrom(Date.class)) {
-                columnAnn.addMemberValue("defaultValue", new StringMemberValue(columnDef, constPool));
-            }
-            fieldAttr.addAnnotation(columnAnn);
-
-            // 属性别名
-            Annotation aliasAnn = new Annotation(JsonAlias.class.getTypeName(), constPool);
-            aliasAnn.addMemberValue("value", new StringMemberValue(tableName + Constant.NAME_SEPARATOR + columnName, constPool));
-            fieldAttr.addAnnotation(aliasAnn);
-
-            // 是否为时间类型
-            if (dataType.isAssignableFrom(Date.class)) {
-                Annotation formatAnn = new Annotation(JsonFormat.class.getTypeName(), constPool);
-                formatAnn.addMemberValue("pattern", new StringMemberValue("yyyy-MM-dd HH:mm:ss", constPool));
-                fieldAttr.addAnnotation(formatAnn);
-            }
             fieldInfo.addAttribute(fieldAttr);
             ctClass.addField(field);
             // 生成 getter、setter 方法
