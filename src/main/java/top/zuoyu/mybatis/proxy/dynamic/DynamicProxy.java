@@ -45,10 +45,12 @@ class DynamicProxy implements InvocationHandler {
         this.subject = subject;
         this.dynamicAround = new DynamicAround() {
             @Override
-            public void before(Object proxy, Method method, Object[] args) {}
+            public void before(Object proxy, Method method, Object[] args) {
+            }
 
             @Override
-            public void after(Object proxy, Method method, Object[] args) {}
+            public void after(Object proxy, Method method, Object[] args) {
+            }
         };
     }
 

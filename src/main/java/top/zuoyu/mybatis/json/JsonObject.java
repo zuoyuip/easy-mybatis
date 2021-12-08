@@ -1471,16 +1471,42 @@ public class JsonObject implements Cloneable, Serializable, Map<String, Object> 
         return result;
     }
 
+    /**
+     * 转换为指定Bean
+     *
+     * @param tClass - Bean类型
+     * @return 包含属性的Bean对象
+     */
     public <T> T toClass(@NonNull Class<T> tClass) {
         try {
             T instance = tClass.newInstance();
-            // TODO 转换
             BeanMap beanMap = BeanMap.create(instance);
             beanMap.putAll(this.nameValuePairs);
             return instance;
         } catch (InstantiationException | IllegalAccessException e) {
             throw new JsonException(e.getMessage(), e);
         }
+    }
+
+    /**
+     * 根据自定义转换器转换为指定类型Bean
+     *
+     * @param convertClass - 自定义转换器
+     * @return 指定类型Bean对象
+     */
+    public <T> T toClass(@NonNull ConvertClass<T> convertClass) {
+        return convertClass.convert(this.nameValuePairs);
+    }
+
+    /**
+     * 根据自定义转换器转换为指定类型Bean，并定义返回默认值的触发条件
+     *
+     * @param convertClass - 自定义转换器
+     * @param defaultValue - 默认值
+     * @return 指定类型Bean对象
+     */
+    public <T> T toClass(@NonNull ConvertClass<T> convertClass, T defaultValue) {
+        return convertClass.convert(this.nameValuePairs, defaultValue);
     }
 
     /**
