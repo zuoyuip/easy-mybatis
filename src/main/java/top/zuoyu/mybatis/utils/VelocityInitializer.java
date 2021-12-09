@@ -48,7 +48,6 @@ public class VelocityInitializer {
 //                    "file.resource.loader.class",
 //                    "org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader");
             String path = ClassUtil.getBasePath("vm/mapper.xml.vm").getPath();
-            System.out.println("path:" + path);
             p.setProperty(VelocityEngine.FILE_RESOURCE_LOADER_PATH, path);
             // 定义字符集
             p.setProperty(Velocity.INPUT_ENCODING, StandardCharsets.UTF_8.name());
