@@ -23,6 +23,11 @@
  */
 package top.zuoyu.mybatis.utils;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.StringWriter;
+
 import org.springframework.lang.NonNull;
 
 /**
@@ -48,5 +53,23 @@ public class StrUtil {
             return String.valueOf(cs);
         }
         return str;
+    }
+
+    public static String getStringFromStream(InputStream is) throws IOException {
+        if (null == is) {
+            return null;
+        }
+        try {
+            InputStreamReader reader = new InputStreamReader(is);
+            char[] buffer = new char[1024];
+            StringWriter writer = new StringWriter();
+            int bytesRead;
+            while ((bytesRead = reader.read(buffer)) != -1) {
+                writer.write(buffer, 0, bytesRead);
+            }
+            return (writer.toString());
+        } finally {
+            is.close();
+        }
     }
 }

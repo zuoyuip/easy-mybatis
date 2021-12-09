@@ -23,32 +23,30 @@
  */
 package top.zuoyu.mybatis.utils;
 
-import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.util.Properties;
 
 import org.apache.velocity.app.Velocity;
-import org.apache.velocity.app.VelocityEngine;
 
 /**
  * VelocityEngine工厂
  *
+ *
  * @author zuoyu
  */
+@Deprecated
 public class VelocityInitializer {
+
     /**
-     * 初始化vm方法
+     * 初始化vm方法（此方式在打包后无法使用）
      */
     public static void initVelocity() {
         Properties p = new Properties();
         try {
             // 加载classpath目录下的vm文件
-//            此方式在打包后无法使用
-//            p.setProperty(
-//                    "file.resource.loader.class",
-//                    "org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader");
-            String path = ClassUtil.getBasePath("vm/mapper.xml.vm").getPath();
-            p.setProperty(VelocityEngine.FILE_RESOURCE_LOADER_PATH, path);
+            p.setProperty(
+                    "file.resource.loader.class",
+                    "org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader");
             // 定义字符集
             p.setProperty(Velocity.INPUT_ENCODING, StandardCharsets.UTF_8.name());
             p.setProperty(Velocity.OUTPUT_ENCODING, StandardCharsets.UTF_8.name());

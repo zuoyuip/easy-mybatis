@@ -23,6 +23,8 @@
  */
 package top.zuoyu.mybatis.utils;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 
 import org.apache.logging.log4j.util.Strings;
@@ -49,6 +51,10 @@ public class ClassUtil {
 
     public static URL getResource(String file) {
         return ClassUtil.class.getResource(file);
+    }
+
+    public static InputStream getResourceInputStream(String file) {
+        return ClassUtil.class.getClassLoader().getResourceAsStream(file);
     }
 
 
