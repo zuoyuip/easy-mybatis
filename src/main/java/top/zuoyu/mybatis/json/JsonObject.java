@@ -260,7 +260,8 @@ public class JsonObject implements Cloneable, Serializable, Map<String, Object> 
      * @param newKey – 赋予的新键名称
      * @return {@link JsonObject}
      */
-    public JsonObject renameKey(String oldKey, String newKey) {
+    @NonNull
+    public JsonObject renameKey(@NonNull String oldKey, @NonNull String newKey) {
         if (this.nameValuePairs.containsKey(oldKey)) {
             if (this.nameValuePairs.containsKey(newKey)) {
                 throw new JsonException("this " + newKey + " is exists");
@@ -280,7 +281,8 @@ public class JsonObject implements Cloneable, Serializable, Map<String, Object> 
      * @param value – 对应的值
      * @return {@link JsonObject}
      */
-    public JsonObject put(String name, boolean value) {
+    @NonNull
+    public JsonObject put(@NonNull String name, boolean value) {
         this.nameValuePairs.put(checkName(name), value);
         return this;
     }
@@ -292,7 +294,8 @@ public class JsonObject implements Cloneable, Serializable, Map<String, Object> 
      * @param value – 对应的值
      * @return {@link JsonObject}
      */
-    public JsonObject put(String name, double value) {
+    @NonNull
+    public JsonObject put(@NonNull String name, double value) {
         this.nameValuePairs.put(checkName(name), Json.checkDouble(value));
         return this;
     }
@@ -304,7 +307,8 @@ public class JsonObject implements Cloneable, Serializable, Map<String, Object> 
      * @param value – 对应的值
      * @return {@link JsonObject}
      */
-    public JsonObject put(String name, int value) {
+    @NonNull
+    public JsonObject put(@NonNull String name, int value) {
         this.nameValuePairs.put(checkName(name), value);
         return this;
     }
@@ -316,7 +320,8 @@ public class JsonObject implements Cloneable, Serializable, Map<String, Object> 
      * @param value – 对应的值
      * @return {@link JsonObject}
      */
-    public JsonObject put(String name, long value) {
+    @NonNull
+    public JsonObject put(@NonNull String name, long value) {
         this.nameValuePairs.put(checkName(name), value);
         return this;
     }
@@ -328,7 +333,8 @@ public class JsonObject implements Cloneable, Serializable, Map<String, Object> 
      * @param value – 对应的值
      * @return {@link JsonObject}
      */
-    public JsonObject put(String name, byte value) {
+    @NonNull
+    public JsonObject put(@NonNull String name, byte value) {
         this.nameValuePairs.put(checkName(name), value);
         return this;
     }
@@ -340,7 +346,8 @@ public class JsonObject implements Cloneable, Serializable, Map<String, Object> 
      * @param value – 对应的值
      * @return {@link JsonObject}
      */
-    public JsonObject put(String name, short value) {
+    @NonNull
+    public JsonObject put(@NonNull String name, short value) {
         this.nameValuePairs.put(checkName(name), value);
         return this;
     }
@@ -352,7 +359,8 @@ public class JsonObject implements Cloneable, Serializable, Map<String, Object> 
      * @param value – 对应的值
      * @return {@link JsonObject}
      */
-    public JsonObject put(String name, char value) {
+    @NonNull
+    public JsonObject put(@NonNull String name, char value) {
         this.nameValuePairs.put(checkName(name), value);
         return this;
     }
@@ -364,7 +372,8 @@ public class JsonObject implements Cloneable, Serializable, Map<String, Object> 
      * @param value – 对应的值
      * @return {@link JsonObject}
      */
-    public JsonObject put(String name, String value) {
+    @NonNull
+    public JsonObject put(@NonNull String name, String value) {
         try {
             this.nameValuePairs.put(checkName(name), value);
         } catch (JsonException e) {
@@ -432,7 +441,8 @@ public class JsonObject implements Cloneable, Serializable, Map<String, Object> 
      * @return {@link JsonObject}
      */
     @Override
-    public JsonObject put(String name, Object value) {
+    @NonNull
+    public JsonObject put(@NonNull String name, Object value) {
         if (value == null) {
             this.nameValuePairs.remove(name);
             return this;
@@ -459,7 +469,7 @@ public class JsonObject implements Cloneable, Serializable, Map<String, Object> 
      * @return 先前由name映射的值，如果没有这样的映射，则为 null
      */
     @Override
-    public Object remove(Object key) {
+    public Object remove(@NonNull Object key) {
         return this.nameValuePairs.remove(key);
     }
 
@@ -519,6 +529,7 @@ public class JsonObject implements Cloneable, Serializable, Map<String, Object> 
      * @param value – 对应的值
      * @return {@link JsonObject}
      */
+    @NonNull
     public JsonObject putOpt(String name, Object value) {
         if (name == null || value == null) {
             return this;

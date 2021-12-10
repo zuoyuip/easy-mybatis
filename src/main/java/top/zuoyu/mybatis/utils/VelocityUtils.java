@@ -59,10 +59,10 @@ public class VelocityUtils {
         String packageName = ClassUtils.getPackageName(BaseMapper.class);
         String tableName = table.getTableName();
         List<Column> columns = new ArrayList<>(Collections.emptyList());
-        Assert.notEmpty(table.getColumns(), "表" + tableName + "列数为0");
+        Assert.notEmpty(table.getColumns(), "table\t" + tableName + "column count is 0");
         columns.addAll(table.getColumns().stream().map(Column::builder).collect(Collectors.toList()));
         Set<String> primaryKeys = table.getPrimaryKeys();
-        Assert.isTrue(primaryKeys.size() == 1, "表" + tableName + "主键错误");
+        Assert.isTrue(primaryKeys.size() == 1, "table\t" + tableName + "primaryKey is error");
         String primaryKey = primaryKeys.iterator().next();
         top.zuoyu.mybatis.data.model.Column primaryKeyColumn = table.getColumn(primaryKey);
 

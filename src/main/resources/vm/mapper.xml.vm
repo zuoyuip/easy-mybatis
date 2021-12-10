@@ -148,29 +148,38 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         SELECT EXISTS(SELECT 1 FROM ${tableName} ${suffixSql})
     </select>
 
-    <insert id="insert" parameterType="top.zuoyu.mybatis.json.JsonObject"#if($pkColumn.increment) useGeneratedKeys="true" keyProperty="$pkColumn.javaField"#end>
+    <insert id="insert" parameterType="top.zuoyu.mybatis.json.JsonObject"#if($pkColumn.increment == "1") useGeneratedKeys="true" keyProperty="$pkColumn.javaField"#end>
         INSERT INTO ${tableName}
         <trim prefix="(" suffix=")" suffixOverrides=",">
+#if($pkColumn.increment != "1")
+            <if test="$pkColumn.javaField != null#if($pkColumn.javaType == 'java.lang.String' && $pkColumn.required == "1") and $pkColumn.javaField != ''#end">$pkColumn.columnName,</if>
+#end
 #foreach($column in $columns)
-#if($column.columnName != $pkColumn.columnName || !$pkColumn.increment)
-            <if test="$column.javaField != null#if($column.javaType == 'java.lang.String' && $column.required) and $column.javaField != ''#end">$column.columnName,</if>
+#if($column.columnName != $pkColumn.columnName)
+            <if test="$column.javaField != null#if($column.javaType == 'java.lang.String' && $column.required == "1") and $column.javaField != ''#end">$column.columnName,</if>
 #end
 #end
          </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
+#if($pkColumn.increment != "1")
+            <if test="$pkColumn.javaField != null#if($pkColumn.javaType == 'java.lang.String' && $pkColumn.required == "1") and $pkColumn.javaField != ''#end">#{$pkColumn.javaField, jdbcType=$pkColumn.jdbcType},</if>
+#end
 #foreach($column in $columns)
-#if($column.columnName != $pkColumn.columnName || !$pkColumn.increment)
-            <if test="$column.javaField != null#if($column.javaType == 'java.lang.String' && $column.required) and $column.javaField != ''#end">#{$column.javaField, jdbcType=$column.jdbcType},</if>
+#if($column.columnName != $pkColumn.columnName)
+            <if test="$column.javaField != null#if($column.javaType == 'java.lang.String' && $column.required == "1") and $column.javaField != ''#end">#{$column.javaField, jdbcType=$column.jdbcType},</if>
 #end
 #end
          </trim>
     </insert>
 
-    <insert id="insertBatch" parameterType="java.util.List"#if($pkColumn.increment) useGeneratedKeys="true" keyProperty="$pkColumn.javaField"#end>
+    <insert id="insertBatch" parameterType="java.util.List"#if($pkColumn.increment == "1") useGeneratedKeys="true" keyProperty="$pkColumn.javaField"#end>
         INSERT INTO ${tableName}
         <trim prefix="(" suffix=")" suffixOverrides=",">
+#if($pkColumn.increment != "1")
+            $pkColumn.columnName,
+#end
 #foreach($column in $columns)
-#if($column.columnName != $pkColumn.columnName || !$pkColumn.increment)
+#if($column.columnName != $pkColumn.columnName)
             $column.columnName,
 #end
 #end
@@ -178,8 +187,11 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         VALUES
         <foreach collection ="list" item="item" index= "index" separator =",">
             <trim prefix="(" suffix=")" suffixOverrides=",">
+#if(!$pkColumn.increment != "1")
+                #{item.${pkColumn.javaField}, jdbcType=$pkColumn.jdbcType},
+#end
 #foreach($column in $columns)
-#if($column.columnName != $pkColumn.columnName || !$pkColumn.increment)
+#if($column.columnName != $pkColumn.columnName)
                 #{item.${column.javaField}, jdbcType=$column.jdbcType},
 #end
 #end
@@ -192,7 +204,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <trim prefix="SET" suffixOverrides=",">
 #foreach($column in $columns)
 #if($column.columnName != $pkColumn.columnName)
-            <if test="$column.javaField != null#if($column.javaType == 'java.lang.String' && $column.required) and $column.javaField != ''#end">$column.columnName = #{$column.javaField, jdbcType=$column.jdbcType},</if>
+            <if test="$column.javaField != null#if($column.javaType == 'java.lang.String' && $column.required == "1") and $column.javaField != ''#end">$column.columnName = #{$column.javaField, jdbcType=$column.jdbcType},</if>
 #end
 #end
         </trim>
@@ -204,7 +216,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <trim prefix="SET" suffixOverrides=",">
 #foreach($column in $columns)
 #if($column.columnName != $pkColumn.columnName)
-            <if test="jsonObject.$column.javaField != null#if($column.javaType == 'java.lang.String' && $column.required) and jsonObject.$column.javaField != ''#end">$column.columnName = #{jsonObject.$column.javaField, jdbcType=$column.jdbcType},</if>
+            <if test="jsonObject.$column.javaField != null#if($column.javaType == 'java.lang.String' && $column.required == "1") and jsonObject.$column.javaField != ''#end">$column.columnName = #{jsonObject.$column.javaField, jdbcType=$column.jdbcType},</if>
 #end
 #end
         </trim>
@@ -218,10 +230,10 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 #if($column.columnName != $pkColumn.columnName)
             <trim prefix="$column.javaField = case" suffix="end,">
                 <foreach collection="list" item="item" index="index">
-                    <if test="item.${column.javaField} != null#if($column.javaType == 'java.lang.String' && $column.required) and item.${column.javaField} != ''#end">
+                    <if test="item.${column.javaField} != null#if($column.javaType == 'java.lang.String' && $column.required == "1") and item.${column.javaField} != ''#end">
                         WHEN ${pkColumn.columnName} = #{item.${pkColumn.javaField}} THEN #{item.${column.javaField}, jdbcType=$column.jdbcType}
                     </if>
-                    <if test="item.${column.javaField} == null#if($column.javaType == 'java.lang.String' && $column.required) and item.${column.javaField} == ''#end">
+                    <if test="item.${column.javaField} == null#if($column.javaType == 'java.lang.String' && $column.required == "1") and item.${column.javaField} == ''#end">
                         WHEN ${pkColumn.columnName} = #{item.${pkColumn.javaField}} THEN ${tableName}.${column.javaField}
                     </if>
                 </foreach>
