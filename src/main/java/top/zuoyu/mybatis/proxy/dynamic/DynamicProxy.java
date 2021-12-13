@@ -25,12 +25,8 @@ package top.zuoyu.mybatis.proxy.dynamic;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
-import java.lang.reflect.Proxy;
 
 import org.springframework.lang.NonNull;
-
-import top.zuoyu.mybatis.exception.EasyMybatisException;
-import top.zuoyu.mybatis.service.MapperRepository;
 
 /**
  * JDK动态代理 .
@@ -38,19 +34,14 @@ import top.zuoyu.mybatis.service.MapperRepository;
  * @author: zuoyu
  * @create: 2021-11-15 10:48
  */
-class DynamicProxy implements InvocationHandler {
+class DynamicProxy<T> implements InvocationHandler {
 
-    private final Object subject;
+    private final Class<T> interfaceType;
 
     private final DynamicAround dynamicAround;
 
-    public DynamicProxy(Object subject, DynamicAround dynamicAround) {
-        this.subject = subject;
-        this.dynamicAround = dynamicAround;
-    }
-
-    public DynamicProxy(Object subject) {
-        this.subject = subject;
+    public DynamicProxy(Class<T> intefaceType) {
+        this.interfaceType = intefaceType;
         this.dynamicAround = new DynamicAround() {
             @Override
             public void before(Object proxy, Method method, Object[] args) {
@@ -65,17 +56,9 @@ class DynamicProxy implements InvocationHandler {
     @Override
     public Object invoke(Object proxy, @NonNull Method method, Object[] args) throws Throwable {
         dynamicAround.before(proxy, method, args);
-        Object invoke = method.invoke(subject, args);
+        Object invoke = method.invoke(this, args);
         dynamicAround.after(proxy, method, args);
         return invoke;
     }
 
-    public MapperRepository getUnifyService() {
-        Class<?> subjectClass = subject.getClass();
-        Object proxyInstance = Proxy.newProxyInstance(subjectClass.getClassLoader(), subjectClass.getInterfaces(), this);
-        if (proxyInstance instanceof MapperRepository) {
-            return (MapperRepository) proxyInstance;
-        }
-        throw new EasyMybatisException(subjectClass.getTypeName() + " can't cast " + MapperRepository.class.getTypeName());
-    }
 }
