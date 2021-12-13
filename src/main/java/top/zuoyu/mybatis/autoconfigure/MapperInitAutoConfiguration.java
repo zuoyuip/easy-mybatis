@@ -24,11 +24,20 @@
 package top.zuoyu.mybatis.autoconfigure;
 
 import java.lang.reflect.Field;
+import java.util.Map;
 
 import org.mybatis.spring.SqlSessionTemplate;
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanPostProcessor;
+import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.beans.factory.support.AbstractBeanDefinition;
+import org.springframework.beans.factory.support.BeanDefinitionBuilder;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.lang.NonNull;
 
@@ -36,6 +45,7 @@ import top.zuoyu.mybatis.annotation.Magic;
 import top.zuoyu.mybatis.exception.EasyMybatisException;
 import top.zuoyu.mybatis.proxy.dynamic.Mappers;
 import top.zuoyu.mybatis.service.MapperRepository;
+import top.zuoyu.mybatis.ssist.StructureInit;
 
 /**
  * Mapper加载自动配置 .
@@ -45,10 +55,24 @@ import top.zuoyu.mybatis.service.MapperRepository;
  */
 @Configuration(proxyBeanMethods = false)
 @AutoConfigureAfter(EasyMybatisAutoConfiguration.class)
-public class MapperInitAutoConfiguration {
+public class MapperInitAutoConfiguration implements ApplicationContextAware {
+
+    private ApplicationContext applicationContext;
 
     public MapperInitAutoConfiguration(SqlSessionTemplate sqlSessionTemplate) {
-        Mappers.getInstance().init(sqlSessionTemplate);
+
+    }
+
+    @Override
+    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+        ConfigurableApplicationContext context = (ConfigurableApplicationContext) applicationContext;
+        DefaultListableBeanFactory beanFactory = (DefaultListableBeanFactory) context.getBeanFactory();
+        Map<String, Class<?>> tableNameClass = StructureInit.getTableNameClass();
+        for (Map.Entry<String, Class<?>> mapperClassEntry : tableNameClass.entrySet()) {
+            BeanDefinitionBuilder definitionBuilder = BeanDefinitionBuilder.genericBeanDefinition(mapperClassEntry.getValue());
+            BeanDefinition beanDefinition = definitionBuilder.getRawBeanDefinition();
+            
+        }
     }
 
     /**
