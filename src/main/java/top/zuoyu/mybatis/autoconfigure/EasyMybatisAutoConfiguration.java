@@ -72,7 +72,6 @@ import top.zuoyu.mybatis.ssist.StructureInit;
  * @create: 2021-10-29 16:55
  */
 @Configuration(proxyBeanMethods = false)
-//@EnableAspectJAutoProxy(exposeProxy = true)
 @ConditionalOnClass({SqlSessionFactory.class, SqlSessionFactoryBean.class})
 @ConditionalOnSingleCandidate(DataSource.class)
 @EnableConfigurationProperties({MybatisProperties.class, EasyProperties.class})
@@ -156,7 +155,7 @@ public class EasyMybatisAutoConfiguration implements InitializingBean {
         } else {
             factory.setMapperLocations(this.easyProperties.getResources());
         }
-
+        System.out.println("------------------------------factory.getObject()----------------------------------");
         return factory.getObject();
     }
 

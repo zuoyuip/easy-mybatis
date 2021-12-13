@@ -23,14 +23,20 @@
  */
 package top.zuoyu.mybatis.autoconfigure;
 
-import java.lang.reflect.Field;
 import java.util.Map;
+import java.util.Optional;
 
+import org.apache.ibatis.session.SqlSessionFactory;
 import org.mybatis.spring.SqlSessionTemplate;
+import org.mybatis.spring.mapper.MapperFactoryBean;
 import org.springframework.beans.BeansException;
+import org.springframework.beans.PropertyValue;
+import org.springframework.beans.PropertyValues;
+import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.beans.factory.config.BeanPostProcessor;
-import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.beans.factory.config.PropertyResourceConfigurer;
+import org.springframework.beans.factory.config.TypedStringValue;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
@@ -41,10 +47,6 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.lang.NonNull;
 
-import top.zuoyu.mybatis.annotation.Magic;
-import top.zuoyu.mybatis.exception.EasyMybatisException;
-import top.zuoyu.mybatis.proxy.dynamic.Mappers;
-import top.zuoyu.mybatis.service.MapperRepository;
 import top.zuoyu.mybatis.ssist.StructureInit;
 
 /**
@@ -55,55 +57,101 @@ import top.zuoyu.mybatis.ssist.StructureInit;
  */
 @Configuration(proxyBeanMethods = false)
 @AutoConfigureAfter(EasyMybatisAutoConfiguration.class)
-public class MapperInitAutoConfiguration implements ApplicationContextAware {
+public class MapperInitAutoConfiguration implements ApplicationContextAware, BeanNameAware {
 
-    private ApplicationContext applicationContext;
+    private final SqlSessionTemplate sqlSessionTemplate;
+    private final SqlSessionFactory sqlSessionFactory;
+    private String beanName;
+    private String basePackage;
+    private String sqlSessionFactoryBeanName;
+    private String sqlSessionTemplateBeanName;
+    private String lazyInitialization;
+    private String defaultScope;
+    private boolean processPropertyPlaceHolders;
 
-    public MapperInitAutoConfiguration(SqlSessionTemplate sqlSessionTemplate) {
-
+    public MapperInitAutoConfiguration(SqlSessionTemplate sqlSessionTemplate, SqlSessionFactory sqlSessionFactory) {
+        this.sqlSessionTemplate = sqlSessionTemplate;
+        this.sqlSessionFactory = sqlSessionFactory;
     }
 
     @Override
-    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+    public void setApplicationContext(@NonNull ApplicationContext applicationContext) throws BeansException {
+        processPropertyPlaceHolders(applicationContext);
         ConfigurableApplicationContext context = (ConfigurableApplicationContext) applicationContext;
+
         DefaultListableBeanFactory beanFactory = (DefaultListableBeanFactory) context.getBeanFactory();
         Map<String, Class<?>> tableNameClass = StructureInit.getTableNameClass();
         for (Map.Entry<String, Class<?>> mapperClassEntry : tableNameClass.entrySet()) {
-            BeanDefinitionBuilder definitionBuilder = BeanDefinitionBuilder.genericBeanDefinition(mapperClassEntry.getValue());
-            BeanDefinition beanDefinition = definitionBuilder.getRawBeanDefinition();
-            
+            BeanDefinitionBuilder definition = BeanDefinitionBuilder.genericBeanDefinition(mapperClassEntry.getValue());
+            AbstractBeanDefinition abstractBeanDefinition = definition.getBeanDefinition();
+            abstractBeanDefinition.setBeanClass(MapperFactoryBean.class);
+            abstractBeanDefinition.getPropertyValues().add("addToConfig", true);
+            abstractBeanDefinition.getPropertyValues().add("sqlSessionFactory", this.sqlSessionFactory);
+            abstractBeanDefinition.getPropertyValues().add("sqlSessionTemplate", this.sqlSessionTemplate);
+            abstractBeanDefinition.setAutowireMode(AbstractBeanDefinition.AUTOWIRE_BY_NAME);
+            abstractBeanDefinition.setLazyInit(Boolean.parseBoolean(this.lazyInitialization));
+            abstractBeanDefinition.setScope(ConfigurableBeanFactory.SCOPE_SINGLETON);
+            System.out.println("------------------------" + mapperClassEntry.getKey() + "-------------------------");
+            beanFactory.registerBeanDefinition(mapperClassEntry.getKey(), abstractBeanDefinition);
         }
     }
 
-    /**
-     * 依赖注入
-     */
-    @Configuration(proxyBeanMethods = false)
-    class MapperInjectProcessor implements BeanPostProcessor {
 
-        @Override
-        public Object postProcessAfterInitialization(@NonNull Object bean, String beanName) throws BeansException {
-            Class<?> beanClass = bean.getClass();
-            Field[] declaredFields = beanClass.getDeclaredFields();
-            for (Field field : declaredFields) {
-                if (field.isAnnotationPresent(Magic.class)) {
-                    if (!field.getType().isAssignableFrom(MapperRepository.class)) {
-                        throw new EasyMybatisException("Magic field must be declared as an interface:" + MapperRepository.class.getTypeName());
-                    }
-                    field.setAccessible(true);
-                    String tableName = field.getAnnotation(Magic.class).value();
-                    MapperRepository unifyService = Mappers.getUnifyService(tableName);
-                    try {
-                        field.set(bean, unifyService);
-                    } catch (IllegalAccessException e) {
-                        throw new EasyMybatisException(e.getMessage());
-                    }
-                }
+    @Override
+    public void setBeanName(String name) {
+        this.beanName = name;
+    }
+
+    private void processPropertyPlaceHolders(@NonNull ApplicationContext applicationContext) {
+        Map<String, PropertyResourceConfigurer> contextBeansOfType = applicationContext.getBeansOfType(PropertyResourceConfigurer.class,
+                false, false);
+
+        if (!contextBeansOfType.isEmpty() && applicationContext instanceof ConfigurableApplicationContext) {
+            BeanDefinition mapperScannerBean = ((ConfigurableApplicationContext) applicationContext).getBeanFactory()
+                    .getBeanDefinition(beanName);
+
+            DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
+            factory.registerBeanDefinition(beanName, mapperScannerBean);
+
+            for (PropertyResourceConfigurer prc : contextBeansOfType.values()) {
+                prc.postProcessBeanFactory(factory);
             }
-            return BeanPostProcessor.super.postProcessAfterInitialization(bean, beanName);
+
+            PropertyValues values = mapperScannerBean.getPropertyValues();
+
+            this.basePackage = getPropertyValue("basePackage", values);
+            this.sqlSessionFactoryBeanName = getPropertyValue("sqlSessionFactoryBeanName", values);
+            this.sqlSessionTemplateBeanName = getPropertyValue("sqlSessionTemplateBeanName", values);
+            this.lazyInitialization = getPropertyValue("lazyInitialization", values);
+            this.defaultScope = getPropertyValue("defaultScope", values);
         }
-
-
+        this.basePackage = Optional.ofNullable(this.basePackage).map(applicationContext.getEnvironment()::resolvePlaceholders).orElse(null);
+        this.sqlSessionFactoryBeanName = Optional.ofNullable(this.sqlSessionFactoryBeanName)
+                .map(applicationContext.getEnvironment()::resolvePlaceholders).orElse(null);
+        this.sqlSessionTemplateBeanName = Optional.ofNullable(this.sqlSessionTemplateBeanName)
+                .map(applicationContext.getEnvironment()::resolvePlaceholders).orElse(null);
+        this.lazyInitialization = Optional.ofNullable(this.lazyInitialization).map(applicationContext.getEnvironment()::resolvePlaceholders)
+                .orElse(null);
+        this.defaultScope = Optional.ofNullable(this.defaultScope).map(applicationContext.getEnvironment()::resolvePlaceholders).orElse(null);
     }
 
+    private String getPropertyValue(String propertyName, @NonNull PropertyValues values) {
+        PropertyValue property = values.getPropertyValue(propertyName);
+
+        if (property == null) {
+            return null;
+        }
+
+        Object value = property.getValue();
+
+        if (value == null) {
+            return null;
+        } else if (value instanceof String) {
+            return value.toString();
+        } else if (value instanceof TypedStringValue) {
+            return ((TypedStringValue) value).getValue();
+        } else {
+            return null;
+        }
+    }
 }
