@@ -35,9 +35,11 @@ import org.springframework.core.io.Resource;
 @ConfigurationProperties(prefix = EasyProperties.EASY_PREFIX)
 public class EasyProperties {
 
-    public static final String EASY_PREFIX = "easy";
+    public static final String EASY_PREFIX = "easy-mybatis";
 
     private Resource[] resources;
+
+    private String[] tableNames;
 
     public Resource[] getResources() {
         return resources;
@@ -45,5 +47,13 @@ public class EasyProperties {
 
     public void setResources(Resource[] resources) {
         this.resources = resources;
+    }
+
+    public String[] getTableNames() {
+        return tableNames;
+    }
+
+    public void setTableNames(String[] tableNames) {
+        this.tableNames = tableNames;
     }
 }

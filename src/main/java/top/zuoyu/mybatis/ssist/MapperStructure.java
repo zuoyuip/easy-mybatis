@@ -28,6 +28,7 @@ import java.io.Serializable;
 import java.net.URL;
 import java.util.List;
 
+import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Repository;
@@ -65,19 +66,25 @@ import top.zuoyu.mybatis.utils.StrUtil;
 class MapperStructure {
 
 
-    static Class<?> registerMapper(@NonNull Table table) {
+    static void registerMapper(@NonNull String tableName) {
         ClassPool classPool = ClassPool.getDefault();
 
         // 创建一个接口
-        CtClass ctClass = classPool.makeInterface(Constant.MAPPER_PACKAGE_NAME + Constant.PACKAGE_SEPARATOR + String.format(Constant.MAPPER_SUFFIX, StrUtil.captureName(table.getTableName())));
+        CtClass ctClass = classPool.makeInterface(Constant.MAPPER_PACKAGE_NAME + Constant.PACKAGE_SEPARATOR + String.format(Constant.MAPPER_SUFFIX, StrUtil.captureName(tableName)));
         ctClass.setModifiers(Modifier.setPublic(Modifier.INTERFACE));
         ClassFile classFile = ctClass.getClassFile();
         ConstPool constPool = classFile.getConstPool();
 
         // 接口注解
         AnnotationsAttribute classAttr = new AnnotationsAttribute(constPool, AnnotationsAttribute.visibleTag);
-        Annotation interfaceAnn = new Annotation(Repository.class.getTypeName(), constPool);
-        classAttr.addAnnotation(interfaceAnn);
+
+        Annotation interfaceAnnMapper = new Annotation(Mapper.class.getTypeName(), constPool);
+        classAttr.addAnnotation(interfaceAnnMapper);
+
+        Annotation interfaceAnnRepository = new Annotation(Repository.class.getTypeName(), constPool);
+        interfaceAnnRepository.addMemberValue("value", new StringMemberValue(tableName, constPool));
+        classAttr.addAnnotation(interfaceAnnRepository);
+
         classFile.addAttribute(classAttr);
 
         try {
@@ -92,12 +99,12 @@ class MapperStructure {
             throw new EasyMybatisException(e.getMessage(), e);
         }
 
+        URL basePath = ClassUtil.getBasePath();
         try {
-            return classPool.toClass(ctClass);
-        } catch (CannotCompileException e) {
-            throw new EasyMybatisException("toClass is fail!", e);
+            ctClass.writeFile(basePath.getPath());
+        } catch (CannotCompileException | IOException e) {
+            throw new CustomException("writeFile is fail!", e);
         }
-
 
     }
 

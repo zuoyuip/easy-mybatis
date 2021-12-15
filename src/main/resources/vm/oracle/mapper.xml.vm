@@ -1,0 +1,264 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+  ~ The MIT License (MIT)
+  ~
+  ~ Copyright (c) 2021 zuoyuip@foxmail.com
+  ~
+  ~ Permission is hereby granted, free of charge, to any person obtaining a copy
+  ~ of this software and associated documentation files (the "Software"), to deal
+  ~ in the Software without restriction, including without limitation the rights
+  ~ to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+  ~ copies of the Software, and to permit persons to whom the Software is
+  ~ furnished to do so, subject to the following conditions:
+  ~
+  ~ The above copyright notice and this permission notice shall be included in
+  ~ all copies or substantial portions of the Software.
+  ~
+  ~ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  ~ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+  ~ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+  ~ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+  ~ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+  ~ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+  ~ THE SOFTWARE.
+  -->
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="${packageName}.${className}Mapper">
+
+    <resultMap type="top.zuoyu.mybatis.json.JsonObject" id="${tableName}ResultByZuoyu">
+#foreach ($column in $columns)
+#if(${column.columnName} == ${pkColumn.columnName})
+        <id property="${column.javaField}" column="${column.columnName}" jdbcType="${column.jdbcType}" javaType="${column.javaType}"/>
+#else
+        <result property="${column.javaField}" column="${column.columnName}" jdbcType="${column.jdbcType}" javaType="${column.javaType}" />
+#end
+#end
+    </resultMap>
+
+    <sql id="select${className}Vo">
+        SELECT#foreach($column in $columns) $column.columnName#if($velocityCount != $columns.size()),#end#end FROM ${tableName}
+    </sql>
+
+    <select id="selectList" resultMap="${tableName}ResultByZuoyu">
+        <include refid="select${className}Vo"/>
+    </select>
+
+    <select id="selectListByExample" parameterType="top.zuoyu.mybatis.json.JsonObject" resultMap="${tableName}ResultByZuoyu">
+        <include refid="select${className}Vo"/>
+        <where>
+#foreach($column in $columns)
+#set($javaField=$column.javaField)
+#set($javaType=$column.javaType)
+#set($columnName=$column.columnName)
+#if($javaType == "java.lang.String")
+            <if test="$javaField != null #if($javaType == 'java.lang.String' ) and $javaField.trim() != ''#end"> and $columnName like concat('%', #{$javaField}, '%')</if>
+#else
+            <if test="$javaField != null #if($javaType == 'java.lang.String' ) and $javaField.trim() != ''#end"> and $columnName = #{$javaField}</if>
+#end
+#end
+        </where>
+    </select>
+
+    <select id="selectByPrimaryKey" parameterType="java.io.Serializable" resultMap="${tableName}ResultByZuoyu">
+        <include refid="select${className}Vo"/>
+        WHERE ${pkColumn.columnName} = #{${pkColumn.javaField}, jdbcType=$pkColumn.jdbcType}
+    </select>
+
+    <select id="selectListBy" parameterType="java.lang.String" resultMap="${tableName}ResultByZuoyu">
+        <include refid="select${className}Vo"/> ${suffixSql}
+    </select>
+
+    <select id="selectFields" resultType="top.zuoyu.mybatis.json.JsonObject">
+        SELECT ${fields} FROM ${tableName}
+    </select>
+
+    <select id="selectFieldsByExample" resultType="top.zuoyu.mybatis.json.JsonObject">
+        SELECT ${fields} FROM ${tableName}
+        <where>
+#foreach($column in $columns)
+#set($javaField=$column.javaField)
+#set($javaType=$column.javaType)
+#set($columnName=$column.columnName)
+#if($javaType == "java.lang.String")
+            <if test="jsonObject.$javaField != null #if($javaType == 'java.lang.String' ) and jsonObject.$javaField.trim() != ''#end"> and $columnName like concat('%', #{jsonObject.$javaField}, '%')</if>
+#else
+            <if test="jsonObject.$javaField != null #if($javaType == 'java.lang.String' ) and jsonObject.$javaField.trim() != ''#end"> and $columnName = #{jsonObject.$javaField}</if>
+#end
+#end
+        </where>
+    </select>
+
+    <select id="selectFieldsByPrimaryKey" resultType="top.zuoyu.mybatis.json.JsonObject">
+        SELECT ${fields} FROM ${tableName}
+        WHERE ${pkColumn.columnName} = #{primaryKey, jdbcType=$pkColumn.jdbcType}
+    </select>
+
+    <select id="selectFieldsByPrimaryKeys" resultType="top.zuoyu.mybatis.json.JsonObject">
+        SELECT ${fields} FROM ${tableName}
+        WHERE ${pkColumn.columnName} IN
+        <foreach item="primaryKey" collection="array" open="(" separator="," close=")">
+            #{primaryKey, jdbcType=$pkColumn.jdbcType}
+        </foreach>
+    </select>
+
+    <select id="selectFieldsBy" resultType="top.zuoyu.mybatis.json.JsonObject">
+        SELECT ${fields} FROM ${tableName} ${suffixSql}
+    </select>
+
+    <select id="countByExample" parameterType="top.zuoyu.mybatis.json.JsonObject" resultType="java.lang.Long">
+        SELECT COUNT(${pkColumn.columnName}) FROM ${tableName}
+        <where>
+#foreach($column in $columns)
+#set($javaField=$column.javaField)
+#set($javaType=$column.javaType)
+#set($columnName=$column.columnName)
+#if($javaType == "java.lang.String")
+            <if test="$javaField != null #if($javaType == 'java.lang.String' ) and $javaField.trim() != ''#end"> and $columnName like concat('%', #{$javaField}, '%')</if>
+#else
+            <if test="$javaField != null #if($javaType == 'java.lang.String' ) and $javaField.trim() != ''#end"> and $columnName = #{$javaField}</if>
+#end
+#end
+        </where>
+    </select>
+
+    <select id="countBy" parameterType="java.lang.String"  resultType="java.lang.Long">
+        SELECT COUNT(${pkColumn.columnName}) FROM ${tableName} ${suffixSql}
+    </select>
+
+    <select id="existsByExample" parameterType="top.zuoyu.mybatis.json.JsonObject" resultType="boolean">
+        SELECT EXISTS(SELECT 1 FROM ${tableName}
+        <where>
+#foreach($column in $columns)
+#set($javaField=$column.javaField)
+#set($javaType=$column.javaType)
+#set($columnName=$column.columnName)
+#if($javaType == "java.lang.String")
+            <if test="$javaField != null #if($javaType == 'java.lang.String' ) and $javaField.trim() != ''#end"> and $columnName like concat('%', #{$javaField}, '%')</if>
+#else
+            <if test="$javaField != null #if($javaType == 'java.lang.String' ) and $javaField.trim() != ''#end"> and $columnName = #{$javaField}</if>
+#end
+#end
+        </where>
+        )
+    </select>
+
+    <select id="existsBy" parameterType="java.lang.String" resultType="boolean">
+        SELECT EXISTS(SELECT 1 FROM ${tableName} ${suffixSql})
+    </select>
+
+    <insert id="insert" parameterType="top.zuoyu.mybatis.json.JsonObject"#if($pkColumn.increment == "1") useGeneratedKeys="true" keyProperty="$pkColumn.javaField"#end>
+        INSERT INTO ${tableName}
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+#if($pkColumn.increment != "1")
+            <if test="$pkColumn.javaField != null#if($pkColumn.javaType == 'java.lang.String' && $pkColumn.required == "1") and $pkColumn.javaField != ''#end">$pkColumn.columnName,</if>
+#end
+#foreach($column in $columns)
+#if($column.columnName != $pkColumn.columnName)
+            <if test="$column.javaField != null#if($column.javaType == 'java.lang.String' && $column.required == "1") and $column.javaField != ''#end">$column.columnName,</if>
+#end
+#end
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+#if($pkColumn.increment != "1")
+            <if test="$pkColumn.javaField != null#if($pkColumn.javaType == 'java.lang.String' && $pkColumn.required == "1") and $pkColumn.javaField != ''#end">#{$pkColumn.javaField, jdbcType=$pkColumn.jdbcType},</if>
+#end
+#foreach($column in $columns)
+#if($column.columnName != $pkColumn.columnName)
+            <if test="$column.javaField != null#if($column.javaType == 'java.lang.String' && $column.required == "1") and $column.javaField != ''#end">#{$column.javaField, jdbcType=$column.jdbcType},</if>
+#end
+#end
+         </trim>
+    </insert>
+
+    <insert id="insertBatch" parameterType="java.util.List"#if($pkColumn.increment == "1") useGeneratedKeys="true" keyProperty="$pkColumn.javaField"#end>
+        INSERT INTO ${tableName}
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+#if($pkColumn.increment != "1")
+            $pkColumn.columnName,
+#end
+#foreach($column in $columns)
+#if($column.columnName != $pkColumn.columnName)
+            $column.columnName,
+#end
+#end
+        </trim>
+        VALUES
+        <foreach collection ="list" item="item" index= "index" separator =",">
+            <trim prefix="(" suffix=")" suffixOverrides=",">
+#if(!$pkColumn.increment != "1")
+                #{item.${pkColumn.javaField}, jdbcType=$pkColumn.jdbcType},
+#end
+#foreach($column in $columns)
+#if($column.columnName != $pkColumn.columnName)
+                #{item.${column.javaField}, jdbcType=$column.jdbcType},
+#end
+#end
+            </trim>
+        </foreach>
+    </insert>
+
+    <update id="updateByPrimaryKey" parameterType="top.zuoyu.mybatis.json.JsonObject">
+        UPDATE ${tableName}
+        <trim prefix="SET" suffixOverrides=",">
+#foreach($column in $columns)
+#if($column.columnName != $pkColumn.columnName)
+            <if test="$column.javaField != null#if($column.javaType == 'java.lang.String' && $column.required == "1") and $column.javaField != ''#end">$column.columnName = #{$column.javaField, jdbcType=$column.jdbcType},</if>
+#end
+#end
+        </trim>
+        WHERE ${pkColumn.columnName} = #{${pkColumn.javaField}, jdbcType=$pkColumn.jdbcType}
+    </update>
+
+    <update id="updateBy">
+        UPDATE ${tableName}
+        <trim prefix="SET" suffixOverrides=",">
+#foreach($column in $columns)
+#if($column.columnName != $pkColumn.columnName)
+            <if test="jsonObject.$column.javaField != null#if($column.javaType == 'java.lang.String' && $column.required == "1") and jsonObject.$column.javaField != ''#end">$column.columnName = #{jsonObject.$column.javaField, jdbcType=$column.jdbcType},</if>
+#end
+#end
+        </trim>
+        ${suffixSql}
+    </update>
+
+    <update id="updateByPrimaryKeyBatch" parameterType="java.util.List">
+        UPDATE ${tableName}
+        <trim prefix="SET" suffixOverrides=",">
+#foreach($column in $columns)
+#if($column.columnName != $pkColumn.columnName)
+            <trim prefix="$column.javaField = case" suffix="end,">
+                <foreach collection="list" item="item" index="index">
+                    <if test="item.${column.javaField} != null#if($column.javaType == 'java.lang.String' && $column.required == "1") and item.${column.javaField} != ''#end">
+                        WHEN ${pkColumn.columnName} = #{item.${pkColumn.javaField}} THEN #{item.${column.javaField}, jdbcType=$column.jdbcType}
+                    </if>
+                    <if test="item.${column.javaField} == null#if($column.javaType == 'java.lang.String' && $column.required == "1") and item.${column.javaField} == ''#end">
+                        WHEN ${pkColumn.columnName} = #{item.${pkColumn.javaField}} THEN ${tableName}.${column.javaField}
+                    </if>
+                </foreach>
+            </trim>
+#end
+#end
+        </trim>
+        where ${pkColumn.columnName} IN
+        <foreach collection="list" index="index" item="item" separator="," open="(" close=")">
+            #{item.${pkColumn.javaField}, jdbcType=$pkColumn.jdbcType}
+        </foreach>
+    </update>
+
+    <delete id="deleteByPrimaryKey" parameterType="java.io.Serializable">
+        DELETE FROM ${tableName} WHERE ${pkColumn.columnName} = #{${pkColumn.javaField}, jdbcType=$pkColumn.jdbcType}
+    </delete>
+
+    <delete id="deleteBy" parameterType="java.lang.String">
+        DELETE FROM ${tableName} ${suffixSql}
+    </delete>
+
+    <delete id="deleteByPrimaryKeys" parameterType="java.io.Serializable">
+        DELETE FROM ${tableName} WHERE ${pkColumn.columnName} IN
+        <foreach item="${pkColumn.javaField}" collection="array" open="(" separator="," close=")">
+            #{${pkColumn.javaField}, jdbcType=$pkColumn.jdbcType}
+        </foreach>
+    </delete>
+</mapper>

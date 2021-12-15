@@ -23,23 +23,31 @@
  */
 package top.zuoyu.mybatis.autoconfigure;
 
+import java.beans.PropertyDescriptor;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.sql.DataSource;
 
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.ibatis.mapping.DatabaseIdProvider;
 import org.apache.ibatis.plugin.Interceptor;
+import org.apache.ibatis.scripting.LanguageDriver;
 import org.apache.ibatis.session.ExecutorType;
 import org.apache.ibatis.session.SqlSessionFactory;
+import org.apache.ibatis.type.TypeHandler;
 import org.mybatis.spring.SqlSessionFactoryBean;
 import org.mybatis.spring.SqlSessionTemplate;
+import org.mybatis.spring.annotation.MapperScan;
 import org.mybatis.spring.boot.autoconfigure.ConfigurationCustomizer;
 import org.mybatis.spring.boot.autoconfigure.MybatisAutoConfiguration;
 import org.mybatis.spring.boot.autoconfigure.MybatisProperties;
 import org.mybatis.spring.boot.autoconfigure.SpringBootVFS;
 import org.mybatis.spring.mapper.MapperFactoryBean;
 import org.mybatis.spring.mapper.MapperScannerConfigurer;
+import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
@@ -56,13 +64,12 @@ import org.springframework.context.annotation.Import;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.lang.NonNull;
-import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
-import top.zuoyu.mybatis.json.JsonObject;
-import top.zuoyu.mybatis.ssist.StructureInit;
+import top.zuoyu.mybatis.common.Constant;
+import top.zuoyu.mybatis.ssist.XmlStructureInit;
 
 
 /**
@@ -76,8 +83,12 @@ import top.zuoyu.mybatis.ssist.StructureInit;
 @ConditionalOnSingleCandidate(DataSource.class)
 @EnableConfigurationProperties({MybatisProperties.class, EasyProperties.class})
 @AutoConfigureAfter(DataSourceAutoConfiguration.class)
-@AutoConfigureBefore(name = "org.mybatis.spring.boot.autoconfigure.MybatisAutoConfiguration")
+@AutoConfigureBefore(MybatisAutoConfiguration.class)
+@MapperScan(basePackages = Constant.MAPPER_PACKAGE_NAME)
 public class EasyMybatisAutoConfiguration implements InitializingBean {
+
+    private static final String SCRIPTING_LANGUAGE_DRIVERS = "scriptingLanguageDrivers";
+    private static final String DEFAULT_SCRIPTING_LANGUAGE_DRIVER = "defaultScriptingLanguageDriver";
 
     private final MybatisProperties properties;
 
@@ -85,22 +96,31 @@ public class EasyMybatisAutoConfiguration implements InitializingBean {
 
     private final Interceptor[] interceptors;
 
+    private final TypeHandler[] typeHandlers;
+
     private final ResourceLoader resourceLoader;
 
     private final DatabaseIdProvider databaseIdProvider;
 
     private final List<ConfigurationCustomizer> configurationCustomizers;
 
+    private final LanguageDriver[] languageDrivers;
+
 
     public EasyMybatisAutoConfiguration(@NonNull MybatisProperties properties,
-                                        @NonNull EasyProperties easyProperties, @NonNull ObjectProvider<Interceptor[]> interceptorsProvider,
+                                        @NonNull EasyProperties easyProperties,
+                                        @NonNull ObjectProvider<Interceptor[]> interceptorsProvider,
                                         @NonNull ResourceLoader resourceLoader,
+                                        @NonNull ObjectProvider<TypeHandler[]> typeHandlersProvider,
+                                        @NonNull ObjectProvider<LanguageDriver[]> languageDriversProvider,
                                         @NonNull ObjectProvider<DatabaseIdProvider> databaseIdProvider,
                                         @NonNull ObjectProvider<List<ConfigurationCustomizer>> configurationCustomizersProvider) {
         this.properties = properties;
         this.easyProperties = easyProperties;
         this.interceptors = interceptorsProvider.getIfAvailable();
         this.resourceLoader = resourceLoader;
+        this.typeHandlers = typeHandlersProvider.getIfAvailable();
+        this.languageDrivers = languageDriversProvider.getIfAvailable();
         this.databaseIdProvider = databaseIdProvider.getIfAvailable();
         this.configurationCustomizers = configurationCustomizersProvider.getIfAvailable();
     }
@@ -109,7 +129,7 @@ public class EasyMybatisAutoConfiguration implements InitializingBean {
     public void afterPropertiesSet() {
         // 添加别名包
         String typeAliasesPackage = this.properties.getTypeAliasesPackage();
-        String modelPackageName = ClassUtils.getPackageName(JsonObject.class);
+        String modelPackageName = Constant.JSON_PACKAGE_NAME;
         if (StringUtils.hasLength(typeAliasesPackage)) {
             this.properties.setTypeAliasesPackage(typeAliasesPackage + "," + modelPackageName);
         } else {
@@ -121,7 +141,7 @@ public class EasyMybatisAutoConfiguration implements InitializingBean {
     @Bean
     @ConditionalOnMissingBean
     public SqlSessionFactory sqlSessionFactory(DataSource dataSource) throws Exception {
-        Resource[] resources = StructureInit.register(dataSource);
+        Resource[] resources = XmlStructureInit.register(dataSource, easyProperties.getTableNames());
         this.easyProperties.setResources(resources);
         SqlSessionFactoryBean factory = new SqlSessionFactoryBean();
         factory.setDataSource(dataSource);
@@ -148,6 +168,9 @@ public class EasyMybatisAutoConfiguration implements InitializingBean {
         if (StringUtils.hasLength(this.properties.getTypeHandlersPackage())) {
             factory.setTypeHandlersPackage(this.properties.getTypeHandlersPackage());
         }
+        if (!ObjectUtils.isEmpty(this.typeHandlers)) {
+            factory.setTypeHandlers(this.typeHandlers);
+        }
         if (!ObjectUtils.isEmpty(this.properties.resolveMapperLocations())) {
             Resource[] resolveMapperLocations = this.properties.resolveMapperLocations();
             Resource[] all = (Resource[]) ArrayUtils.addAll(resolveMapperLocations, this.easyProperties.getResources());
@@ -155,7 +178,22 @@ public class EasyMybatisAutoConfiguration implements InitializingBean {
         } else {
             factory.setMapperLocations(this.easyProperties.getResources());
         }
-        System.out.println("------------------------------factory.getObject()----------------------------------");
+
+        Set<String> factoryPropertyNames = Stream
+                .of(new BeanWrapperImpl(SqlSessionFactoryBean.class).getPropertyDescriptors()).map(PropertyDescriptor::getName)
+                .collect(Collectors.toSet());
+        Class<? extends LanguageDriver> defaultLanguageDriver = this.properties.getDefaultScriptingLanguageDriver();
+        if (factoryPropertyNames.contains(SCRIPTING_LANGUAGE_DRIVERS) && !ObjectUtils.isEmpty(this.languageDrivers)) {
+            // Need to mybatis-spring 2.0.2+
+            factory.setScriptingLanguageDrivers(this.languageDrivers);
+            if (defaultLanguageDriver == null && this.languageDrivers.length == 1) {
+                defaultLanguageDriver = this.languageDrivers[0].getClass();
+            }
+        }
+        if (factoryPropertyNames.contains(DEFAULT_SCRIPTING_LANGUAGE_DRIVER)) {
+            // Need to mybatis-spring 2.0.2+
+            factory.setDefaultScriptingLanguageDriver(defaultLanguageDriver);
+        }
         return factory.getObject();
     }
 
@@ -170,7 +208,7 @@ public class EasyMybatisAutoConfiguration implements InitializingBean {
         }
     }
 
-    private void applyConfiguration(SqlSessionFactoryBean factory) {
+    private void applyConfiguration(@NonNull SqlSessionFactoryBean factory) {
         org.apache.ibatis.session.Configuration configuration = this.properties.getConfiguration();
         if (configuration == null && !StringUtils.hasText(this.properties.getConfigLocation())) {
             configuration = new org.apache.ibatis.session.Configuration();
@@ -182,6 +220,7 @@ public class EasyMybatisAutoConfiguration implements InitializingBean {
         }
         factory.setConfiguration(configuration);
     }
+
 
     @Configuration(proxyBeanMethods = false)
     @Import(MybatisAutoConfiguration.AutoConfiguredMapperScannerRegistrar.class)

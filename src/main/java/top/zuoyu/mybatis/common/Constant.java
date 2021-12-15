@@ -25,11 +25,6 @@ package top.zuoyu.mybatis.common;
 
 import java.io.File;
 
-import org.springframework.util.ClassUtils;
-
-import top.zuoyu.mybatis.temp.mapper.BaseMapper;
-import top.zuoyu.mybatis.temp.model.BaseModel;
-
 /**
  * 常量 .
  *
@@ -75,10 +70,15 @@ public interface Constant {
     /**
      * mybatis的接口包路径
      */
-    String MAPPER_PACKAGE_NAME = ClassUtils.getPackageName(BaseMapper.class);
+    String MAPPER_PACKAGE_NAME = "top.zuoyu.mybatis.temp.mapper";
 
     /**
      * model的路径
      */
-    String MODEL_PACKAGE_NAME = ClassUtils.getPackageName(BaseModel.class);
+    String MODEL_PACKAGE_NAME = "top.zuoyu.mybatis.temp.model";
+
+    /**
+     * json的路径
+     */
+    String JSON_PACKAGE_NAME = "top.zuoyu.mybatis.json";
 }

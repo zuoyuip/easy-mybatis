@@ -23,7 +23,6 @@
  */
 package top.zuoyu.mybatis.utils;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -33,11 +32,10 @@ import java.util.stream.Collectors;
 import org.apache.velocity.VelocityContext;
 import org.springframework.lang.NonNull;
 import org.springframework.util.Assert;
-import org.springframework.util.ClassUtils;
 
+import top.zuoyu.mybatis.common.Constant;
 import top.zuoyu.mybatis.data.enums.JdbcType;
 import top.zuoyu.mybatis.data.model.Table;
-import top.zuoyu.mybatis.temp.mapper.BaseMapper;
 
 
 /**
@@ -56,7 +54,7 @@ public class VelocityUtils {
      */
     @NonNull
     public static VelocityContext prepareContext(@NonNull Table table) {
-        String packageName = ClassUtils.getPackageName(BaseMapper.class);
+        String packageName = Constant.MAPPER_PACKAGE_NAME;
         String tableName = table.getTableName();
         List<Column> columns = new ArrayList<>(Collections.emptyList());
         Assert.notEmpty(table.getColumns(), "table\t" + tableName + "column count is 0");
@@ -82,8 +80,8 @@ public class VelocityUtils {
      * @return 模板列表
      */
     @NonNull
-    public static String getTemplate() {
-        return "mapper.xml.vm";
+    public static String getMySqlTemplate() {
+        return "vm/mysql/mapper.xml.vm";
     }
 
     public static class Column {

@@ -26,13 +26,14 @@ package top.zuoyu.mybatis.ssist;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.Collections;
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import javax.sql.DataSource;
 
+import org.apache.commons.lang.ArrayUtils;
+import org.mybatis.logging.Logger;
+import org.mybatis.logging.LoggerFactory;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.jdbc.support.JdbcUtils;
@@ -40,6 +41,8 @@ import org.springframework.jdbc.support.MetaDataAccessException;
 import org.springframework.lang.NonNull;
 
 import top.zuoyu.mybatis.data.model.Table;
+import top.zuoyu.mybatis.data.support.DatabaseProductNameCallback;
+import top.zuoyu.mybatis.data.support.TableNamesCallback;
 import top.zuoyu.mybatis.data.support.TablesCallback;
 
 /**
@@ -48,26 +51,34 @@ import top.zuoyu.mybatis.data.support.TablesCallback;
  * @author: zuoyu
  * @create: 2021-11-02 10:25
  */
-public final class StructureInit {
+public final class XmlStructureInit {
 
-    private static final Map<String, Class<?>> TABLE_NAME_CLASS = Collections.synchronizedMap(new HashMap<>());
+    private static final Logger LOGGER = LoggerFactory.getLogger(XmlStructureInit.class);
 
     @NonNull
-    public static Resource[] register(@NonNull DataSource dataSource) throws MetaDataAccessException {
-        TABLE_NAME_CLASS.clear();
-        List<Table> tables = JdbcUtils.extractDatabaseMetaData(dataSource, TablesCallback.getInstance());
+    public static Resource[] register(@NonNull DataSource dataSource, @NonNull String[] tableNames) throws MetaDataAccessException {
+        List<String> allTableNames = JdbcUtils.extractDatabaseMetaData(dataSource, TableNamesCallback.getInstance());
+        if (ArrayUtils.isEmpty(tableNames)) {
+            LOGGER.warn(() -> "No tables was found, please check your configuration.");
+            return new Resource[0];
+        }
+        List<String> tableNameList = new ArrayList<>();
+        for (String tableName : tableNames) {
+            if (allTableNames.contains(tableName)) {
+                tableNameList.add(tableName);
+                continue;
+            }
+            LOGGER.warn(() -> "table:" + tableName + " was found, please check your configuration.");
+        }
+        String databaseProductName = JdbcUtils.extractDatabaseMetaData(dataSource, DatabaseProductNameCallback.getInstance());
+        List<Table> tables = JdbcUtils.extractDatabaseMetaData(dataSource, TablesCallback.getInstance(tableNameList));
         Resource[] resources = new Resource[tables.size()];
         for (int i = 0; i < tables.size(); i++) {
-            String mapperXml = MapperXmlStructure.registerMapperXml(tables.get(i));
+            String mapperXml = XmlStructure.registerMapperXml(tables.get(i), databaseProductName);
             InputStream mapperXmlInputStream = new ByteArrayInputStream(mapperXml.getBytes(StandardCharsets.UTF_8));
             resources[i] = new InputStreamResource(mapperXmlInputStream, tables.get(i).getTableName() + "MapperXmlInputStream");
-            Class<?> mapperClass = MapperStructure.registerMapper(tables.get(i));
-            TABLE_NAME_CLASS.put(tables.get(i).getTableName(), mapperClass);
         }
         return resources;
     }
 
-    public static Map<String, Class<?>> getTableNameClass() {
-        return TABLE_NAME_CLASS;
-    }
 }

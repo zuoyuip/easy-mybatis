@@ -43,11 +43,17 @@ public class TablesCallback extends DataInfoLoad implements org.springframework.
 
     private volatile static TablesCallback TABLES_CALLBACK;
 
-    public static TablesCallback getInstance() {
+    private final List<String> tableNames;
+
+    private TablesCallback(List<String> tableNames) {
+        this.tableNames = tableNames;
+    }
+
+    public static TablesCallback getInstance(List<String> tableNames) {
         if (Objects.isNull(TABLES_CALLBACK)) {
             synchronized (TablesCallback.class) {
                 if (Objects.isNull(TABLES_CALLBACK)) {
-                    TABLES_CALLBACK = new TablesCallback();
+                    TABLES_CALLBACK = new TablesCallback(tableNames);
                 }
             }
         }
@@ -56,6 +62,6 @@ public class TablesCallback extends DataInfoLoad implements org.springframework.
 
     @Override
     public List<Table> processMetaData(DatabaseMetaData databaseMetaData) throws SQLException, MetaDataAccessException {
-        return getTables(databaseMetaData);
+        return getTables(databaseMetaData, tableNames);
     }
 }

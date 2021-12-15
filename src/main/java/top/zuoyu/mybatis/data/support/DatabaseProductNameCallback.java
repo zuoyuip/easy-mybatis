@@ -25,7 +25,6 @@ package top.zuoyu.mybatis.data.support;
 
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
-import java.util.List;
 import java.util.Objects;
 
 import org.springframework.jdbc.support.MetaDataAccessException;
@@ -39,27 +38,27 @@ import top.zuoyu.mybatis.data.DataInfoLoad;
  * @author: zuoyu
  * @create: 2021-11-04 10:00
  */
-public class TableNamesCallback extends DataInfoLoad implements org.springframework.jdbc.support.DatabaseMetaDataCallback<List<String>> {
+public class DatabaseProductNameCallback extends DataInfoLoad implements org.springframework.jdbc.support.DatabaseMetaDataCallback<String> {
 
 
-    private volatile static TableNamesCallback TABLE_NAMES_CALLBACK;
+    private volatile static DatabaseProductNameCallback DATABASE_PRODUCT_NAME_CALLBACK;
 
-    private TableNamesCallback() {
+    private DatabaseProductNameCallback() {
     }
 
-    public static TableNamesCallback getInstance() {
-        if (Objects.isNull(TABLE_NAMES_CALLBACK)) {
-            synchronized (TableNamesCallback.class) {
-                if (Objects.isNull(TABLE_NAMES_CALLBACK)) {
-                    TABLE_NAMES_CALLBACK = new TableNamesCallback();
+    public static DatabaseProductNameCallback getInstance() {
+        if (Objects.isNull(DATABASE_PRODUCT_NAME_CALLBACK)) {
+            synchronized (DatabaseProductNameCallback.class) {
+                if (Objects.isNull(DATABASE_PRODUCT_NAME_CALLBACK)) {
+                    DATABASE_PRODUCT_NAME_CALLBACK = new DatabaseProductNameCallback();
                 }
             }
         }
-        return TABLE_NAMES_CALLBACK;
+        return DATABASE_PRODUCT_NAME_CALLBACK;
     }
 
     @Override
-    public List<String> processMetaData(@NonNull DatabaseMetaData databaseMetaData) throws SQLException, MetaDataAccessException {
-        return getTableNames(databaseMetaData);
+    public String processMetaData(@NonNull DatabaseMetaData databaseMetaData) throws SQLException, MetaDataAccessException {
+        return getDatabaseProductName(databaseMetaData);
     }
 }

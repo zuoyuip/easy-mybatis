@@ -95,6 +95,20 @@ public class DataInfoLoad {
     }
 
     /**
+     * 获取数据库类型
+     *
+     * @param databaseMetaData - {@link DatabaseMetaData} 数据库元信息
+     * @return schema
+     */
+    public static String getDatabaseProductName(@NonNull DatabaseMetaData databaseMetaData) {
+        try {
+            return databaseMetaData.getDatabaseProductName();
+        } catch (SQLException e) {
+            throw new CustomException("databaseMetaData.getConnection() is fail!", e);
+        }
+    }
+
+    /**
      * 获取schema
      *
      * @param databaseMetaData - {@link DatabaseMetaData} 数据库元信息
@@ -193,6 +207,25 @@ public class DataInfoLoad {
     protected static List<Table> getTables(@NonNull DatabaseMetaData databaseMetaData) throws SQLException {
         final List<Table> tables = new ArrayList<>();
         List<String> tableNames = getTableNames(databaseMetaData);
+        if (CollectionUtils.isEmpty(tableNames)) {
+            return tables;
+        }
+        for (String tableName : tableNames) {
+            tables.add(getTableInfo(databaseMetaData, tableName));
+        }
+        return tables;
+    }
+
+    /**
+     * 获取指定表信息
+     *
+     * @param databaseMetaData - {@link DatabaseMetaData} 数据库元数据
+     * @param tableNames       - 指定表名
+     * @return {@link Table} 所有表信息
+     */
+    @NonNull
+    protected static List<Table> getTables(@NonNull DatabaseMetaData databaseMetaData, List<String> tableNames) throws SQLException {
+        final List<Table> tables = new ArrayList<>();
         if (CollectionUtils.isEmpty(tableNames)) {
             return tables;
         }

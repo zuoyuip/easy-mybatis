@@ -43,17 +43,20 @@ import top.zuoyu.mybatis.utils.VelocityUtils;
  * @author: zuoyu
  * @create: 2021-11-01 14:25
  */
-class MapperXmlStructure {
+class XmlStructure {
 
 
     @NonNull
-    static String registerMapperXml(@NonNull Table table) {
+    static String registerMapperXml(@NonNull Table table, @NonNull String databaseProductName) {
 
         VelocityContext context = VelocityUtils.prepareContext(table);
 
         StringWriter stringWriter = new StringWriter();
 
-        InputStream resourceInputStream = ClassUtil.getResourceInputStream("vm/mapper.xml.vm");
+        System.out.println("---------------------------------");
+        System.out.println("---------------------------------" + databaseProductName);
+
+        InputStream resourceInputStream = ClassUtil.getResourceInputStream(VelocityUtils.getMySqlTemplate());
         try {
             String stringFromStream = StrUtil.getStringFromStream(resourceInputStream);
             // 模板渲染
@@ -61,7 +64,6 @@ class MapperXmlStructure {
         } catch (IOException e) {
             throw new EasyMybatisException(e.getMessage(), e);
         }
-        System.out.println(stringWriter.toString());
         return stringWriter.toString();
     }
 }
