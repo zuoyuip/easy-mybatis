@@ -47,16 +47,13 @@ class XmlStructure {
 
 
     @NonNull
-    static String registerMapperXml(@NonNull Table table, @NonNull String databaseProductName) {
+    static String registerMapperXml(@NonNull Table table, @NonNull String dateFormat, @NonNull String databaseProductName) {
 
-        VelocityContext context = VelocityUtils.prepareContext(table);
+        VelocityContext context = VelocityUtils.prepareContext(table, dateFormat);
 
         StringWriter stringWriter = new StringWriter();
 
-        System.out.println("---------------------------------");
-        System.out.println("---------------------------------" + databaseProductName);
-
-        InputStream resourceInputStream = ClassUtil.getResourceInputStream(VelocityUtils.getMySqlTemplate());
+        InputStream resourceInputStream = ClassUtil.getResourceInputStream(VelocityUtils.getXmlTemplate(databaseProductName));
         try {
             String stringFromStream = StrUtil.getStringFromStream(resourceInputStream);
             // 模板渲染
@@ -64,6 +61,7 @@ class XmlStructure {
         } catch (IOException e) {
             throw new EasyMybatisException(e.getMessage(), e);
         }
+        System.out.println(stringWriter.toString());
         return stringWriter.toString();
     }
 }

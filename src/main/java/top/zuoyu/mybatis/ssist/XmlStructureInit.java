@@ -28,6 +28,8 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 import javax.sql.DataSource;
 
@@ -40,6 +42,7 @@ import org.springframework.jdbc.support.JdbcUtils;
 import org.springframework.jdbc.support.MetaDataAccessException;
 import org.springframework.lang.NonNull;
 
+import top.zuoyu.mybatis.autoconfigure.EasyProperties;
 import top.zuoyu.mybatis.data.model.Table;
 import top.zuoyu.mybatis.data.support.DatabaseProductNameCallback;
 import top.zuoyu.mybatis.data.support.TableNamesCallback;
@@ -56,8 +59,9 @@ public final class XmlStructureInit {
     private static final Logger LOGGER = LoggerFactory.getLogger(XmlStructureInit.class);
 
     @NonNull
-    public static Resource[] register(@NonNull DataSource dataSource, @NonNull String[] tableNames) throws MetaDataAccessException {
+    public static Resource[] register(@NonNull DataSource dataSource, @NonNull EasyProperties easyProperties) throws MetaDataAccessException {
         List<String> allTableNames = JdbcUtils.extractDatabaseMetaData(dataSource, TableNamesCallback.getInstance());
+        String[] tableNames = easyProperties.getTableNames();
         if (ArrayUtils.isEmpty(tableNames)) {
             LOGGER.warn(() -> "No tables was found, please check your configuration.");
             return new Resource[0];
@@ -68,15 +72,22 @@ public final class XmlStructureInit {
                 tableNameList.add(tableName);
                 continue;
             }
-            LOGGER.warn(() -> "table:" + tableName + " was found, please check your configuration.");
+            LOGGER.warn(() -> "table:" + tableName + " was not found, please check your configuration.");
         }
         String databaseProductName = JdbcUtils.extractDatabaseMetaData(dataSource, DatabaseProductNameCallback.getInstance());
+        Map<String, String> sequences = easyProperties.getSequences();
+        String dateFormat = Objects.isNull(easyProperties.getOracleDateFormat()) ? "yyyy-mm-dd hh24:mi:ss" : easyProperties.getOracleDateFormat();
         List<Table> tables = JdbcUtils.extractDatabaseMetaData(dataSource, TablesCallback.getInstance(tableNameList));
         Resource[] resources = new Resource[tables.size()];
         for (int i = 0; i < tables.size(); i++) {
-            String mapperXml = XmlStructure.registerMapperXml(tables.get(i), databaseProductName);
+            Table table = tables.get(i);
+            String tableName = table.getTableName();
+            if (Objects.nonNull(sequences)) {
+                table.setSequence(sequences.get(tableName));
+            }
+            String mapperXml = XmlStructure.registerMapperXml(table, dateFormat, databaseProductName);
             InputStream mapperXmlInputStream = new ByteArrayInputStream(mapperXml.getBytes(StandardCharsets.UTF_8));
-            resources[i] = new InputStreamResource(mapperXmlInputStream, tables.get(i).getTableName() + "MapperXmlInputStream");
+            resources[i] = new InputStreamResource(mapperXmlInputStream, tableName + "MapperXmlInputStream");
         }
         return resources;
     }

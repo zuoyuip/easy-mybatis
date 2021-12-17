@@ -53,9 +53,9 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 #set($javaType=$column.javaType)
 #set($columnName=$column.columnName)
 #if($javaType == "java.lang.String")
-            <if test="$javaField != null #if($javaType == 'java.lang.String' ) and $javaField.trim() != ''#end"> and $columnName like concat('%', #{$javaField}, '%')</if>
+            <if test="$javaField != null #if($javaType == 'java.lang.String' ) and $javaField.trim() != ''#end"> and $columnName like CONCAT('%', #{$javaField}, '%')</if>
 #else
-            <if test="$javaField != null #if($javaType == 'java.lang.String' ) and $javaField.trim() != ''#end"> and $columnName = #{$javaField}</if>
+            <if test="$javaField != null"> and $columnName = #{$javaField}</if>
 #end
 #end
         </where>
@@ -82,7 +82,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 #set($javaType=$column.javaType)
 #set($columnName=$column.columnName)
 #if($javaType == "java.lang.String")
-            <if test="jsonObject.$javaField != null #if($javaType == 'java.lang.String' ) and jsonObject.$javaField.trim() != ''#end"> and $columnName like concat('%', #{jsonObject.$javaField}, '%')</if>
+            <if test="jsonObject.$javaField != null #if($javaType == 'java.lang.String' ) and jsonObject.$javaField.trim() != ''#end"> and $columnName like CONCAT('%', #{jsonObject.$javaField}, '%')</if>
 #else
             <if test="jsonObject.$javaField != null #if($javaType == 'java.lang.String' ) and jsonObject.$javaField.trim() != ''#end"> and $columnName = #{jsonObject.$javaField}</if>
 #end
@@ -115,7 +115,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 #set($javaType=$column.javaType)
 #set($columnName=$column.columnName)
 #if($javaType == "java.lang.String")
-            <if test="$javaField != null #if($javaType == 'java.lang.String' ) and $javaField.trim() != ''#end"> and $columnName like concat('%', #{$javaField}, '%')</if>
+            <if test="$javaField != null #if($javaType == 'java.lang.String' ) and $javaField.trim() != ''#end"> and $columnName like CONCAT('%', #{$javaField}, '%')</if>
 #else
             <if test="$javaField != null #if($javaType == 'java.lang.String' ) and $javaField.trim() != ''#end"> and $columnName = #{$javaField}</if>
 #end
@@ -135,7 +135,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 #set($javaType=$column.javaType)
 #set($columnName=$column.columnName)
 #if($javaType == "java.lang.String")
-            <if test="$javaField != null #if($javaType == 'java.lang.String' ) and $javaField.trim() != ''#end"> and $columnName like concat('%', #{$javaField}, '%')</if>
+            <if test="$javaField != null #if($javaType == 'java.lang.String' ) and $javaField.trim() != ''#end"> and $columnName like CONCAT('%', #{$javaField}, '%')</if>
 #else
             <if test="$javaField != null #if($javaType == 'java.lang.String' ) and $javaField.trim() != ''#end"> and $columnName = #{$javaField}</if>
 #end
@@ -187,7 +187,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         VALUES
         <foreach collection ="list" item="item" index= "index" separator =",">
             <trim prefix="(" suffix=")" suffixOverrides=",">
-#if(!$pkColumn.increment != "1")
+#if($pkColumn.increment != "1")
                 #{item.${pkColumn.javaField}, jdbcType=$pkColumn.jdbcType},
 #end
 #foreach($column in $columns)

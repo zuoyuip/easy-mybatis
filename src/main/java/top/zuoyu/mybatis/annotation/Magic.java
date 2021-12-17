@@ -29,6 +29,10 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.core.annotation.AliasFor;
+
 /**
  * 接口实现注入 .
  *
@@ -38,10 +42,14 @@ import java.lang.annotation.Target;
 @Target({ElementType.FIELD, ElementType.ANNOTATION_TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
+@Qualifier
+@Autowired(required = true)
 public @interface Magic {
 
     /**
      * 对应的表名称
      */
+    @AliasFor(annotation = Qualifier.class)
     String value();
 }
+

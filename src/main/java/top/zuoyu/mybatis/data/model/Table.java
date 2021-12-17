@@ -107,6 +107,11 @@ public class Table implements Serializable, Cloneable {
      */
     private String refGeneration;
 
+    /**
+     * Oracle数据库的主键生成器
+     */
+    private String sequence;
+
 
     public String getTableCat() {
         return this.tableCat;
@@ -186,6 +191,14 @@ public class Table implements Serializable, Cloneable {
 
     public void setRefGeneration(String refGeneration) {
         this.refGeneration = refGeneration;
+    }
+
+    public String getSequence() {
+        return sequence;
+    }
+
+    public void setSequence(String sequence) {
+        this.sequence = sequence;
     }
 
     public Set<String> getPrimaryKeys() {
@@ -270,6 +283,9 @@ public class Table implements Serializable, Cloneable {
         this.setTableName(tablesResultSet.getString(TableMeta.TABLE_NAME.value()));
         this.setTableType(tablesResultSet.getString(TableMeta.TABLE_TYPE.value()));
         this.setRemarks(tablesResultSet.getString(TableMeta.REMARKS.value()));
+    }
+
+    public void onlyMySql(@NonNull ResultSet tablesResultSet) throws SQLException {
         this.setTypeCat(tablesResultSet.getString(TableMeta.TYPE_CAT.value()));
         this.setTypeSchema(tablesResultSet.getString(TableMeta.TYPE_SCHEM.value()));
         this.setTypeName(tablesResultSet.getString(TableMeta.TYPE_NAME.value()));
@@ -280,7 +296,10 @@ public class Table implements Serializable, Cloneable {
     @Override
     public String toString() {
         return "Table{" +
-                "tableCat='" + tableCat + '\'' +
+                "primaryKeys=" + primaryKeys +
+                ", indexs=" + indexs +
+                ", columns=" + columns +
+                ", tableCat='" + tableCat + '\'' +
                 ", tableSchema='" + tableSchema + '\'' +
                 ", tableName='" + tableName + '\'' +
                 ", tableType='" + tableType + '\'' +
@@ -290,6 +309,7 @@ public class Table implements Serializable, Cloneable {
                 ", typeName='" + typeName + '\'' +
                 ", selfReferencingColName='" + selfReferencingColName + '\'' +
                 ", refGeneration='" + refGeneration + '\'' +
+                ", sequence='" + sequence + '\'' +
                 '}';
     }
 }

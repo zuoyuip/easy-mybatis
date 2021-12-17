@@ -141,7 +141,7 @@ public class EasyMybatisAutoConfiguration implements InitializingBean {
     @Bean
     @ConditionalOnMissingBean
     public SqlSessionFactory sqlSessionFactory(DataSource dataSource) throws Exception {
-        Resource[] resources = XmlStructureInit.register(dataSource, easyProperties.getTableNames());
+        Resource[] resources = XmlStructureInit.register(dataSource, easyProperties);
         this.easyProperties.setResources(resources);
         SqlSessionFactoryBean factory = new SqlSessionFactoryBean();
         factory.setDataSource(dataSource);

@@ -23,6 +23,8 @@
  */
 package top.zuoyu.mybatis.autoconfigure;
 
+import java.util.Map;
+
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.core.io.Resource;
 
@@ -41,6 +43,12 @@ public class EasyProperties {
 
     private String[] tableNames;
 
+    private Map<String, String> sequences;
+
+    private static String dateFormat;
+
+    private String oracleDateFormat;
+
     public Resource[] getResources() {
         return resources;
     }
@@ -55,5 +63,29 @@ public class EasyProperties {
 
     public void setTableNames(String[] tableNames) {
         this.tableNames = tableNames;
+    }
+
+    public Map<String, String> getSequences() {
+        return sequences;
+    }
+
+    public void setSequences(Map<String, String> sequences) {
+        this.sequences = sequences;
+    }
+
+    public static String getDateFormat() {
+        return dateFormat;
+    }
+
+    public void setDateFormat(String dateFormat) {
+        EasyProperties.dateFormat = dateFormat;
+    }
+
+    public String getOracleDateFormat() {
+        return oracleDateFormat;
+    }
+
+    public void setOracleDateFormat(String oracleDateFormat) {
+        this.oracleDateFormat = oracleDateFormat;
     }
 }

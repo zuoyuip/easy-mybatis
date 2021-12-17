@@ -53,9 +53,9 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 #set($javaType=$column.javaType)
 #set($columnName=$column.columnName)
 #if($javaType == "java.lang.String")
-            <if test="$javaField != null #if($javaType == 'java.lang.String' ) and $javaField.trim() != ''#end"> and $columnName like concat('%', #{$javaField}, '%')</if>
+            <if test="$javaField != null #if($javaType == 'java.lang.String' ) and $javaField.trim() != ''#end"> and $columnName like CONCAT(CONCAT('%', #{$javaField}), '%')</if>
 #else
-            <if test="$javaField != null #if($javaType == 'java.lang.String' ) and $javaField.trim() != ''#end"> and $columnName = #{$javaField}</if>
+            <if test="$javaField != null">#if($column.javaType == 'java.util.Date') and $columnName =TO_DATE(#{$column.javaField, jdbcType=$column.jdbcType}, '$dateFormat') #else and $columnName = #{$javaField} #end</if>
 #end
 #end
         </where>
@@ -82,9 +82,9 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 #set($javaType=$column.javaType)
 #set($columnName=$column.columnName)
 #if($javaType == "java.lang.String")
-            <if test="jsonObject.$javaField != null #if($javaType == 'java.lang.String' ) and jsonObject.$javaField.trim() != ''#end"> and $columnName like concat('%', #{jsonObject.$javaField}, '%')</if>
+            <if test="jsonObject.$javaField != null #if($javaType == 'java.lang.String' ) and jsonObject.$javaField.trim() != ''#end"> and $columnName like CONCAT(CONCAT('%', #{jsonObject.$javaField}), '%')</if>
 #else
-            <if test="jsonObject.$javaField != null #if($javaType == 'java.lang.String' ) and jsonObject.$javaField.trim() != ''#end"> and $columnName = #{jsonObject.$javaField}</if>
+            <if test="$javaField != null">#if($column.javaType == 'java.util.Date') and $columnName =TO_DATE(#{$column.javaField, jdbcType=$column.jdbcType}, '$dateFormat') #else and $columnName = #{$javaField} #end</if>
 #end
 #end
         </where>
@@ -115,9 +115,9 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 #set($javaType=$column.javaType)
 #set($columnName=$column.columnName)
 #if($javaType == "java.lang.String")
-            <if test="$javaField != null #if($javaType == 'java.lang.String' ) and $javaField.trim() != ''#end"> and $columnName like concat('%', #{$javaField}, '%')</if>
+            <if test="$javaField != null #if($javaType == 'java.lang.String' ) and $javaField.trim() != ''#end"> and $columnName like CONCAT(CONCAT('%', #{$javaField}), '%')</if>
 #else
-            <if test="$javaField != null #if($javaType == 'java.lang.String' ) and $javaField.trim() != ''#end"> and $columnName = #{$javaField}</if>
+            <if test="$javaField != null">#if($column.javaType == 'java.util.Date') and $columnName =TO_DATE(#{$column.javaField, jdbcType=$column.jdbcType}, '$dateFormat') #else and $columnName = #{$javaField} #end</if>
 #end
 #end
         </where>
@@ -128,75 +128,81 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </select>
 
     <select id="existsByExample" parameterType="top.zuoyu.mybatis.json.JsonObject" resultType="boolean">
-        SELECT EXISTS(SELECT 1 FROM ${tableName}
+        SELECT CASE WHEN EXISTS(SELECT 1 FROM ${tableName}
         <where>
 #foreach($column in $columns)
 #set($javaField=$column.javaField)
 #set($javaType=$column.javaType)
 #set($columnName=$column.columnName)
 #if($javaType == "java.lang.String")
-            <if test="$javaField != null #if($javaType == 'java.lang.String' ) and $javaField.trim() != ''#end"> and $columnName like concat('%', #{$javaField}, '%')</if>
+            <if test="$javaField != null #if($javaType == 'java.lang.String' ) and $javaField.trim() != ''#end"> and $columnName like CONCAT(CONCAT('%', #{$javaField}), '%')</if>
 #else
-            <if test="$javaField != null #if($javaType == 'java.lang.String' ) and $javaField.trim() != ''#end"> and $columnName = #{$javaField}</if>
+            <if test="$javaField != null">#if($column.javaType == 'java.util.Date') and $columnName =TO_DATE(#{$column.javaField, jdbcType=$column.jdbcType}, '$dateFormat') #else and $columnName = #{$javaField} #end</if>
 #end
 #end
         </where>
-        )
+        ) THEN 1 ELSE 0 END FROM DUAL
     </select>
 
     <select id="existsBy" parameterType="java.lang.String" resultType="boolean">
-        SELECT EXISTS(SELECT 1 FROM ${tableName} ${suffixSql})
+        SELECT CASE WHEN EXISTS(SELECT 1 FROM ${tableName} ${suffixSql}) THEN 1 ELSE 0 END FROM DUAL
     </select>
 
-    <insert id="insert" parameterType="top.zuoyu.mybatis.json.JsonObject"#if($pkColumn.increment == "1") useGeneratedKeys="true" keyProperty="$pkColumn.javaField"#end>
-        INSERT INTO ${tableName}
-        <trim prefix="(" suffix=")" suffixOverrides=",">
-#if($pkColumn.increment != "1")
-            <if test="$pkColumn.javaField != null#if($pkColumn.javaType == 'java.lang.String' && $pkColumn.required == "1") and $pkColumn.javaField != ''#end">$pkColumn.columnName,</if>
+    <insert id="insert" parameterType="top.zuoyu.mybatis.json.JsonObject">
+#if($sequence != "null")
+        <selectKey keyProperty="${pkColumn.javaField}" resultType="${pkColumn.javaType}" order="BEFORE">
+            SELECT ${sequence}.NEXTVAL as ${pkColumn.javaField} FROM DUAL
+        </selectKey>
 #end
+            INSERT INTO ${tableName}
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="$pkColumn.javaField != null#if($pkColumn.javaType == 'java.lang.String' && $pkColumn.required == "1") and $pkColumn.javaField != ''#end">$pkColumn.columnName,</if>
 #foreach($column in $columns)
 #if($column.columnName != $pkColumn.columnName)
             <if test="$column.javaField != null#if($column.javaType == 'java.lang.String' && $column.required == "1") and $column.javaField != ''#end">$column.columnName,</if>
 #end
 #end
          </trim>
-        <trim prefix="values (" suffix=")" suffixOverrides=",">
-#if($pkColumn.increment != "1")
+        <trim prefix="VALUES (" suffix=")" suffixOverrides=",">
             <if test="$pkColumn.javaField != null#if($pkColumn.javaType == 'java.lang.String' && $pkColumn.required == "1") and $pkColumn.javaField != ''#end">#{$pkColumn.javaField, jdbcType=$pkColumn.jdbcType},</if>
-#end
 #foreach($column in $columns)
 #if($column.columnName != $pkColumn.columnName)
-            <if test="$column.javaField != null#if($column.javaType == 'java.lang.String' && $column.required == "1") and $column.javaField != ''#end">#{$column.javaField, jdbcType=$column.jdbcType},</if>
+            <if test="$column.javaField != null#if($column.javaType == 'java.lang.String' && $column.required == "1") and $column.javaField != ''#end">#if($column.javaType == 'java.util.Date') TO_DATE(#{$column.javaField, jdbcType=$column.jdbcType}, '$dateFormat') #else #{$column.javaField, jdbcType=$column.jdbcType} #end,</if>
 #end
 #end
          </trim>
     </insert>
 
-    <insert id="insertBatch" parameterType="java.util.List"#if($pkColumn.increment == "1") useGeneratedKeys="true" keyProperty="$pkColumn.javaField"#end>
+    <insert id="insertBatch" parameterType="java.util.List" useGeneratedKeys="false">
         INSERT INTO ${tableName}
         <trim prefix="(" suffix=")" suffixOverrides=",">
-#if($pkColumn.increment != "1")
             $pkColumn.columnName,
-#end
 #foreach($column in $columns)
 #if($column.columnName != $pkColumn.columnName)
             $column.columnName,
 #end
 #end
         </trim>
-        VALUES
-        <foreach collection ="list" item="item" index= "index" separator =",">
-            <trim prefix="(" suffix=")" suffixOverrides=",">
-#if(!$pkColumn.increment != "1")
+        SELECT
+#if($sequence != "null")
+        ${sequence}.NEXTVAL,
+#end
+        this.* FROM (
+        <foreach item="item" index="index" collection="list" separator="union all">
+        SELECT
+            <trim suffixOverrides=",">
+#if($sequence == "null")
                 #{item.${pkColumn.javaField}, jdbcType=$pkColumn.jdbcType},
 #end
 #foreach($column in $columns)
 #if($column.columnName != $pkColumn.columnName)
-                #{item.${column.javaField}, jdbcType=$column.jdbcType},
+                #if($column.javaType == 'java.util.Date') TO_DATE(#{item.${column.javaField}, jdbcType=$column.jdbcType}, '$dateFormat') #else #{item.${column.javaField}, jdbcType=$column.jdbcType} #end,
 #end
 #end
             </trim>
+        FROM dual
         </foreach>
+        ) this
     </insert>
 
     <update id="updateByPrimaryKey" parameterType="top.zuoyu.mybatis.json.JsonObject">
@@ -204,7 +210,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <trim prefix="SET" suffixOverrides=",">
 #foreach($column in $columns)
 #if($column.columnName != $pkColumn.columnName)
-            <if test="$column.javaField != null#if($column.javaType == 'java.lang.String' && $column.required == "1") and $column.javaField != ''#end">$column.columnName = #{$column.javaField, jdbcType=$column.jdbcType},</if>
+            <if test="$column.javaField != null#if($column.javaType == 'java.lang.String' && $column.required == "1") and $column.javaField != ''#end">$column.columnName = #if($column.javaType == 'java.util.Date') TO_DATE(#{$column.javaField, jdbcType=$column.jdbcType}, '$dateFormat') #else #{$column.javaField, jdbcType=$column.jdbcType} #end,</if>
 #end
 #end
         </trim>
@@ -216,7 +222,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <trim prefix="SET" suffixOverrides=",">
 #foreach($column in $columns)
 #if($column.columnName != $pkColumn.columnName)
-            <if test="jsonObject.$column.javaField != null#if($column.javaType == 'java.lang.String' && $column.required == "1") and jsonObject.$column.javaField != ''#end">$column.columnName = #{jsonObject.$column.javaField, jdbcType=$column.jdbcType},</if>
+            <if test="jsonObject.$column.javaField != null#if($column.javaType == 'java.lang.String' && $column.required == "1") and jsonObject.$column.javaField != ''#end">#if($column.javaType == 'java.util.Date') TO_DATE(#{jsonObject.$column.javaField, jdbcType=$column.jdbcType}, '$dateFormat') #else #{jsonObject.$column.javaField, jdbcType=$column.jdbcType} #end,</if>
 #end
 #end
         </trim>
@@ -231,7 +237,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <trim prefix="$column.javaField = case" suffix="end,">
                 <foreach collection="list" item="item" index="index">
                     <if test="item.${column.javaField} != null#if($column.javaType == 'java.lang.String' && $column.required == "1") and item.${column.javaField} != ''#end">
-                        WHEN ${pkColumn.columnName} = #{item.${pkColumn.javaField}} THEN #{item.${column.javaField}, jdbcType=$column.jdbcType}
+                        WHEN ${pkColumn.columnName} = #{item.${pkColumn.javaField}} THEN #if($column.javaType == 'java.util.Date') TO_DATE(#{item.$column.javaField, jdbcType=$column.jdbcType}, '$dateFormat') #else #{item.$column.javaField, jdbcType=$column.jdbcType} #end
                     </if>
                     <if test="item.${column.javaField} == null#if($column.javaType == 'java.lang.String' && $column.required == "1") and item.${column.javaField} == ''#end">
                         WHEN ${pkColumn.columnName} = #{item.${pkColumn.javaField}} THEN ${tableName}.${column.javaField}

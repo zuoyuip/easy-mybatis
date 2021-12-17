@@ -36,6 +36,7 @@ import org.springframework.util.Assert;
 import top.zuoyu.mybatis.common.Constant;
 import top.zuoyu.mybatis.data.enums.JdbcType;
 import top.zuoyu.mybatis.data.model.Table;
+import top.zuoyu.mybatis.exception.EasyMybatisException;
 
 
 /**
@@ -53,7 +54,7 @@ public class VelocityUtils {
      * @return 模板列表
      */
     @NonNull
-    public static VelocityContext prepareContext(@NonNull Table table) {
+    public static VelocityContext prepareContext(@NonNull Table table, @NonNull String dateFormat) {
         String packageName = Constant.MAPPER_PACKAGE_NAME;
         String tableName = table.getTableName();
         List<Column> columns = new ArrayList<>(Collections.emptyList());
@@ -69,7 +70,9 @@ public class VelocityUtils {
         velocityContext.put("className", StrUtil.captureName(tableName));
         velocityContext.put("packageName", packageName);
         velocityContext.put("pkColumn", Column.builder(primaryKeyColumn));
+        velocityContext.put("sequence", table.getSequence() == null ? "null" : table.getSequence());
         velocityContext.put("columns", columns);
+        velocityContext.put("dateFormat", dateFormat);
         return velocityContext;
     }
 
@@ -80,8 +83,14 @@ public class VelocityUtils {
      * @return 模板列表
      */
     @NonNull
-    public static String getMySqlTemplate() {
-        return "vm/mysql/mapper.xml.vm";
+    public static String getXmlTemplate(@NonNull String databaseProductName) {
+        if (Constant.MYSQL.equalsIgnoreCase(databaseProductName)) {
+            return "vm/mysql/mapper.xml.vm";
+        }
+        if (Constant.ORACLE.equalsIgnoreCase(databaseProductName)) {
+            return "vm/oracle/mapper.xml.vm";
+        }
+        throw new EasyMybatisException("not supper databaseProductName");
     }
 
     public static class Column {

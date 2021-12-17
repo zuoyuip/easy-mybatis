@@ -81,4 +81,14 @@ public interface Constant {
      * json的路径
      */
     String JSON_PACKAGE_NAME = "top.zuoyu.mybatis.json";
+
+    /**
+     * Oracle标识
+     */
+    String ORACLE = "Oracle";
+
+    /**
+     * MySQL标识
+     */
+    String MYSQL = "MySQL";
 }

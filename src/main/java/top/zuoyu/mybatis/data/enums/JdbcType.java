@@ -23,22 +23,15 @@
  */
 package top.zuoyu.mybatis.data.enums;
 
-import java.awt.Cursor;
 import java.lang.reflect.Array;
 import java.math.BigDecimal;
-import java.net.URL;
-import java.sql.Blob;
-import java.sql.Clob;
-import java.sql.Ref;
-import java.sql.RowId;
-import java.sql.Struct;
 import java.sql.Types;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
 /**
- * JDBC中字段类型 .
+ * JDBC中字段类型（适配Mybatis） .
  *
  * @author: zuoyu
  * @create: 2021-12-02 16:01
@@ -78,7 +71,7 @@ public enum JdbcType {
     /**
      * FLOAT
      */
-    FLOAT(Types.FLOAT, Double.class),
+    FLOAT(Types.FLOAT, Float.class),
 
     /**
      * REAL
@@ -148,7 +141,7 @@ public enum JdbcType {
     /**
      * NULL
      */
-    NULL(Types.NULL, null),
+    NULL(Types.NULL, Object.class),
 
     /**
      * OTHER
@@ -158,12 +151,12 @@ public enum JdbcType {
     /**
      * BLOB
      */
-    BLOB(Types.BLOB, Blob.class),
+    BLOB(Types.BLOB, Byte[].class),
 
     /**
      * CLOB
      */
-    CLOB(Types.CLOB, Clob.class),
+    CLOB(Types.CLOB, String.class),
 
     /**
      * BOOLEAN
@@ -173,12 +166,12 @@ public enum JdbcType {
     /**
      * CURSOR
      */
-    CURSOR(-10, Cursor.class), // Oracle
+    CURSOR(-10, Object.class), // Oracle
 
     /**
      * UNDEFINED
      */
-    UNDEFINED(Integer.MIN_VALUE + 1000, null),
+    UNDEFINED(Integer.MIN_VALUE + 1000, Object.class),
 
     /**
      * NVARCHAR
@@ -198,7 +191,7 @@ public enum JdbcType {
     /**
      * STRUCT
      */
-    STRUCT(Types.STRUCT, Struct.class),
+    STRUCT(Types.STRUCT, Object.class),
 
     /**
      * JAVA_OBJECT
@@ -213,17 +206,17 @@ public enum JdbcType {
     /**
      * REF
      */
-    REF(Types.REF, Ref.class),
+    REF(Types.REF, Object.class),
 
     /**
      * DATALINK
      */
-    DATALINK(Types.DATALINK, URL.class),
+    DATALINK(Types.DATALINK, Object.class),
 
     /**
      * ROWID
      */
-    ROWID(Types.ROWID, RowId.class), // JDK6
+    ROWID(Types.ROWID, Object.class), // JDK6
 
     /**
      * LONGNVARCHAR
@@ -233,7 +226,7 @@ public enum JdbcType {
     /**
      * SQLXML
      */
-    SQLXML(Types.SQLXML, java.sql.SQLXML.class), // JDK6
+    SQLXML(Types.SQLXML, String.class), // JDK6
 
     /**
      * DATETIMEOFFSET

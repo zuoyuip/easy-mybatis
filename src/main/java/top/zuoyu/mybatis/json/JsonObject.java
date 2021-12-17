@@ -27,7 +27,9 @@ import java.io.Serializable;
 import java.lang.reflect.Array;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -40,7 +42,9 @@ import java.util.Set;
 
 import org.springframework.cglib.beans.BeanMap;
 import org.springframework.lang.NonNull;
+import org.springframework.util.StringUtils;
 
+import top.zuoyu.mybatis.autoconfigure.EasyProperties;
 import top.zuoyu.mybatis.exception.JsonException;
 import top.zuoyu.mybatis.json.convert.BigDecimalConvert;
 import top.zuoyu.mybatis.json.convert.BigIntegerConvert;
@@ -1541,6 +1545,44 @@ public class JsonObject implements Cloneable, Serializable, Map<String, Object> 
      */
     public JsonArray names() {
         return this.nameValuePairs.isEmpty() ? null : new JsonArray(new ArrayList<>(this.nameValuePairs.keySet()));
+    }
+
+    /**
+     * 将对象内的Date值进行格式化
+     *
+     * @return 格式化后的对象
+     */
+    public JsonObject dateFormat() {
+        Set<Entry<String, Object>> entries = this.nameValuePairs.entrySet();
+        for (Entry<String, Object> entry : entries) {
+            Object value = entry.getValue();
+            Date date;
+            if (value instanceof Date) {
+                date = (Date) value;
+            } else if (value instanceof Calendar) {
+                date = ((Calendar) value).getTime();
+            } else {
+                continue;
+            }
+            String format = Objects.isNull(EasyProperties.getDateFormat()) ? "yyyy-MM-dd HH:mm:ss" : EasyProperties.getDateFormat();
+            String s = new SimpleDateFormat(format).format(date);
+            putOpt(entry.getKey(), s);
+        }
+        return this;
+    }
+
+    /**
+     * 将对象内的键转换为小写
+     *
+     * @return 格式化后的对象
+     */
+    public JsonObject toLower() {
+        Set<Entry<String, Object>> entries = this.nameValuePairs.entrySet();
+        for (Entry<String, Object> entry : entries) {
+            String key = entry.getKey();
+            renameKey(key, key.toLowerCase());
+        }
+        return this;
     }
 
     @Override
