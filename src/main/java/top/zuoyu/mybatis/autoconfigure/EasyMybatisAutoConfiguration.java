@@ -40,7 +40,6 @@ import org.apache.ibatis.session.SqlSessionFactory;
 import org.apache.ibatis.type.TypeHandler;
 import org.mybatis.spring.SqlSessionFactoryBean;
 import org.mybatis.spring.SqlSessionTemplate;
-import org.mybatis.spring.annotation.MapperScan;
 import org.mybatis.spring.boot.autoconfigure.ConfigurationCustomizer;
 import org.mybatis.spring.boot.autoconfigure.MybatisAutoConfiguration;
 import org.mybatis.spring.boot.autoconfigure.MybatisProperties;
@@ -84,7 +83,6 @@ import top.zuoyu.mybatis.ssist.XmlStructureInit;
 @EnableConfigurationProperties({MybatisProperties.class, EasyProperties.class})
 @AutoConfigureAfter(DataSourceAutoConfiguration.class)
 @AutoConfigureBefore(MybatisAutoConfiguration.class)
-@MapperScan(basePackages = Constant.MAPPER_PACKAGE_NAME)
 public class EasyMybatisAutoConfiguration implements InitializingBean {
 
     private static final String SCRIPTING_LANGUAGE_DRIVERS = "scriptingLanguageDrivers";

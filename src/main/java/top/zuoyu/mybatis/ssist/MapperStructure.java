@@ -26,7 +26,9 @@ package top.zuoyu.mybatis.ssist;
 import java.io.IOException;
 import java.io.Serializable;
 import java.net.URL;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -48,8 +50,6 @@ import javassist.bytecode.ParameterAnnotationsAttribute;
 import javassist.bytecode.annotation.Annotation;
 import javassist.bytecode.annotation.StringMemberValue;
 import top.zuoyu.mybatis.common.Constant;
-import top.zuoyu.mybatis.data.model.Table;
-import top.zuoyu.mybatis.exception.CustomException;
 import top.zuoyu.mybatis.exception.EasyMybatisException;
 import top.zuoyu.mybatis.json.JsonArray;
 import top.zuoyu.mybatis.json.JsonObject;
@@ -66,7 +66,7 @@ import top.zuoyu.mybatis.utils.StrUtil;
 class MapperStructure {
 
 
-    static void registerMapper(@NonNull String tableName) {
+    static Map<String, Class<?>> registerMapper(@NonNull String tableName) {
         ClassPool classPool = ClassPool.getDefault();
 
         // 创建一个接口
@@ -94,18 +94,13 @@ class MapperStructure {
 
             // 创建方法
             methodList(ctClass, classPool);
-
-        } catch (NotFoundException | CannotCompileException e) {
+            URL basePath = ClassUtil.getBasePath();
+            // TODO 尽量不要生成文件
+            ctClass.writeFile(basePath.getPath());
+            return Collections.singletonMap(tableName, ctClass.toClass());
+        } catch (NotFoundException | CannotCompileException | IOException e) {
             throw new EasyMybatisException(e.getMessage(), e);
         }
-
-        URL basePath = ClassUtil.getBasePath();
-        try {
-            ctClass.writeFile(basePath.getPath());
-        } catch (CannotCompileException | IOException e) {
-            throw new CustomException("writeFile is fail!", e);
-        }
-
     }
 
     private static void param(@NonNull CtMethod ctMethod, @NonNull String... values) {

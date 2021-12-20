@@ -1,5 +1,8 @@
 package top.zuoyu.mybatis.ssist;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.springframework.lang.NonNull;
 
 /**
@@ -10,9 +13,13 @@ import org.springframework.lang.NonNull;
  */
 public final class MapperStructureInit {
 
-    public static void register(@NonNull String[] tableNames) {
+    @NonNull
+    public static Map<String, Class<?>> register(@NonNull String[] tableNames) {
+        Map<String, Class<?>> mappers = new HashMap<>(tableNames.length);
         for (String tableName : tableNames) {
-            MapperStructure.registerMapper(tableName);
+            Map<String, Class<?>> mapper = MapperStructure.registerMapper(tableName);
+            mappers.putAll(mapper);
         }
+        return mappers;
     }
 }
