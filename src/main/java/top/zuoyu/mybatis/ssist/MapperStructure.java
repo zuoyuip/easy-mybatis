@@ -230,5 +230,9 @@ class MapperStructure {
         CtMethod deleteByPrimaryKeys = new CtMethod(intClass, "deleteByPrimaryKeys", new CtClass[]{serializableArrayClass}, ctClass);
         param(deleteByPrimaryKeys, "array");
         ctClass.addMethod(deleteByPrimaryKeys);
+
+        // 根据已有键值删除对象
+        CtMethod deleteByExample = new CtMethod(intClass, "deleteByExample", new CtClass[]{jsonObjectClass}, ctClass);
+        ctClass.addMethod(deleteByExample);
     }
 }

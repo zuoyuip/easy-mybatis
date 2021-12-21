@@ -214,5 +214,11 @@ public interface MapperRepository {
      */
     int deleteByPrimaryKeys(Serializable[] primaryKeys);
 
-
+    /**
+     * 根据已有键值删除对象
+     *
+     * @param example - 已有键值
+     * @return 变动数据的数量
+     */
+    int deleteByExample(JsonObject example);
 }

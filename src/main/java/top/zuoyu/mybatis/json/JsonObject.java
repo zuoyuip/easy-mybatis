@@ -28,6 +28,8 @@ import java.lang.reflect.Array;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.temporal.TemporalAccessor;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
@@ -42,7 +44,6 @@ import java.util.Set;
 
 import org.springframework.cglib.beans.BeanMap;
 import org.springframework.lang.NonNull;
-import org.springframework.util.StringUtils;
 
 import top.zuoyu.mybatis.autoconfigure.EasyProperties;
 import top.zuoyu.mybatis.exception.JsonException;
@@ -59,6 +60,7 @@ import top.zuoyu.mybatis.json.convert.IntegerConvert;
 import top.zuoyu.mybatis.json.convert.LongConvert;
 import top.zuoyu.mybatis.json.convert.ShortConvert;
 import top.zuoyu.mybatis.json.convert.StringConvert;
+import top.zuoyu.mybatis.utils.DateUtils;
 
 /**
  * Json对象 .
@@ -384,6 +386,51 @@ public class JsonObject implements Cloneable, Serializable, Map<String, Object> 
             e.printStackTrace();
         }
         return this;
+    }
+
+    /**
+     * 将value映射到name ，破坏任何具有相同名称的现有名称/值映射
+     *
+     * @param name  - 属性的名称
+     * @param value – 对应的值
+     * @return {@link JsonObject}
+     */
+    @NonNull
+    public JsonObject put(@NonNull String name, @NonNull Date value) {
+        String format = Objects.isNull(EasyProperties.getDateFormat()) ? "yyyy-MM-dd HH:mm:ss" : EasyProperties.getDateFormat();
+        String s = new SimpleDateFormat(format).format(value);
+        try {
+            this.nameValuePairs.put(checkName(name), s);
+        } catch (JsonException e) {
+            e.printStackTrace();
+        }
+        return this;
+    }
+
+    /**
+     * 将value映射到name ，破坏任何具有相同名称的现有名称/值映射
+     *
+     * @param name  - 属性的名称
+     * @param value – 对应的值
+     * @return {@link JsonObject}
+     */
+    @NonNull
+    public JsonObject put(@NonNull String name, @NonNull Calendar value) {
+        Date date = value.getTime();
+        return put(name, date);
+    }
+
+    /**
+     * 将value映射到name ，破坏任何具有相同名称的现有名称/值映射
+     *
+     * @param name  - 属性的名称
+     * @param value – 对应的值
+     * @return {@link JsonObject}
+     */
+    @NonNull
+    public JsonObject put(@NonNull String name, @NonNull TemporalAccessor value) {
+        LocalDateTime localDateTime = LocalDateTime.from(value);
+        return put(name, DateUtils.asDate(localDateTime));
     }
 
     /**

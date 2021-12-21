@@ -84,7 +84,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 #if($javaType == "java.lang.String")
             <if test="jsonObject.$javaField != null #if($javaType == 'java.lang.String' ) and jsonObject.$javaField.trim() != ''#end"> and $columnName like CONCAT('%', #{jsonObject.$javaField}, '%')</if>
 #else
-            <if test="jsonObject.$javaField != null #if($javaType == 'java.lang.String' ) and jsonObject.$javaField.trim() != ''#end"> and $columnName = #{jsonObject.$javaField}</if>
+            <if test="jsonObject.$javaField != null"> and $columnName = #{jsonObject.$javaField}</if>
 #end
 #end
         </where>
@@ -117,7 +117,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 #if($javaType == "java.lang.String")
             <if test="$javaField != null #if($javaType == 'java.lang.String' ) and $javaField.trim() != ''#end"> and $columnName like CONCAT('%', #{$javaField}, '%')</if>
 #else
-            <if test="$javaField != null #if($javaType == 'java.lang.String' ) and $javaField.trim() != ''#end"> and $columnName = #{$javaField}</if>
+            <if test="$javaField != null"> and $columnName = #{$javaField}</if>
 #end
 #end
         </where>
@@ -137,7 +137,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 #if($javaType == "java.lang.String")
             <if test="$javaField != null #if($javaType == 'java.lang.String' ) and $javaField.trim() != ''#end"> and $columnName like CONCAT('%', #{$javaField}, '%')</if>
 #else
-            <if test="$javaField != null #if($javaType == 'java.lang.String' ) and $javaField.trim() != ''#end"> and $columnName = #{$javaField}</if>
+            <if test="$javaField != null"> and $columnName = #{$javaField}</if>
 #end
 #end
         </where>
@@ -260,5 +260,21 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <foreach item="${pkColumn.javaField}" collection="array" open="(" separator="," close=")">
             #{${pkColumn.javaField}, jdbcType=$pkColumn.jdbcType}
         </foreach>
+    </delete>
+
+    <delete id="deleteByExample" parameterType="top.zuoyu.mybatis.json.JsonObject">
+        DELETE FROM ${tableName}
+        <where>
+#foreach($column in $columns)
+#set($javaField=$column.javaField)
+#set($javaType=$column.javaType)
+#set($columnName=$column.columnName)
+#if($javaType == "java.lang.String")
+            <if test="$javaField != null #if($javaType == 'java.lang.String' ) and $javaField.trim() != ''#end"> and $columnName like CONCAT('%', #{$javaField}, '%')</if>
+#else
+            <if test="$javaField != null"> and $columnName = #{$javaField}</if>
+#end
+#end
+        </where>
     </delete>
 </mapper>
