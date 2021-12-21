@@ -23,15 +23,16 @@
  */
 package top.zuoyu.mybatis.ssist;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.Serializable;
-import java.net.URL;
-import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.core.io.Resource;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.StringUtils;
@@ -54,7 +55,6 @@ import top.zuoyu.mybatis.exception.EasyMybatisException;
 import top.zuoyu.mybatis.json.JsonArray;
 import top.zuoyu.mybatis.json.JsonObject;
 import top.zuoyu.mybatis.service.MapperRepository;
-import top.zuoyu.mybatis.utils.ClassUtil;
 import top.zuoyu.mybatis.utils.StrUtil;
 
 /**
@@ -66,7 +66,8 @@ import top.zuoyu.mybatis.utils.StrUtil;
 class MapperStructure {
 
 
-    static Map<String, Class<?>> registerMapper(@NonNull String tableName) {
+    @NonNull
+    static Resource registerMapper(@NonNull String tableName) {
         ClassPool classPool = ClassPool.getDefault();
 
         // 创建一个接口
@@ -94,10 +95,11 @@ class MapperStructure {
 
             // 创建方法
             methodList(ctClass, classPool);
-            URL basePath = ClassUtil.getBasePath();
-            // TODO 尽量不要生成文件
-            ctClass.writeFile(basePath.getPath());
-            return Collections.singletonMap(tableName, ctClass.toClass());
+            // 先生成class加入内存
+            ctClass.toClass();
+            byte[] bytecode = ctClass.toBytecode();
+            InputStream byteArrayInputStream = new ByteArrayInputStream(bytecode);
+            return new InputStreamResource(byteArrayInputStream, tableName + "MapperInputStream");
         } catch (NotFoundException | CannotCompileException | IOException e) {
             throw new EasyMybatisException(e.getMessage(), e);
         }

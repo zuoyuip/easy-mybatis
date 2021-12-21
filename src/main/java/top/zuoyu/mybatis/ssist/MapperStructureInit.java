@@ -1,8 +1,9 @@
 package top.zuoyu.mybatis.ssist;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Arrays;
+import java.util.stream.Stream;
 
+import org.springframework.core.io.Resource;
 import org.springframework.lang.NonNull;
 
 /**
@@ -14,12 +15,7 @@ import org.springframework.lang.NonNull;
 public final class MapperStructureInit {
 
     @NonNull
-    public static Map<String, Class<?>> register(@NonNull String[] tableNames) {
-        Map<String, Class<?>> mappers = new HashMap<>(tableNames.length);
-        for (String tableName : tableNames) {
-            Map<String, Class<?>> mapper = MapperStructure.registerMapper(tableName);
-            mappers.putAll(mapper);
-        }
-        return mappers;
+    public static Stream<Resource> register(@NonNull String[] tableNames) {
+        return Arrays.stream(tableNames).map(MapperStructure::registerMapper);
     }
 }

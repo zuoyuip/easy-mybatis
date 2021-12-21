@@ -28,6 +28,7 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import org.apache.commons.lang.ArrayUtils;
 import org.mybatis.logging.Logger;
@@ -73,6 +74,7 @@ import org.springframework.context.annotation.ScopeMetadata;
 import org.springframework.context.annotation.ScopeMetadataResolver;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.core.env.Environment;
+import org.springframework.core.io.Resource;
 import org.springframework.core.type.classreading.CachingMetadataReaderFactory;
 import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
@@ -138,7 +140,6 @@ public class MapperInitConfiguration implements BeanDefinitionRegistryPostProces
             beanDefinitions.add(definitionHolder);
             BeanDefinitionReaderUtils.registerBeanDefinition(definitionHolder, registry);
         }
-        System.out.println("--------------------------postProcessBeanDefinitionRegistry-------------------------------");
         processBeanDefinitions(beanDefinitions, registry);
     }
 
@@ -155,19 +156,19 @@ public class MapperInitConfiguration implements BeanDefinitionRegistryPostProces
 
     @NonNull
     private Set<BeanDefinition> loadCandidates() {
-        Map<String, Class<?>> mappers = MapperStructureInit.register(easyProperties.getTableNames());
+        Stream<Resource> mappers = MapperStructureInit.register(easyProperties.getTableNames());
         Set<BeanDefinition> candidates = new LinkedHashSet<>();
-        for (Map.Entry<String, Class<?>> classEntry : mappers.entrySet()) {
+        mappers.forEach(resource -> {
             try {
-                // TODO 尝试从内存获取流文件
-                MetadataReader metadataReader = this.metadataReaderFactory.getMetadataReader(classEntry.getValue().getName());
+                // 从内存获取流文件
+                MetadataReader metadataReader = this.metadataReaderFactory.getMetadataReader(resource);
                 ScannedGenericBeanDefinition sbd = new ScannedGenericBeanDefinition(metadataReader);
                 sbd.setSource(metadataReader.getResource());
                 candidates.add(sbd);
             } catch (IOException e) {
                 e.printStackTrace();
             }
-        }
+        });
         return candidates;
     }
 
@@ -196,8 +197,7 @@ public class MapperInitConfiguration implements BeanDefinitionRegistryPostProces
             LOGGER.debug(() -> "Creating MapperFactoryBean with name '" + holder.getBeanName() + "' and '" + beanClassName
                     + "' mapperInterface");
 
-            // the mapper interface is the original class of the bean
-            // but, the actual class of the bean is MapperFactoryBean
+            // MapperFactoryBean
             if (beanClassName != null) {
                 definition.getConstructorArgumentValues().addGenericArgumentValue(beanClassName);
             }
@@ -260,9 +260,6 @@ public class MapperInitConfiguration implements BeanDefinitionRegistryPostProces
             BeanDefinition mapperScannerBean = ((ConfigurableApplicationContext) applicationContext).getBeanFactory()
                     .getBeanDefinition(beanName);
 
-            // PropertyResourceConfigurer does not expose any methods to explicitly perform
-            // property placeholder substitution. Instead, create a BeanFactory that just
-            // contains this mapper scanner and post process the factory.
             DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
             factory.registerBeanDefinition(beanName, mapperScannerBean);
 
