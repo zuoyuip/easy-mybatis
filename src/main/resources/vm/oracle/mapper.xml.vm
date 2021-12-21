@@ -27,7 +27,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="${packageName}.${className}Mapper">
 
-    <resultMap type="top.zuoyu.mybatis.json.JsonObject" id="${tableName}ResultByZuoyu">
+    <resultMap type="top.zuoyu.mybatis.json.JsonObject" id="${tableName}ResultForJson">
 #foreach ($column in $columns)
 #if(${column.columnName} == ${pkColumn.columnName})
         <id property="${column.javaField}" column="${column.columnName}" jdbcType="${column.jdbcType}" javaType="${column.javaType}"/>
@@ -41,11 +41,11 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         SELECT#foreach($column in $columns) $column.columnName#if($velocityCount != $columns.size()),#end#end FROM ${tableName}
     </sql>
 
-    <select id="selectList" resultMap="${tableName}ResultByZuoyu">
+    <select id="selectList" resultMap="${tableName}ResultForJson">
         <include refid="select${className}Vo"/>
     </select>
 
-    <select id="selectListByExample" parameterType="top.zuoyu.mybatis.json.JsonObject" resultMap="${tableName}ResultByZuoyu">
+    <select id="selectListByExample" parameterType="top.zuoyu.mybatis.json.JsonObject" resultMap="${tableName}ResultForJson">
         <include refid="select${className}Vo"/>
         <where>
 #foreach($column in $columns)
@@ -61,12 +61,12 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         </where>
     </select>
 
-    <select id="selectByPrimaryKey" parameterType="java.io.Serializable" resultMap="${tableName}ResultByZuoyu">
+    <select id="selectByPrimaryKey" parameterType="java.io.Serializable" resultMap="${tableName}ResultForJson">
         <include refid="select${className}Vo"/>
         WHERE ${pkColumn.columnName} = #{${pkColumn.javaField}, jdbcType=$pkColumn.jdbcType}
     </select>
 
-    <select id="selectListBy" parameterType="java.lang.String" resultMap="${tableName}ResultByZuoyu">
+    <select id="selectListBy" parameterType="java.lang.String" resultMap="${tableName}ResultForJson">
         <include refid="select${className}Vo"/> ${suffixSql}
     </select>
 
