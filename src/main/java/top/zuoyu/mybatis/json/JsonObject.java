@@ -31,6 +31,7 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.temporal.TemporalAccessor;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
@@ -540,6 +541,39 @@ public class JsonObject implements Cloneable, Serializable, Map<String, Object> 
     @Override
     public void clear() {
         this.nameValuePairs.clear();
+    }
+
+    /**
+     * 仅保留指定的键值对
+     *
+     * @param keys - 保留的键
+     * @return {@link JsonObject}
+     */
+    public JsonObject includes(@NonNull String... keys) {
+        List<String> keyList = Arrays.asList(keys);
+        for (Entry<String, Object> entry : this.nameValuePairs.entrySet()) {
+            if (keyList.contains(entry.getKey())) {
+                continue;
+            }
+            this.remove(entry.getKey());
+        }
+        return this;
+    }
+
+    /**
+     * 排除指定的键值对，仅保留剩余的
+     *
+     * @param keys - 排除的键
+     * @return {@link JsonObject}
+     */
+    public JsonObject exclusions(@NonNull String... keys) {
+        List<String> keyList = Arrays.asList(keys);
+        for (Entry<String, Object> entry : this.nameValuePairs.entrySet()) {
+            if (keyList.contains(entry.getKey())) {
+                this.remove(entry.getKey());
+            }
+        }
+        return this;
     }
 
     /**

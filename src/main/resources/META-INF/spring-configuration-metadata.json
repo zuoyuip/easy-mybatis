@@ -1,0 +1,28 @@
+{
+    "properties": [
+        {
+            "defaultValue": "",
+            "name": "easy-mybatis.table-names",
+            "description": "需要载入的表名，多表名用逗号隔开.",
+            "type": "java.lang.Array"
+        },
+        {
+            "defaultValue": [],
+            "name": "easy-mybatis.sequences",
+            "description": "Oracle数据库需要配置的主键生成器，使用'表名:主键生成器'的格式进行配置.",
+            "type": "java.util.Map"
+        },
+        {
+            "defaultValue": "'yyyy-MM-dd HH:mm:ss",
+            "name": "easy-mybatis.dateFormat",
+            "description": "从数据库读取日期时自动格式化的日期格式，如果不配置默认为'yyyy-MM-dd HH:mm:ss'.",
+            "type": "java.lang.String"
+        },
+        {
+            "defaultValue": [],
+            "name": "easy-mybatis.sequences",
+            "description": "Oracle数据库需要配置的主键生成器，使用'表名:主键生成器'的格式进行配置.",
+            "type": "java.util.Map"
+        }
+    ]
+}

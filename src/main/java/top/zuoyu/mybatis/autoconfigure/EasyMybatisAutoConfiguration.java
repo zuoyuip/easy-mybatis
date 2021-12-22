@@ -140,7 +140,6 @@ public class EasyMybatisAutoConfiguration implements InitializingBean {
     @ConditionalOnMissingBean
     public SqlSessionFactory sqlSessionFactory(DataSource dataSource) throws Exception {
         Resource[] resources = XmlStructureInit.register(dataSource, easyProperties);
-        this.easyProperties.setResources(resources);
         SqlSessionFactoryBean factory = new SqlSessionFactoryBean();
         factory.setDataSource(dataSource);
         factory.setVfs(SpringBootVFS.class);
@@ -171,10 +170,10 @@ public class EasyMybatisAutoConfiguration implements InitializingBean {
         }
         if (!ObjectUtils.isEmpty(this.properties.resolveMapperLocations())) {
             Resource[] resolveMapperLocations = this.properties.resolveMapperLocations();
-            Resource[] all = (Resource[]) ArrayUtils.addAll(resolveMapperLocations, this.easyProperties.getResources());
+            Resource[] all = (Resource[]) ArrayUtils.addAll(resolveMapperLocations, resources);
             factory.setMapperLocations(all);
         } else {
-            factory.setMapperLocations(this.easyProperties.getResources());
+            factory.setMapperLocations(resources);
         }
 
         Set<String> factoryPropertyNames = Stream

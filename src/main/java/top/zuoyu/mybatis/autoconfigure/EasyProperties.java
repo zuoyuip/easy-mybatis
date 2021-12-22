@@ -26,7 +26,6 @@ package top.zuoyu.mybatis.autoconfigure;
 import java.util.Map;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.core.io.Resource;
 
 /**
  * Mybatis配置 .
@@ -39,23 +38,22 @@ public class EasyProperties {
 
     public static final String EASY_PREFIX = "easy-mybatis";
 
-    private Resource[] resources;
-
-    private String[] tableNames;
-
-    private Map<String, String> sequences;
-
+    /**
+     * 从数据库读取日期时自动格式化的日期格式，如果不配置默认为"yyyy-MM-dd HH:mm:ss"
+     */
     private static String dateFormat;
-
+    /**
+     * 需要载入的表名，多表名用逗号隔开
+     */
+    private String[] tableNames;
+    /**
+     * Oracle数据库需要配置的主键生成器
+     */
+    private Map<String, String> sequences;
+    /**
+     * Oracle数据库解析日期时的日期格式，如果不配置默认为"yyyy-mm-dd hh24:mi:ss"
+     */
     private String oracleDateFormat;
-
-    public Resource[] getResources() {
-        return resources;
-    }
-
-    public void setResources(Resource[] resources) {
-        this.resources = resources;
-    }
 
     public String[] getTableNames() {
         return tableNames;

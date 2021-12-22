@@ -61,7 +61,6 @@ class XmlStructure {
         } catch (IOException e) {
             throw new EasyMybatisException(e.getMessage(), e);
         }
-        System.out.println(stringWriter.toString());
         return stringWriter.toString();
     }
 }
