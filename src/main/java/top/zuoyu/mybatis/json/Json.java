@@ -34,7 +34,6 @@ import java.util.Date;
 import org.springframework.lang.NonNull;
 import org.springframework.util.StringUtils;
 
-import top.zuoyu.mybatis.exception.EasyMybatisException;
 import top.zuoyu.mybatis.exception.JsonException;
 import top.zuoyu.mybatis.utils.DateUtils;
 
