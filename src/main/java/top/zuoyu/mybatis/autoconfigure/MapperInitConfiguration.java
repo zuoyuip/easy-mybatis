@@ -100,9 +100,9 @@ public class MapperInitConfiguration implements BeanDefinitionRegistryPostProces
     private Environment environment;
 
     private static final String FACTORY_BEAN_OBJECT_TYPE = "factoryBeanObjectType";
-    private final MetadataReaderFactory metadataReaderFactory = new CachingMetadataReaderFactory();
-    private final ScopeMetadataResolver scopeMetadataResolver = new AnnotationScopeMetadataResolver();
-    private final BeanNameGenerator beanNameGenerator = AnnotationBeanNameGenerator.INSTANCE;
+    private static final MetadataReaderFactory METADATA_READER_FACTORY = new CachingMetadataReaderFactory();
+    private static final ScopeMetadataResolver SCOPE_METADATA_RESOLVER = new AnnotationScopeMetadataResolver();
+    private static final BeanNameGenerator BEAN_NAME_GENERATOR = AnnotationBeanNameGenerator.INSTANCE;
     private String lazyInitialization;
     private String sqlSessionFactoryBeanName;
     private String sqlSessionTemplateBeanName;
@@ -128,9 +128,9 @@ public class MapperInitConfiguration implements BeanDefinitionRegistryPostProces
         Set<BeanDefinitionHolder> beanDefinitions = new LinkedHashSet<>();
         Set<BeanDefinition> candidates = loadCandidates();
         for (BeanDefinition candidate : candidates) {
-            ScopeMetadata scopeMetadata = this.scopeMetadataResolver.resolveScopeMetadata(candidate);
+            ScopeMetadata scopeMetadata = SCOPE_METADATA_RESOLVER.resolveScopeMetadata(candidate);
             candidate.setScope(scopeMetadata.getScopeName());
-            String beanName = this.beanNameGenerator.generateBeanName(candidate, registry);
+            final String beanName = BEAN_NAME_GENERATOR.generateBeanName(candidate, registry);
             if (candidate instanceof AnnotatedBeanDefinition) {
                 AnnotationConfigUtils.processCommonDefinitionAnnotations((AnnotatedBeanDefinition) candidate);
             }
@@ -161,7 +161,7 @@ public class MapperInitConfiguration implements BeanDefinitionRegistryPostProces
         mappers.forEach(resource -> {
             try {
                 // 从内存获取流文件
-                MetadataReader metadataReader = this.metadataReaderFactory.getMetadataReader(resource);
+                MetadataReader metadataReader = METADATA_READER_FACTORY.getMetadataReader(resource);
                 ScannedGenericBeanDefinition sbd = new ScannedGenericBeanDefinition(metadataReader);
                 sbd.setSource(metadataReader.getResource());
                 candidates.add(sbd);

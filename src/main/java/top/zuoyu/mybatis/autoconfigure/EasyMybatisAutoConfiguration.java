@@ -69,7 +69,7 @@ import org.springframework.util.StringUtils;
 
 import top.zuoyu.mybatis.common.Constant;
 import top.zuoyu.mybatis.ssist.XmlStructureInit;
-
+import top.zuoyu.mybatis.utils.ConfigurationAppTo;
 
 /**
  * 自动装配 .
@@ -78,9 +78,9 @@ import top.zuoyu.mybatis.ssist.XmlStructureInit;
  * @create: 2021-10-29 16:55
  */
 @Configuration(proxyBeanMethods = false)
-@ConditionalOnClass({SqlSessionFactory.class, SqlSessionFactoryBean.class})
+@ConditionalOnClass({ SqlSessionFactory.class, SqlSessionFactoryBean.class })
 @ConditionalOnSingleCandidate(DataSource.class)
-@EnableConfigurationProperties({MybatisProperties.class, EasyProperties.class})
+@EnableConfigurationProperties({ MybatisProperties.class, EasyProperties.class })
 @AutoConfigureAfter(DataSourceAutoConfiguration.class)
 @AutoConfigureBefore(MybatisAutoConfiguration.class)
 public class EasyMybatisAutoConfiguration implements InitializingBean {
@@ -104,15 +104,14 @@ public class EasyMybatisAutoConfiguration implements InitializingBean {
 
     private final LanguageDriver[] languageDrivers;
 
-
     public EasyMybatisAutoConfiguration(@NonNull MybatisProperties properties,
-                                        @NonNull EasyProperties easyProperties,
-                                        @NonNull ObjectProvider<Interceptor[]> interceptorsProvider,
-                                        @NonNull ResourceLoader resourceLoader,
-                                        @NonNull ObjectProvider<TypeHandler[]> typeHandlersProvider,
-                                        @NonNull ObjectProvider<LanguageDriver[]> languageDriversProvider,
-                                        @NonNull ObjectProvider<DatabaseIdProvider> databaseIdProvider,
-                                        @NonNull ObjectProvider<List<ConfigurationCustomizer>> configurationCustomizersProvider) {
+            @NonNull EasyProperties easyProperties,
+            @NonNull ObjectProvider<Interceptor[]> interceptorsProvider,
+            @NonNull ResourceLoader resourceLoader,
+            @NonNull ObjectProvider<TypeHandler[]> typeHandlersProvider,
+            @NonNull ObjectProvider<LanguageDriver[]> languageDriversProvider,
+            @NonNull ObjectProvider<DatabaseIdProvider> databaseIdProvider,
+            @NonNull ObjectProvider<List<ConfigurationCustomizer>> configurationCustomizersProvider) {
         this.properties = properties;
         this.easyProperties = easyProperties;
         this.interceptors = interceptorsProvider.getIfAvailable();
@@ -134,7 +133,6 @@ public class EasyMybatisAutoConfiguration implements InitializingBean {
             this.properties.setTypeAliasesPackage(modelPackageName);
         }
     }
-
 
     @Bean
     @ConditionalOnMissingBean
@@ -177,7 +175,8 @@ public class EasyMybatisAutoConfiguration implements InitializingBean {
         }
 
         Set<String> factoryPropertyNames = Stream
-                .of(new BeanWrapperImpl(SqlSessionFactoryBean.class).getPropertyDescriptors()).map(PropertyDescriptor::getName)
+                .of(new BeanWrapperImpl(SqlSessionFactoryBean.class).getPropertyDescriptors())
+                .map(PropertyDescriptor::getName)
                 .collect(Collectors.toSet());
         Class<? extends LanguageDriver> defaultLanguageDriver = this.properties.getDefaultScriptingLanguageDriver();
         if (factoryPropertyNames.contains(SCRIPTING_LANGUAGE_DRIVERS) && !ObjectUtils.isEmpty(this.languageDrivers)) {
@@ -206,9 +205,13 @@ public class EasyMybatisAutoConfiguration implements InitializingBean {
     }
 
     private void applyConfiguration(@NonNull SqlSessionFactoryBean factory) {
-        org.apache.ibatis.session.Configuration configuration = this.properties.getConfiguration();
-        if (configuration == null && !StringUtils.hasText(this.properties.getConfigLocation())) {
+        MybatisProperties.CoreConfiguration coreConfiguration = this.properties.getConfiguration();
+        org.apache.ibatis.session.Configuration configuration = null;
+        if (coreConfiguration != null || !StringUtils.hasText(this.properties.getConfigLocation())) {
             configuration = new org.apache.ibatis.session.Configuration();
+        }
+        if (configuration != null && coreConfiguration != null) {
+            ConfigurationAppTo.mybatisConfiguration(coreConfiguration, configuration);
         }
         if (configuration != null && !CollectionUtils.isEmpty(this.configurationCustomizers)) {
             for (ConfigurationCustomizer customizer : this.configurationCustomizers) {
@@ -218,10 +221,9 @@ public class EasyMybatisAutoConfiguration implements InitializingBean {
         factory.setConfiguration(configuration);
     }
 
-
     @Configuration(proxyBeanMethods = false)
     @Import(MybatisAutoConfiguration.AutoConfiguredMapperScannerRegistrar.class)
-    @ConditionalOnMissingBean({MapperFactoryBean.class, MapperScannerConfigurer.class})
+    @ConditionalOnMissingBean({ MapperFactoryBean.class, MapperScannerConfigurer.class })
     public static class MapperScannerRegistrarNotFoundConfiguration implements InitializingBean {
 
         @Override
@@ -230,7 +232,6 @@ public class EasyMybatisAutoConfiguration implements InitializingBean {
         }
     }
 
-
     /**
      * Support Devtools Restart.
      */
@@ -238,8 +239,6 @@ public class EasyMybatisAutoConfiguration implements InitializingBean {
     @ConditionalOnProperty(prefix = "spring.devtools.restart", name = "enabled", matchIfMissing = true)
     static class RestartConfiguration {
 
-
     }
-
 
 }

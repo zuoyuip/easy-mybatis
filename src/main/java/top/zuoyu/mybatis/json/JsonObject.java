@@ -1673,7 +1673,7 @@ public class JsonObject implements Cloneable, Serializable, Map<String, Object> 
             writeTo(stringer);
             return stringer.toString();
         } catch (JsonException e) {
-            return null;
+            return "";
         }
     }
 

@@ -27,7 +27,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>top.zuoyu.mybatis</groupId>
     <artifactId>easy-mybatis-spring-boot-starter</artifactId>
-    <version>1.0.0</version>
+    <version>2.0.0</version>
     <name>easy-mybatis</name>
     <description>一个把Mybatis操作简化至极致的框架</description>
     <url>https://github.com/zuoyuip/easy-mybatis</url>
@@ -59,16 +59,16 @@
     </issueManagement>
 
     <properties>
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <jdk.version>1.8</jdk.version>
+        <jdk.version>17</jdk.version>
 
-        <javassist.version>3.27.0-GA</javassist.version>
+        <javassist.version>3.29.2-GA</javassist.version>
         <velocity.version>1.7</velocity.version>
-        <spring-boot.version>2.3.4.RELEASE</spring-boot.version>
-        <mybatis-spring-boot-starter.version>2.2.0</mybatis-spring-boot-starter.version>
+        <spring-boot.version>3.0.5</spring-boot.version>
+        <mybatis-spring-boot-starter.version>3.0.0</mybatis-spring-boot-starter.version>
     </properties>
 
     <dependencyManagement>
@@ -121,11 +121,10 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-compiler-plugin</artifactId>
-                        <version>3.8.0</version>
+                        <version>3.11.0</version>
                         <configuration>
                             <encoding>UTF-8</encoding>
-                            <source>${jdk.version}</source>
-                            <target>${jdk.version}</target>
+                            <release>${jdk.version}</release>
                         </configuration>
                     </plugin>
 
@@ -146,26 +145,13 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-javadoc-plugin</artifactId>
-                        <version>3.2.0</version>
-                        <configuration>
-                            <additionalOptions>
-                                <additionalOption>-Xdoclint:none</additionalOption>
-                            </additionalOptions>
-                        </configuration>
-                        <executions>
-                            <execution>
-                                <phase>package</phase>
-                                <goals>
-                                    <goal>jar</goal>
-                                </goals>
-                            </execution>
-                        </executions>
+                        <version>3.5.0</version>
                     </plugin>
 
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-gpg-plugin</artifactId>
-                        <version>1.6</version>
+                        <version>3.0.1</version>
                         <executions>
                             <execution>
                                 <id>sign-artifacts</id>
